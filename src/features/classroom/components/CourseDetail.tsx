@@ -230,7 +230,7 @@ export default function CourseDetail({ course, onBack, onCourseUpdated, onEdit }
                         type="button"
                         onClick={() => saveEdit(ch.id)}
                         disabled={isSavingEdit}
-                        className="flex-1 py-2.5 bg-[#ae3df7] text-white text-sm font-bold rounded-xl disabled:opacity-50"
+                        className="flex-1 py-2.5 bg-brand-primary text-white text-sm font-bold rounded-xl disabled:opacity-50"
                       >
                         {isSavingEdit ? "Guardando..." : "Guardar título/video"}
                       </button>

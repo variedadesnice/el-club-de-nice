@@ -245,7 +245,7 @@ export default function CreateCourseSheet({ open, onClose, onCreated, course }: 
         <button
           type="submit"
           disabled={isSaving || isDeleting || isUploading}
-          className="flex items-center justify-center gap-2 py-3.5 bg-[#ae3df7] text-white font-bold rounded-2xl hover:bg-[#921be2] disabled:opacity-50 transition-all cursor-pointer w-full"
+          className="flex items-center justify-center gap-2 py-3.5 bg-brand-primary text-white font-bold rounded-2xl hover:bg-brand-primary-hover disabled:opacity-50 transition-all cursor-pointer w-full"
         >
           {isSaving ? "Guardando..." : (
             <><Save size={18} /> {isEdit ? "Guardar cambios" : "Crear curso"}</>

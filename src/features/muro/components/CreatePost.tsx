@@ -122,7 +122,7 @@ export default function CreatePost({ onSubmit }: CreatePostProps) {
           <button
             onClick={handleSubmit}
             disabled={!value.trim()}
-            className="p-3 bg-[#ae3df7] text-white rounded-2xl shadow-md shadow-violet-950/10 hover:bg-[#921be2] active:scale-[0.98] disabled:opacity-50 disabled:grayscale transition-all flex items-center justify-center"
+            className="p-3 bg-brand-primary text-white rounded-2xl shadow-md shadow-violet-950/10 hover:bg-brand-primary-hover active:scale-[0.98] disabled:opacity-50 disabled:grayscale transition-all flex items-center justify-center"
           >
             <Send size={20} />
           </button>
@@ -156,7 +156,7 @@ export default function CreatePost({ onSubmit }: CreatePostProps) {
             <button
               onClick={handleCreateTag}
               disabled={!newTag.trim() || creatingTag}
-              className="flex items-center gap-1 px-3 py-1.5 bg-[#ae3df7] text-white rounded-xl text-xs font-bold disabled:opacity-40 hover:bg-[#921be2] transition-colors"
+              className="flex items-center gap-1 px-3 py-1.5 bg-brand-primary text-white rounded-xl text-xs font-bold disabled:opacity-40 hover:bg-brand-primary-hover transition-colors"
             >
               <Plus size={13} /> Crear
             </button>

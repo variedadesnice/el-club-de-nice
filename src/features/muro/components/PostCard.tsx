@@ -297,7 +297,7 @@ export default function PostCard({ post, index, onReact, onDelete, onEdit, onPin
             <button onClick={() => setEditing(false)} className="flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-bold text-slate-500 hover:bg-slate-100 transition-colors">
               <X size={13} /> Cancelar
             </button>
-            <button onClick={handleSaveEdit} className="flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-bold bg-[#ae3df7] text-white hover:bg-[#921be2] transition-colors shadow-sm">
+            <button onClick={handleSaveEdit} className="flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-bold bg-brand-primary text-white hover:bg-brand-primary-hover transition-colors shadow-sm">
               <Check size={13} /> Guardar
             </button>
           </div>

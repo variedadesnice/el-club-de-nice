@@ -168,7 +168,7 @@ export default function AddChapterForm({ courseId, onAdded }: AddChapterFormProp
         <button
           type="submit"
           disabled={isSaving}
-          className="flex-1 py-2.5 bg-[#ae3df7] text-white text-sm font-bold rounded-xl disabled:opacity-50"
+          className="flex-1 py-2.5 bg-brand-primary text-white text-sm font-bold rounded-xl disabled:opacity-50"
         >
           {isSaving ? "Guardando..." : "Guardar capítulo"}
         </button>

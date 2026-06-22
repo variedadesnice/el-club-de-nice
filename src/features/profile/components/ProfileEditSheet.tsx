@@ -175,7 +175,7 @@ export default function ProfileEditSheet({
                 type="button"
                 onClick={onSave}
                 disabled={isSaving}
-                className="w-full flex items-center justify-center gap-2 py-3.5 bg-[#ae3df7] text-white font-bold rounded-2xl hover:bg-[#921be2] disabled:opacity-50 transition-all shadow-md shadow-violet-950/10 active:scale-[0.98]"
+                className="w-full flex items-center justify-center gap-2 py-3.5 bg-brand-primary text-white font-bold rounded-2xl hover:bg-brand-primary-hover disabled:opacity-50 transition-all shadow-md shadow-violet-950/10 active:scale-[0.98]"
               >
                 {isSaving ? "Guardando..." : (
                   <>

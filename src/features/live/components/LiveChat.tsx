@@ -348,7 +348,7 @@ export default function LiveChat({ liveId }: LiveChatProps) {
           <button
             onClick={handleSend}
             disabled={!newMessage.trim() || isSending}
-            className="p-2 rounded-xl bg-[#ae3df7] text-white hover:bg-[#921be2] disabled:opacity-50 disabled:grayscale transition-colors shrink-0"
+            className="p-2 rounded-xl bg-brand-primary text-white hover:bg-brand-primary-hover disabled:opacity-50 disabled:grayscale transition-colors shrink-0"
           >
             <Send size={16} />
           </button>

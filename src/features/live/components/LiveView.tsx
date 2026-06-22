@@ -223,7 +223,7 @@ export default function LiveView() {
               {!showForm ? (
                 <button
                   onClick={() => setShowForm(true)}
-                  className="flex items-center justify-center gap-2 w-full py-3 bg-[#ae3df7] text-white rounded-2xl font-bold shadow-md hover:bg-[#921be2] transition-colors"
+                  className="flex items-center justify-center gap-2 w-full py-3 bg-brand-primary text-white rounded-2xl font-bold shadow-md hover:bg-brand-primary-hover transition-colors"
                 >
                   <Plus size={20} /> Empezar nueva transmisión
                 </button>

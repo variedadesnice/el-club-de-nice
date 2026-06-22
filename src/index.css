@@ -6,15 +6,52 @@
 
   --breakpoint-3xl: 1440px;
 
-  --color-brand-primary: #ae3df7;
+  --color-brand-primary: #db2777;
+  --color-brand-primary-hover: #be185d;
   --color-brand-background: #ffffff;
   --color-brand-border: #e2e8f0;
   --color-brand-text-main: #0f172a;
   --color-brand-text-muted: #64748b;
 
-  --color-profile-accent: #ae3df7;
-  --color-profile-brown: #ae3df7;
-  --color-profile-surface: #fbf6ff;
+  --color-profile-accent: #db2777;
+  --color-profile-brown: #db2777;
+  --color-profile-surface: #fdf2f8;
+
+  --color-violet-50: #fdf2f8;
+  --color-violet-100: #fce7f3;
+  --color-violet-200: #fbcfe8;
+  --color-violet-300: #f9a8d4;
+  --color-violet-400: #f472b6;
+  --color-violet-500: #ec4899;
+  --color-violet-600: #db2777;
+  --color-violet-700: #be185d;
+  --color-violet-800: #9d174d;
+  --color-violet-900: #831843;
+  --color-violet-950: #500724;
+
+  --color-indigo-50: #fdf2f8;
+  --color-indigo-100: #fce7f3;
+  --color-indigo-200: #fbcfe8;
+  --color-indigo-300: #f9a8d4;
+  --color-indigo-400: #f472b6;
+  --color-indigo-500: #ec4899;
+  --color-indigo-600: #db2777;
+  --color-indigo-700: #be185d;
+  --color-indigo-800: #9d174d;
+  --color-indigo-900: #831843;
+  --color-indigo-950: #500724;
+
+  --color-purple-50: #fdf2f8;
+  --color-purple-100: #fce7f3;
+  --color-purple-200: #fbcfe8;
+  --color-purple-300: #f9a8d4;
+  --color-purple-400: #f472b6;
+  --color-purple-500: #ec4899;
+  --color-purple-600: #db2777;
+  --color-purple-700: #be185d;
+  --color-purple-800: #9d174d;
+  --color-purple-900: #831843;
+  --color-purple-950: #500724;
 }
 
 @layer base {

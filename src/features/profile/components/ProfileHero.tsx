@@ -66,7 +66,7 @@ export default function ProfileHero({ name, avatar, subtitle, levelIcon, onEdit 
           <button
             type="button"
             onClick={onEdit}
-            className="w-full py-3 rounded-2xl bg-[#ae3df7] text-white text-sm font-bold shadow-md shadow-violet-950/10 hover:bg-[#921be2] active:scale-[0.98] transition-all"
+            className="w-full py-3 rounded-2xl bg-brand-primary text-white text-sm font-bold shadow-md shadow-violet-950/10 hover:bg-brand-primary-hover active:scale-[0.98] transition-all"
           >
             Editar perfil
           </button>

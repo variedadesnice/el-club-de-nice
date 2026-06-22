@@ -60,7 +60,7 @@ export default function Classroom() {
             <button
               type="button"
               onClick={() => { if (requireAdmin(user?.role, "subir cursos")) setShowCreate(true); }}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-[#ae3df7] text-white text-sm font-bold shadow-md shadow-violet-950/10 hover:bg-[#921be2] active:scale-[0.98] transition-all shrink-0"
+              className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-brand-primary text-white text-sm font-bold shadow-md shadow-violet-950/10 hover:bg-brand-primary-hover active:scale-[0.98] transition-all shrink-0"
             >
               <Plus size={18} /> <span className="hidden sm:inline">Nuevo Curso</span>
             </button>
@@ -83,7 +83,7 @@ export default function Classroom() {
               <button
                 type="button"
                 onClick={() => { if (requireAdmin(user?.role, "subir cursos")) setShowCreate(true); }}
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-[#ae3df7] text-white text-sm font-bold"
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-brand-primary text-white text-sm font-bold"
               >
                 <Plus size={18} /> Subir curso
               </button>

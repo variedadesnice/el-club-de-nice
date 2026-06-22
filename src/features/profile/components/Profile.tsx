@@ -253,7 +253,7 @@ export default function Profile() {
                     </div>
                     <label
                       className={`absolute -bottom-1 -right-1 w-8 h-8 rounded-full flex items-center justify-center shadow-md text-white transition-colors ${
-                        isUploadingImage ? "bg-violet-300 cursor-not-allowed" : "bg-[#ae3df7] hover:bg-[#921be2] cursor-pointer"
+                        isUploadingImage ? "bg-pink-300 cursor-not-allowed" : "bg-brand-primary hover:bg-brand-primary-hover cursor-pointer"
                       }`}
                     >
                       {isUploadingImage ? (
@@ -350,7 +350,7 @@ export default function Profile() {
                     type="button"
                     onClick={handleSave}
                     disabled={isSaving}
-                    className="flex-1 py-3 bg-[#ae3df7] text-white font-bold rounded-2xl disabled:opacity-50 hover:bg-[#921be2] transition-colors shadow-md active:scale-[0.98]"
+                    className="flex-1 py-3 bg-brand-primary text-white font-bold rounded-2xl disabled:opacity-50 hover:bg-brand-primary-hover transition-colors shadow-md active:scale-[0.98]"
                   >
                     {isSaving ? "Guardando..." : "Guardar cambios"}
                   </button>
