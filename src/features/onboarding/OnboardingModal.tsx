@@ -162,7 +162,7 @@ export default function OnboardingModal({ onComplete }: OnboardingModalProps) {
                 ¡Hola, {user?.name?.split(" ")[0]}! 👋
               </h2>
               <p className="text-slate-500 font-medium mb-8">
-                Eres parte de Ecom Club. Cuéntanos un poco sobre ti para personalizar tu experiencia.
+                Eres parte de El Club de Nice. Cuéntanos un poco sobre ti para personalizar tu experiencia.
               </p>
 
               {/* Avatar upload */}
@@ -308,7 +308,7 @@ export default function OnboardingModal({ onComplete }: OnboardingModalProps) {
               </motion.div>
 
               <h2 className="text-3xl font-black text-slate-900 leading-tight mb-3">
-                ¡Ya eres parte de<br />Ecom Club! 🚀
+                ¡Ya eres parte de<br />El Club de Nice! 🚀
               </h2>
               <p className="text-slate-500 font-medium mb-2 max-w-sm mx-auto">
                 Tu perfil está listo. Ahora puedes explorar la comunidad, ver el contenido y conectar con otros emprendedores.

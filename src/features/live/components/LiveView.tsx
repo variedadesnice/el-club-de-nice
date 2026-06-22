@@ -240,7 +240,7 @@ export default function LiveView() {
                   <div>
                     <label className="block text-xs font-bold text-slate-500 mb-1">Título *</label>
                     <input type="text" value={newTitle} onChange={(e) => setNewTitle(e.target.value)}
-                      placeholder="Ej. Q&A Semanal — Ecom Club" className={inputClass} required />
+                      placeholder="Ej. Q&A Semanal — El Club de Nice" className={inputClass} required />
                   </div>
 
                   <div>
