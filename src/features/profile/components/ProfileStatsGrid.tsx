@@ -11,14 +11,27 @@ const iconMap = {
 
 interface Props {
   badgeCount?: number;
+  streakDays?: number;
+  completedCourses?: number;
+  socialImpact?: number;
 }
 
-export default function ProfileStatsGrid({ badgeCount }: Props) {
-  const stats = PROFILE_STATS.map((s) =>
-    s.label === "Insignias" && badgeCount !== undefined
-      ? { ...s, value: String(badgeCount) }
-      : s
-  );
+export default function ProfileStatsGrid({ badgeCount, streakDays, completedCourses, socialImpact }: Props) {
+  const stats = PROFILE_STATS.map((s) => {
+    if (s.label === "Insignias" && badgeCount !== undefined) {
+      return { ...s, value: String(badgeCount) };
+    }
+    if (s.label === "Días de Racha" && streakDays !== undefined) {
+      return { ...s, value: String(streakDays), comingSoon: false, bg: "bg-orange-100", iconColor: "text-orange-500" };
+    }
+    if (s.label === "Cursos Completados" && completedCourses !== undefined) {
+      return { ...s, value: String(completedCourses), comingSoon: false, bg: "bg-violet-100", iconColor: "text-violet-600" };
+    }
+    if (s.label === "Impacto Social" && socialImpact !== undefined) {
+      return { ...s, value: String(socialImpact), comingSoon: false, bg: "bg-emerald-100", iconColor: "text-emerald-600" };
+    }
+    return s;
+  });
 
   return (
     <div className="grid grid-cols-2 gap-3">

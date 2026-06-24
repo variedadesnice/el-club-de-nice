@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
+import { motion, AnimatePresence } from "motion/react";
 import { useAuth } from "../../../context/AuthContext";
 import { useApiFetch } from "../../../lib/api";
-import { MapPin, Phone, User as UserIcon, Mail, Info, Camera } from "lucide-react";
+import { MapPin, Phone, User as UserIcon, Mail, Info, Camera, Flame } from "lucide-react";
 import ProfileHero from "./ProfileHero";
 import ProfileLevelCard from "./ProfileLevelCard";
 import ProfileStatsGrid from "./ProfileStatsGrid";
@@ -15,6 +16,15 @@ interface UserLevel {
   tier?: { name: string; description?: string; icon_url?: string } | null;
 }
 
+interface StreakInfo {
+  status: "already_logged" | "streak_updated";
+  current_streak: number;
+  longest_streak: number;
+  xp_awarded?: number;
+  milestone_reached?: number;
+  achievement?: string;
+}
+
 export default function Profile() {
   const { user, updateUser } = useAuth();
   const api = useApiFetch();
@@ -24,6 +34,12 @@ export default function Profile() {
   const [levelLoading, setLevelLoading] = useState(true);
   const [achievements, setAchievements] = useState<UserAchievement[]>([]);
   const [achievementsLoading, setAchievementsLoading] = useState(true);
+  const [streak, setStreak] = useState<StreakInfo | null>(null);
+  const [streakLoading, setStreakLoading] = useState(true);
+  const [completedCourses, setCompletedCourses] = useState<number | undefined>(undefined);
+  const [coursesLoading, setCoursesLoading] = useState(true);
+  const [socialImpact, setSocialImpact] = useState<number | undefined>(undefined);
+  const [socialImpactLoading, setSocialImpactLoading] = useState(true);
 
   useEffect(() => {
     api<UserLevel>("/api/levels/me")
@@ -35,6 +51,22 @@ export default function Profile() {
       .then(({ data }) => setAchievements(Array.isArray(data) ? data : []))
       .catch(console.error)
       .finally(() => setAchievementsLoading(false));
+
+    // Registra el login diario y devuelve la racha actualizada para mostrarla.
+    api<StreakInfo>("/api/streaks/checkin")
+      .then(({ data }) => setStreak(data))
+      .catch(console.error)
+      .finally(() => setStreakLoading(false));
+
+    api<{ completedCourses: number }>("/api/classroom/me/completed-courses")
+      .then(({ data }) => setCompletedCourses(data.completedCourses))
+      .catch(console.error)
+      .finally(() => setCoursesLoading(false));
+
+    api<{ likes: number; comments: number; totalImpact: number }>("/api/posts/me/social-impact")
+      .then(({ data }) => setSocialImpact(data.totalImpact))
+      .catch(console.error)
+      .finally(() => setSocialImpactLoading(false));
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
   const [editForm, setEditForm] = useState<ProfileEditForm>({
     name: user?.name || "",
@@ -168,8 +200,36 @@ export default function Profile() {
             loading={levelLoading}
           />
           
+          <AnimatePresence>
+            {!streakLoading && streak?.milestone_reached && (
+              <motion.div
+                initial={{ opacity: 0, y: -8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                className="flex items-center gap-3 rounded-2xl bg-gradient-to-r from-orange-50 to-amber-50 border border-orange-100 p-4"
+              >
+                <div className="w-10 h-10 rounded-xl bg-orange-100 text-orange-500 flex items-center justify-center shrink-0">
+                  <Flame size={20} />
+                </div>
+                <div>
+                  <p className="text-xs font-black text-orange-700">
+                    ¡Hito de {streak.milestone_reached} días alcanzado!
+                  </p>
+                  {streak.achievement && (
+                    <p className="text-[11px] font-medium text-orange-600 mt-0.5">{streak.achievement}</p>
+                  )}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <ProfileStatsGrid badgeCount={achievementsLoading ? undefined : achievements.length} />
+            <ProfileStatsGrid
+              badgeCount={achievementsLoading ? undefined : achievements.length}
+              streakDays={streakLoading ? undefined : streak?.current_streak}
+              completedCourses={coursesLoading ? undefined : completedCourses}
+              socialImpact={socialImpactLoading ? undefined : socialImpact}
+            />
 
             {/* New Personal Info Details Card */}
             <div className="bg-white rounded-3xl border border-slate-100 p-5 shadow-sm flex flex-col justify-between">
