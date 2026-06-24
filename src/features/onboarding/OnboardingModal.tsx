@@ -1,6 +1,6 @@
 import React, { useState, useRef } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { Camera, MapPin, Phone, User, Sparkles, ArrowRight, Check, X } from "lucide-react";
+import { Camera, MapPin, Phone, User, Sparkles, ArrowRight, Check, X, Calendar } from "lucide-react";
 import { useAuth, type User as AuthUser } from "../../context/AuthContext";
 import { useApiFetch } from "../../lib/api";
 
@@ -18,7 +18,7 @@ export function needsOnboarding(userId: string | undefined): boolean {
 // El onboarding solo tiene sentido si falta alguno de los datos que pide
 export function hasIncompleteProfile(user: AuthUser | null | undefined): boolean {
   if (!user) return false;
-  return !user.bio?.trim() || !user.city?.trim() || !user.gender?.trim() || !user.phone?.trim();
+  return !user.bio?.trim() || !user.city?.trim() || !user.gender?.trim() || !user.phone?.trim() || !user.birthdate?.trim();
 }
 
 export function markOnboardingDoneForUser(userId: string) {
@@ -46,6 +46,7 @@ export default function OnboardingModal({ onComplete }: OnboardingModalProps) {
   const [city, setCity] = useState(user?.city || "");
   const [gender, setGender] = useState(user?.gender || "");
   const [phone, setPhone] = useState(user?.phone || "");
+  const [birthdate, setBirthdate] = useState(user?.birthdate || "");
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -95,11 +96,14 @@ export default function OnboardingModal({ onComplete }: OnboardingModalProps) {
           gender,
           city,
           phone,
+          birthdate,
         }),
       });
       if (data.user) updateUser(data.user as NonNullable<typeof user>);
     } catch (err) {
       console.error("[Onboarding] save error:", err);
+      const message = err instanceof Error ? err.message : "Error desconocido";
+      alert("No se pudieron guardar tus datos: " + message + ". Puedes volver a intentarlo desde tu perfil.");
     } finally {
       setIsSaving(false);
       onComplete();
@@ -263,18 +267,33 @@ export default function OnboardingModal({ onComplete }: OnboardingModalProps) {
                   </div>
                 </div>
 
-                {/* Teléfono */}
-                <div>
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-wider ml-1 flex items-center gap-1">
-                    <Phone size={10} /> Teléfono
-                  </label>
-                  <input
-                    type="tel"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    placeholder="Ej. +58 412 000 0000"
-                    className="w-full mt-1 bg-slate-50 border-2 border-transparent focus:border-violet-200 focus:bg-white rounded-xl py-3 px-4 text-sm font-bold outline-none transition-all"
-                  />
+                <div className="grid grid-cols-2 gap-4">
+                  {/* Teléfono */}
+                  <div>
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-wider ml-1 flex items-center gap-1">
+                      <Phone size={10} /> Teléfono
+                    </label>
+                    <input
+                      type="tel"
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
+                      placeholder="Ej. +58 412 000 0000"
+                      className="w-full mt-1 bg-slate-50 border-2 border-transparent focus:border-violet-200 focus:bg-white rounded-xl py-3 px-4 text-sm font-bold outline-none transition-all"
+                    />
+                  </div>
+
+                  {/* Fecha de nacimiento */}
+                  <div>
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-wider ml-1 flex items-center gap-1">
+                      <Calendar size={10} /> Nacimiento
+                    </label>
+                    <input
+                      type="date"
+                      value={birthdate}
+                      onChange={(e) => setBirthdate(e.target.value)}
+                      className="w-full mt-1 bg-slate-50 border-2 border-transparent focus:border-violet-200 focus:bg-white rounded-xl py-3 px-4 text-sm font-bold outline-none transition-all"
+                    />
+                  </div>
                 </div>
               </div>
 

@@ -1,5 +1,5 @@
 import React from "react";
-import { Camera, Save, X, MapPin, Phone, User } from "lucide-react";
+import { Camera, Save, X, MapPin, Phone, User, Calendar } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 
 export interface ProfileEditForm {
@@ -9,6 +9,7 @@ export interface ProfileEditForm {
   gender: string;
   city: string;
   phone: string;
+  birthdate: string;
 }
 
 interface ProfileEditSheetProps {
@@ -152,6 +153,19 @@ export default function ProfileEditSheet({
                   value={form.phone}
                   placeholder="Ej. +34 600 000 000"
                   onChange={(e) => onChange({ ...form, phone: e.target.value })}
+                  className="w-full mt-1 bg-slate-50 border-2 border-transparent focus:border-violet-200 focus:bg-white rounded-xl py-3 px-4 text-sm font-bold outline-none transition-all"
+                />
+              </div>
+
+              {/* Fecha de nacimiento */}
+              <div>
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-wider ml-1 flex items-center gap-1">
+                  <Calendar size={12} /> Fecha de nacimiento
+                </label>
+                <input
+                  type="date"
+                  value={form.birthdate}
+                  onChange={(e) => onChange({ ...form, birthdate: e.target.value })}
                   className="w-full mt-1 bg-slate-50 border-2 border-transparent focus:border-violet-200 focus:bg-white rounded-xl py-3 px-4 text-sm font-bold outline-none transition-all"
                 />
               </div>

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { useAuth } from "../../../context/AuthContext";
 import { useApiFetch } from "../../../lib/api";
-import { MapPin, Phone, User as UserIcon, Mail, Info, Camera, Flame } from "lucide-react";
+import { MapPin, Phone, User as UserIcon, Mail, Info, Camera, Flame, Calendar } from "lucide-react";
 import ProfileHero from "./ProfileHero";
 import ProfileLevelCard from "./ProfileLevelCard";
 import ProfileStatsGrid from "./ProfileStatsGrid";
@@ -75,6 +75,7 @@ export default function Profile() {
     gender: user?.gender || "",
     city: user?.city || "",
     phone: user?.phone || "",
+    birthdate: user?.birthdate || "",
   });
   const [isSaving, setIsSaving] = useState(false);
   const [isUploadingImage, setIsUploadingImage] = useState(false);
@@ -134,6 +135,7 @@ export default function Profile() {
           gender: editForm.gender,
           city: editForm.city,
           phone: editForm.phone,
+          birthdate: editForm.birthdate,
         }),
       });
       if (data.user) {
@@ -142,6 +144,8 @@ export default function Profile() {
       }
     } catch (err) {
       console.error(err);
+      const message = err instanceof Error ? err.message : "Error desconocido";
+      alert("No se pudo guardar el perfil: " + message);
     } finally {
       setIsSaving(false);
     }
@@ -155,6 +159,7 @@ export default function Profile() {
       gender: user?.gender || "",
       city: user?.city || "",
       phone: user?.phone || "",
+      birthdate: user?.birthdate || "",
     });
     setUploadedAvatarUrl(null);
     setIsEditing(true);
@@ -169,6 +174,7 @@ export default function Profile() {
       gender: user?.gender || "",
       city: user?.city || "",
       phone: user?.phone || "",
+      birthdate: user?.birthdate || "",
     });
   };
 
@@ -283,6 +289,17 @@ export default function Profile() {
                       <p className="text-xs font-bold text-slate-700">{user?.email || "No especificado"}</p>
                     </div>
                   </div>
+
+                  {/* Fecha de nacimiento */}
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400">
+                      <Calendar size={16} />
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Fecha de nacimiento</p>
+                      <p className="text-xs font-bold text-slate-700">{user?.birthdate || "No especificada"}</p>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -391,17 +408,30 @@ export default function Profile() {
                   </div>
                 </div>
 
-                {/* Fila 4: Teléfono */}
-                <div>
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-wider">
-                    Número de teléfono
-                  </label>
-                  <input
-                    type="tel"
-                    value={editForm.phone}
-                    onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })}
-                    className="w-full mt-1 bg-slate-50 border border-slate-100 rounded-xl py-2.5 px-4 text-sm font-bold outline-none focus:ring-2 focus:ring-violet-200"
-                  />
+                {/* Fila 4: Teléfono y Fecha de nacimiento */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-wider">
+                      Número de teléfono
+                    </label>
+                    <input
+                      type="tel"
+                      value={editForm.phone}
+                      onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })}
+                      className="w-full mt-1 bg-slate-50 border border-slate-100 rounded-xl py-2.5 px-4 text-sm font-bold outline-none focus:ring-2 focus:ring-violet-200"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-wider">
+                      Fecha de nacimiento
+                    </label>
+                    <input
+                      type="date"
+                      value={editForm.birthdate}
+                      onChange={(e) => setEditForm({ ...editForm, birthdate: e.target.value })}
+                      className="w-full mt-1 bg-slate-50 border border-slate-100 rounded-xl py-2.5 px-4 text-sm font-bold outline-none focus:ring-2 focus:ring-violet-200"
+                    />
+                  </div>
                 </div>
 
                 {/* Botones */}

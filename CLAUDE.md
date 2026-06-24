@@ -52,7 +52,7 @@ Auth levels: `—` = public · `🔑` = authenticated user · `🔓` = active-su
 | POST | `/api/auth/login` | — | Sign in, returns `{ user, token }` |
 | GET | `/api/auth/me` | 🔑 | Get current user profile |
 | POST | `/api/auth/avatar` | 🔑 | Upload avatar (base64 → Supabase Storage) |
-| PUT | `/api/auth/profile` | 🔑 | Update name / bio / gender / city / phone |
+| PUT | `/api/auth/profile` | 🔑 | Update name / bio / gender / city / phone / birthdate |
 
 #### `/api/posts`
 | Method | Path | Auth | Description |
@@ -305,7 +305,11 @@ Fetches the same BCV rate API in parallel with `/api/admin/analytics/*` data. `f
 - `ProfileStatsGrid` renders badge count, streak days, completed courses, and social impact from real props — these were previously "Próximamente" placeholders backed by `profileMock.ts`.
 - A milestone banner shows when `streak.milestone_reached` is set (e.g. "¡Hito de 7 días alcanzado!").
 - **Still mock**: ranking and activity-feed tables in `profileMock.ts` remain static.
-- Personal data fields (`gender`, `city`, `phone`, `email`) are shown in a dedicated info card and saved via `PUT /api/auth/profile`.
+- Personal data fields (`gender`, `city`, `phone`, `birthdate`, `email`) are shown in a dedicated info card and saved via `PUT /api/auth/profile`. `birthdate` is edited as a native `<input type="date">` in both `ProfileEditSheet.tsx` (mobile) and the inline desktop edit form in `Profile.tsx` — keep both in sync, they duplicate the same fields.
+
+### Onboarding (`OnboardingModal.tsx`)
+
+3-step modal shown once per user (tracked via `localStorage` key `onboarding_completed_{userId}`), triggered from `App.tsx` when `needsOnboarding(userId) && hasIncompleteProfile(user)`. Step 2 collects `bio`, `city`, `gender`, `phone`, and `birthdate` — all optional, skippable. `hasIncompleteProfile()` checks all five fields; once a user dismisses or completes onboarding it never reappears for that user, even if fields are later cleared.
 
 ### Branding
 
