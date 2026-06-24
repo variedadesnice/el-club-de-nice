@@ -13,9 +13,9 @@ npm run lint     # TypeScript type check (no emit)
 
 No test suite exists. Type check with `npm run lint` to validate.
 
-The **Python FastAPI backend** (separate repo `Comunyapp Backend/backend`) must also be running at `http://localhost:8000` for the app to work:
+The **Python FastAPI backend** (separate repo, sibling directory `Club-de-nice-BACKEND`) must also be running at `http://localhost:8000` for the app to work:
 ```bash
-# from Comunyapp Backend/backend
+# from Club-de-nice-BACKEND
 uvicorn main:app --reload --port 8000
 ```
 
@@ -31,7 +31,7 @@ uvicorn main:app --reload --port 8000
 
 ## Architecture
 
-This repo is a **pure Vite/React SPA**. All API logic lives in the separate Python FastAPI backend repo (`Comunyapp Backend/backend`).
+This repo is a **pure Vite/React SPA**. All API logic lives in the separate Python FastAPI backend repo (`Club-de-nice-BACKEND`). There is **no direct Supabase client usage anywhere in `src/`** — `@supabase/supabase-js` is not used; all auth and data access goes through the backend API. A Google OAuth experiment was added and then fully reverted (`Remove direct Supabase client auth from frontend`) — don't reintroduce direct Supabase auth in this repo.
 
 ### Dev server
 `vite.config.ts` proxies `/api/*` to `PYTHON_BACKEND_URL` (default `http://localhost:8000`) so the frontend can call relative `/api/...` paths during local development without CORS issues.
@@ -43,7 +43,7 @@ This repo is a **pure Vite/React SPA**. All API logic lives in the separate Pyth
 
 FastAPI app with all active API logic. Uses a single Supabase client with the **service role key** (admin privileges). Auth is validated server-side via `supabase.auth.get_user(token)` on each protected request.
 
-Auth levels: `—` = public · `🔑` = authenticated user · `👑` = admin · `?` = optional (user info used if present)
+Auth levels: `—` = public · `🔑` = authenticated user · `🔓` = active-subscription user · `👑` = admin · `?` = optional (user info used if present)
 
 #### `/api/auth`
 | Method | Path | Auth | Description |
@@ -52,13 +52,14 @@ Auth levels: `—` = public · `🔑` = authenticated user · `👑` = admin · 
 | POST | `/api/auth/login` | — | Sign in, returns `{ user, token }` |
 | GET | `/api/auth/me` | 🔑 | Get current user profile |
 | POST | `/api/auth/avatar` | 🔑 | Upload avatar (base64 → Supabase Storage) |
-| PUT | `/api/auth/profile` | 🔑 | Update name / bio |
+| PUT | `/api/auth/profile` | 🔑 | Update name / bio / gender / city / phone |
 
 #### `/api/posts`
 | Method | Path | Auth | Description |
 |--------|------|------|-------------|
 | GET | `/api/posts/` | ? | Cursor-paginated feed (`limit`, `cursor`, `tags` query params) |
 | POST | `/api/posts/` | 🔑 | Create post |
+| GET | `/api/posts/me/social-impact` | 🔑 | Aggregate "social impact" stat used on Profile |
 | PATCH | `/api/posts/{post_id}` | 🔑 | Edit post content / image |
 | DELETE | `/api/posts/{post_id}` | 🔑 | Delete post |
 | POST | `/api/posts/{post_id}/pin` | 🔑 | Toggle pin on post |
@@ -69,7 +70,9 @@ Auth levels: `—` = public · `🔑` = authenticated user · `👑` = admin · 
 | POST | `/api/posts/{post_id}/comments/{comment_id}/react` | 🔑 | React to comment |
 | GET | `/api/posts/{post_id}/comments/{comment_id}/reactions` | — | List comment reactions |
 
-#### `/api/courses`
+#### `/api/courses` — legacy, still the primary admin CRUD path
+The frontend's classroom admin UI (`CreateCourseSheet`, `AddChapterForm`, course/chapter editing in `CourseDetail`) calls this router, **not** `/api/admin/classroom`, for create/update/list of courses and chapters.
+
 | Method | Path | Auth | Description |
 |--------|------|------|-------------|
 | GET | `/api/courses/` | — | List all courses |
@@ -77,8 +80,21 @@ Auth levels: `—` = public · `🔑` = authenticated user · `👑` = admin · 
 | POST | `/api/courses/thumbnail` | 🔑 | Upload thumbnail (base64 → Supabase Storage) |
 | PUT | `/api/courses/{course_id}` | 🔑 | Update course (title, description, thumbnail, category) |
 | GET | `/api/courses/{course_id}/chapters` | — | List chapters (ordered by sort_order) |
-| POST | `/api/courses/{course_id}/chapters` | 🔑 | Add chapter |
+| POST | `/api/courses/{course_id}/chapters` | 🔑 | Add chapter (title ≤150 chars, duration ≤20 chars) |
 | PUT | `/api/courses/{course_id}/chapters/{chapter_id}` | 🔑 | Edit chapter (title, videoUrl, duration) |
+
+#### `/api/classroom` and `/api/admin/classroom` — newer surface
+Used specifically for: chapter PDFs (upload/list/delete), chapter deletion, course publish toggle, and student progress/completion tracking.
+
+| Method | Path | Auth | Description |
+|--------|------|------|-------------|
+| GET | `/api/classroom/me/completed-courses` | 🔑 | `{completedCourses}` — used on Profile stats |
+| GET | `/api/classroom/chapters/{chapter_id}/pdfs` | 🔓 | List PDFs for a chapter — used by `ActiveChapterPdfs` |
+| GET | `/api/classroom/courses/{course_id}/progress` | 🔓 | Per-user progress — **not yet called from the UI** (`CourseDetail` still shows the static `course.progress` field) |
+| POST | `/api/classroom/courses/{course_id}/chapters/{chapter_id}/complete` | 🔓 | Mark chapter complete (also not yet wired into the UI) |
+| DELETE | `/api/admin/classroom/courses/{course_id}/chapters/{chapter_id}` | 👑 | Chapter deletion — used by `CourseDetail` |
+| POST | `/api/admin/classroom/chapters/{chapter_id}/pdfs` | 👑 | Upload chapter PDF — used by `AddChapterForm` / `ChapterPdfsAdmin` |
+| PATCH/DELETE | `/api/admin/classroom/chapters/{chapter_id}/pdfs/{pdf_id}` | 👑 | Edit/delete chapter PDF |
 
 #### `/api/tags`
 | Method | Path | Auth | Description |
@@ -100,12 +116,29 @@ Auth levels: `—` = public · `🔑` = authenticated user · `👑` = admin · 
 | Method | Path | Auth | Description |
 |--------|------|------|-------------|
 | POST | `/api/payments/upload-receipt` | — | Upload receipt image (base64 → Supabase Storage), returns `{ path }` |
-| POST | `/api/payments/register` | — | Register account + payment in one step (wizard flow) |
+| POST | `/api/payments/register` | — | Register account + payment in one step (wizard flow). Body includes `payment_method_id`, `currency_id`, `amount`, `amount_local`, `exchange_rate` (frozen BCV rate at submit time) |
 | GET | `/api/payments/` | 👑 | List all payments (admin panel) |
 | GET | `/api/payments/{user_id}` | 🔑 | Get payments for a specific user |
 | PATCH | `/api/payments/{payment_id}/approve` | 👑 | Approve payment (triggers `sync_subscription_status`) |
 | PATCH | `/api/payments/{payment_id}/reject` | 👑 | Reject payment |
 | GET | `/api/payments/{payment_id}/receipt` | 👑 | Get signed URL for receipt image |
+
+#### `/api/payment-methods` and `/api/admin/payment-methods` — payment method catalog
+Admin-configurable catalog of payment instructions (bank transfer, mobile payment, etc.), each with dynamic fields (text/email/phone/number) and static display values. Surfaced in `Register.tsx` step 2 as a selectable grid with a "tap to copy" panel for each field.
+
+| Method | Path | Auth | Description |
+|--------|------|------|-------------|
+| GET | `/api/payment-methods/` | — | Active methods with fields/values, used in Register wizard |
+| GET | `/api/admin/payment-methods/` | 👑 | All methods incl. inactive |
+| POST/PATCH/DELETE | `/api/admin/payment-methods/{...}` | 👑 | Manage methods, fields, and values — used by `PaymentMethodsPanel` |
+
+#### `/api/currencies` and `/api/admin/currencies` — multi-currency catalog
+| Method | Path | Auth | Description |
+|--------|------|------|-------------|
+| GET | `/api/currencies/` | — | Active currencies, ordered by code |
+| GET/POST/PATCH/DELETE | `/api/admin/currencies/{...}` | 👑 | Manage currency catalog (base currency, e.g. USD, can't be deactivated/deleted) |
+
+> Note: the BCV (Bolívar) exchange rate itself is **not** sourced from this backend catalog — it's fetched client-side from a public rate API. See "BCV exchange rate integration" below.
 
 #### `/api/levels` — Gamificación
 | Method | Path | Auth | Description |
@@ -121,6 +154,39 @@ Auth levels: `—` = public · `🔑` = authenticated user · `👑` = admin · 
 | Method | Path | Auth | Description |
 |--------|------|------|-------------|
 | GET | `/api/achievements/` | — | Catálogo público de todos los logros activos |
+
+#### `/api/streaks` — racha diaria
+| Method | Path | Auth | Description |
+|--------|------|------|-------------|
+| GET | `/api/streaks/checkin` | 🔑 | Registra el login de hoy, devuelve la racha y `milestone_reached?` — llamado desde `Profile.tsx` |
+| GET | `/api/streaks/me` | 🔑 | Racha actual sin registrar check-in |
+
+#### `/api/lives` — Lives (livestream, chat, reacciones, PDFs)
+| Method | Path | Auth | Description |
+|--------|------|------|-------------|
+| GET | `/api/lives/` | 🔓 | Lista de lives (activo primero), cacheado 5s en Redis — polled cada 10s/30s por el frontend |
+| GET | `/api/lives/active` | 🔓 | Live activo actual o null |
+| GET | `/api/lives/{live_id}/chat` | 🔓 | Últimos mensajes de chat (`?limit=50&after=`) |
+| POST | `/api/lives/{live_id}/chat` | 🔓 | Enviar mensaje, broadcast vía WebSocket |
+| WS | `/api/lives/{live_id}/chat/ws?token=<jwt>` | 🔓 | Canal de chat en tiempo real |
+| GET / POST | `/api/lives/{live_id}/reactions` / `/react` | 🔓 | Reacciones (toggle: mismo tipo quita, distinto reemplaza) |
+| GET | `/api/lives/{live_id}/pdfs` | 🔓 | PDFs del live |
+
+#### `/api/admin/lives` — Admin Lives
+| Method | Path | Auth | Description |
+|--------|------|------|-------------|
+| POST/PATCH/DELETE | `/api/admin/lives/{...}` | 👑 | Crear/editar/eliminar live, activar/desactivar (exclusivo — desactiva otros lives activos) |
+| POST/DELETE | `/api/admin/lives/{live_id}/pdfs/{...}` | 👑 | Gestionar PDFs |
+| PATCH/DELETE/POST | `/api/admin/lives/{live_id}/chat/{message_id}` `/pin` | 👑 | Moderar chat (editar/eliminar/fijar mensaje), broadcast vía WS |
+
+#### `/api/admin/analytics` — Analítica admin
+| Method | Path | Auth | Description |
+|--------|------|------|-------------|
+| GET | `/api/admin/analytics/overview` | 👑 | Resumen miembros + ingresos en tiempo real |
+| GET | `/api/admin/analytics/members` | 👑 | Detalle de miembros (género, ciudad, rango de edad) |
+| GET | `/api/admin/analytics/revenue` | 👑 | Detalle de ingresos |
+| GET | `/api/admin/analytics/history` | 👑 | Histórico de snapshots diarios |
+| POST | `/api/admin/analytics/snapshot` | 👑 | Fuerza snapshot del día |
 
 #### `/api/admin/levels` — Admin gamificación
 | Method | Path | Auth | Description |
@@ -142,7 +208,7 @@ Auth levels: `—` = public · `🔑` = authenticated user · `👑` = admin · 
 
 ### Frontend (`src/`)
 
-React 19 SPA with `react-router-dom`, feature-based folder structure:
+React 19 SPA with `react-router-dom` v7, feature-based folder structure:
 
 ```
 src/
@@ -152,16 +218,32 @@ src/
     permissions.ts               — isAdmin(), needsActiveSubscription(), hasActiveSubscription()
   routes/index.tsx               — authRoutes + appRoutes arrays (react-router-dom Route definitions)
   features/
-    auth/
-      Login.tsx                  — login form
-      Register.tsx               — 3-step payment-registration wizard (plan → payment → receipt upload)
-      InviteRegister.tsx         — register via invitation link (auto-login after register)
-      AccountStatus.tsx          — subscription gating screen for inactive/pending/expired accounts
-    landing/                     — pre-auth landing page
-    muro/                        — social feed (PostFeed, PostCard, CommentSection, CreatePost)
-    classroom/                   — courses list + detail (CourseCard, CourseDetail, CreateCourseSheet)
-    profile/                     — user profile page with sub-components
-    admin/                       — admin dashboard (InvitationsPanel, PaymentsPanel, tabs)
+    auth/components/
+      Login.tsx                  — login form (email/password only — no OAuth)
+      Register.tsx                — 3-step payment-registration wizard (plan → payment method/currency → receipt upload), BCV rate fetched live
+      InviteRegister.tsx          — register via invitation link (auto-login after register)
+      AccountStatus.tsx           — subscription gating screen for inactive/pending/expired accounts
+      SessionExpired.tsx          — shown when the JWT is rejected mid-session
+    landing/                      — pre-auth landing page
+    onboarding/OnboardingModal.tsx — first-login onboarding flow
+    muro/                         — social feed
+      components/ CreatePost, PostCard, PostFeed, CommentSection
+      hooks/ usePosts, useComments
+    live/                         — live streaming feature (route: /live)
+      components/ LiveView (container), LivePlayer (YouTube embed), LiveChat (WS chat),
+                   LiveReactions (emoji toggle), LivePdfs (admin upload + list)
+    classroom/
+      components/ Classroom, CourseCard, CourseDetail, CreateCourseSheet, AddChapterForm,
+                   ActiveChapterPdfs (student PDF view), ChapterPdfsAdmin (admin PDF manage)
+      hooks/ useCourses, useCourseChapters, useChapterPdfs
+    profile/
+      components/ Profile, ProfileHero, ProfileStatsGrid, ProfileLevelCard, ProfileAchievements,
+                   ProfileActivity, ProfileRanking, ProfileEditSheet
+      data/profileMock.ts          — ranking/activity table data only; level/XP/achievements/streak/
+                                     completed-courses/social-impact are now real API data (see below)
+    admin/
+      AdminDashboard.tsx, AnalyticsPanel.tsx, GamificationPanel.tsx, PaymentMethodsPanel.tsx
+      (+ existing invitations/payments tabs)
   shared/layout/Layout.tsx       — nav shell (sidebar desktop + bottom nav mobile)
   types.ts                       — shared TypeScript interfaces
 ```
@@ -172,11 +254,13 @@ src/
 
 1. **Not authenticated** (`!isAuthenticated`) → renders auth routes (landing / login / register / invite)
 2. **Authenticated but subscription not active** (`needsActiveSubscription(role) && !hasActiveSubscription(subscription_status)`) → renders `<AccountStatus />` (gating screen)
-3. **Authenticated + active** → renders `<Layout>` with app routes (muro, classroom, profile, admin)
+3. **Authenticated + active** → renders `<Layout>` with app routes (muro, live, classroom, profile, admin)
 
 JWT token stored in `localStorage` under `edu_token`, user object under `edu_user`. Both are read synchronously at mount via `useState` lazy initializers in `AuthProvider`.
 
 `isAuthenticated` is derived from `!!user` (not from token). Always ensure `login(user, token)` is called together — never call `updateUser()` as a substitute for `login()`.
+
+**No direct Supabase auth**: `@supabase/supabase-js` is not used anywhere in `src/`. A Google OAuth experiment was added (`feat: implement Google authentication via Supabase`) and then fully removed (`Remove direct Supabase client auth from frontend`) — all auth is email/password via the backend API.
 
 ### Subscription & payments
 
@@ -186,20 +270,53 @@ A Postgres trigger (`sync_subscription_status`) on the `payments` table automati
 
 Payment statuses: `pending` (awaiting admin review) → `success` (approved, sets `expires_at`) or `failed` (rejected).
 
-Roles that require an active subscription: `miembro`. Roles exempt from gating: `admin`, `superadmin`.
+Roles that require an active subscription: `miembro`. Roles exempt from gating: `admin`, `invitado`.
+
+### Multi-currency & payment methods (Register wizard)
+
+- Step 2 fetches `/api/payment-methods/` and renders a selectable grid of configured methods (e.g. "Transferencia Bancaria", "Pago Móvil"); selecting one shows a `CopyField` panel with all of the method's dynamic fields as tap-to-copy buttons.
+- The wizard fetches the BCV rate from the public API `https://ve.dolarapi.com/v1/dolares/oficial` (field `promedio`) on mount and pre-fills/locks the amount field as `planPriceUSD * bcvRate`, displayed in Bs. If the fetch fails, the amount field stays editable and uncoverted.
+- Final submission to `POST /api/payments/register` sends `payment_method_id`, `currency_id`, `amount` (USD), `amount_local` (Bs), and `exchange_rate` (the frozen rate) — the backend stores all of these verbatim, it does not re-fetch or recompute rates.
+- Phone validation: 7–15 digits total, with a country-code dropdown (🇻🇪 +58, 🇺🇸 +1, 🇲🇽 +52, 🇨🇴 +57, 🇦🇷 +54, 🇵🇪 +51, 🇨🇱 +56, 🇪🇸 +34, 🇵🇦 +507, 🇩🇴 +1) prepended to the digits before submission.
+
+### Admin financial analytics (`AnalyticsPanel.tsx`)
+
+Fetches the same BCV rate API in parallel with `/api/admin/analytics/*` data. `formatAmount(amount, rate?)` divides Bs amounts by the rate to display a USD-equivalent figure on KPI cards, revenue history, and plan breakdown — falls back to a raw dollar format if the rate fetch fails.
+
+### Live streaming (`src/features/live/`, route `/live`)
+
+- `LiveView.tsx` is the container: shows the YouTube embed via `LivePlayer`, polls `GET /api/lives/` every 10s while a live is active or 30s while idle, and (for admins) exposes create/activate/deactivate/end controls.
+- `LiveChat.tsx` connects over WebSocket to `/api/lives/{liveId}/chat/ws?token=...`, falling back to 3s REST polling on disconnect, with 3s reconnect backoff. Admins can edit/pin/delete any message inline; pinned messages show in an amber banner.
+- `LiveReactions.tsx` offers 👍❤️🔥👏😮, toggling via `POST /api/lives/{liveId}/react` (same type removes, different replaces), showing the top 3 + counts.
+- `LivePdfs.tsx` lets admins upload PDFs (base64 → `/api/admin/lives/{liveId}/pdfs`) and everyone view/open them; delete is admin-only.
+
+### Classroom & chapter PDFs
+
+- Course/chapter CRUD (create, edit, list) goes through the **legacy** `/api/courses/*` router — see the endpoint table above. Don't assume `/api/admin/classroom` replaces it; it currently only owns chapter PDFs, chapter deletion, and course publish toggling.
+- `CourseDetail.tsx` tracks the open chapter by **ID, not index** (`activeChapterId` state) so the selection survives chapter list mutations (add/delete/reorder). When the active chapter has no `videoUrl`, it renders an empty-state card ("Este capítulo no tiene un video enlazado...") instead of a blank player, and still shows `ActiveChapterPdfs` below it.
+- `AddChapterForm.tsx` supports multi-file PDF/document attachment: chapter is created first via the legacy endpoint, then each file is uploaded individually to `/api/admin/classroom/chapters/{chapterId}/pdfs`.
+- `ChapterPdfsAdmin.tsx` provides the same upload/delete UI scoped to an already-existing chapter (used during chapter edit).
+- `ActiveChapterPdfs.tsx` (student view) lists PDFs for the currently open chapter via `useChapterPdfs(chapterId)` → `GET /api/classroom/chapters/{chapterId}/pdfs`.
+- `course.progress` (shown on `CourseCard`) is a static integer column on the `courses` table — it is **not** computed from the newer `/api/classroom/.../progress` or `complete_chapter` endpoints, which exist server-side but aren't yet called from this UI.
 
 ### Profile page
 
-- **Real data**: level/XP (`GET /api/levels/me`) and achievements (`GET /api/levels/me/achievements`) are fetched in `Profile.tsx` on mount and passed as props to `ProfileLevelCard` and `ProfileAchievements`.
-- **Mock data**: ranking, activity, and XP breakdown table remain static in `src/features/profile/data/profileMock.ts`.
-- `ProfileStatsGrid` receives `badgeCount` prop with the real count of earned achievements.
-- Personal data fields (`gender`, `city`, `phone`) come from the user object via `AuthContext` and are saved via `PUT /api/auth/profile`.
+- **Real data, fetched on mount in `Profile.tsx`**: level/XP (`GET /api/levels/me`), achievements (`GET /api/levels/me/achievements`), streak (`GET /api/streaks/checkin` — this also registers today's check-in), completed courses (`GET /api/classroom/me/completed-courses`), and social impact (`GET /api/posts/me/social-impact`). All passed as props into `ProfileLevelCard`, `ProfileAchievements`, and `ProfileStatsGrid`.
+- `ProfileStatsGrid` renders badge count, streak days, completed courses, and social impact from real props — these were previously "Próximamente" placeholders backed by `profileMock.ts`.
+- A milestone banner shows when `streak.milestone_reached` is set (e.g. "¡Hito de 7 días alcanzado!").
+- **Still mock**: ranking and activity-feed tables in `profileMock.ts` remain static.
+- Personal data fields (`gender`, `city`, `phone`, `email`) are shown in a dedicated info card and saved via `PUT /api/auth/profile`.
+
+### Branding
+
+App name is "El Club de Nice". Primary color is hot pink `#db2777` (`--color-brand-primary`, hover `#be185d`) — the legacy `violet`/`indigo` Tailwind palette tokens in `index.css` are remapped to pink shades rather than removed, so `bg-violet-*`/`bg-indigo-*` classes in older components still render pink, not purple.
 
 ### Data patterns
 
-- `API_BASE` is `import.meta.env.VITE_API_URL ?? ""`. When set, the browser calls the Python backend directly (cross-origin). When empty, requests go through the Express proxy (same-origin).
-- **Always use trailing slashes** on collection endpoints: `/api/posts/`, `/api/tags/`, `/api/courses/`, `/api/payments/`, `/api/invitations/`, `/api/achievements/`, `/api/admin/achievements/`. The FastAPI routes are defined with a trailing slash — omitting it causes a 307 redirect, and the browser strips the `Authorization` header on cross-origin redirects.
+- `API_BASE` is `import.meta.env.VITE_API_URL ?? ""`. When set, the browser calls the Python backend directly (cross-origin). When empty, requests go through the Vite dev proxy (same-origin).
+- **Always use trailing slashes** on collection endpoints: `/api/posts/`, `/api/tags/`, `/api/courses/`, `/api/payments/`, `/api/invitations/`, `/api/achievements/`, `/api/payment-methods/`, `/api/currencies/`, `/api/admin/achievements/`. The FastAPI routes are defined with a trailing slash — omitting it causes a 307 redirect, and the browser strips the `Authorization` header on cross-origin redirects.
 - Use `useApiFetch()` hook (not bare `apiFetch`) for authenticated requests — it injects the token automatically.
 - Posts use cursor-based pagination (cursor = `created_at` of last item).
 - `posts_view` is a Supabase SQL view that joins posts with profiles — query it directly instead of joining in code.
 - Supabase auth uses the **admin API** server-side so email confirmation is bypassed on register.
+- WebSocket URLs derive from `API_BASE`/`VITE_API_URL` with the scheme swapped (`http→ws`, `https→wss`).

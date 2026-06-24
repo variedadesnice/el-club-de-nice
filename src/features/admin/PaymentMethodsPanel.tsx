@@ -202,35 +202,38 @@ function PaymentMethodCard({
 
   return (
     <div className="bg-slate-50 border border-slate-200 rounded-2xl overflow-hidden">
-      <div className="flex items-center gap-4 p-5">
-        <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${method.is_active ? "bg-indigo-100 text-indigo-600" : "bg-slate-200 text-slate-400"}`}>
-          <CreditCard size={18} />
-        </div>
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2">
-            <p className="font-black text-slate-900 truncate">{method.name}</p>
-            <span className={`text-[10px] font-black px-2 py-0.5 rounded-full ${method.is_active ? "bg-green-50 text-green-700 border border-green-200" : "bg-slate-100 text-slate-400 border border-slate-200"}`}>
-              {method.is_active ? "Activo" : "Inactivo"}
-            </span>
+      <div className="flex flex-col sm:flex-row sm:items-center gap-3 p-4 sm:p-5">
+        <div className="flex items-center gap-3 flex-1 min-w-0">
+          <div className={`w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${method.is_active ? "bg-indigo-100 text-indigo-600" : "bg-slate-200 text-slate-400"}`}>
+            <CreditCard size={16} className="sm:hidden" />
+            <CreditCard size={18} className="hidden sm:block" />
           </div>
-          {method.description && <p className="text-xs font-medium text-slate-400 truncate mt-0.5">{method.description}</p>}
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 flex-wrap">
+              <p className="font-black text-slate-900 truncate text-sm sm:text-base">{method.name}</p>
+              <span className={`text-[10px] font-black px-2 py-0.5 rounded-full flex-shrink-0 ${method.is_active ? "bg-green-50 text-green-700 border border-green-200" : "bg-slate-100 text-slate-400 border border-slate-200"}`}>
+                {method.is_active ? "Activo" : "Inactivo"}
+              </span>
+            </div>
+            {method.description && <p className="text-xs font-medium text-slate-400 truncate mt-0.5">{method.description}</p>}
+          </div>
         </div>
-        <div className="flex items-center gap-2 flex-shrink-0">
+        <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0 self-end sm:self-auto">
           <button
             onClick={handleToggleActive}
             disabled={toggling}
             title={method.is_active ? "Desactivar" : "Activar"}
-            className={`p-2.5 rounded-xl border transition-all disabled:opacity-50 ${method.is_active ? "bg-white border-green-200 text-green-600 hover:bg-green-50" : "bg-white border-slate-200 text-slate-400 hover:bg-slate-100"}`}
+            className={`p-2 sm:p-2.5 rounded-xl border transition-all disabled:opacity-50 ${method.is_active ? "bg-white border-green-200 text-green-600 hover:bg-green-50" : "bg-white border-slate-200 text-slate-400 hover:bg-slate-100"}`}
           >
             {toggling ? <RefreshCw size={15} className="animate-spin" /> : <Power size={15} />}
           </button>
-          <button onClick={() => onEdit(method)} title="Editar" className="p-2.5 rounded-xl bg-white border border-slate-200 text-slate-500 hover:bg-indigo-50 hover:text-indigo-600 transition-all">
+          <button onClick={() => onEdit(method)} title="Editar" className="p-2 sm:p-2.5 rounded-xl bg-white border border-slate-200 text-slate-500 hover:bg-indigo-50 hover:text-indigo-600 transition-all">
             <Edit2 size={15} />
           </button>
-          <button onClick={handleDelete} disabled={deleting} title="Eliminar" className="p-2.5 rounded-xl bg-white border border-slate-200 text-slate-400 hover:bg-red-50 hover:text-red-500 transition-all disabled:opacity-50">
+          <button onClick={handleDelete} disabled={deleting} title="Eliminar" className="p-2 sm:p-2.5 rounded-xl bg-white border border-slate-200 text-slate-400 hover:bg-red-50 hover:text-red-500 transition-all disabled:opacity-50">
             {deleting ? <RefreshCw size={15} className="animate-spin" /> : <Trash2 size={15} />}
           </button>
-          <button onClick={() => setExpanded((v) => !v)} title="Campos y valores" className="p-2.5 rounded-xl bg-white border border-slate-200 text-slate-500 hover:bg-slate-100 transition-all">
+          <button onClick={() => setExpanded((v) => !v)} title="Campos y valores" className="p-2 sm:p-2.5 rounded-xl bg-white border border-slate-200 text-slate-500 hover:bg-slate-100 transition-all">
             {expanded ? <ChevronUp size={15} /> : <ChevronDown size={15} />}
           </button>
         </div>
@@ -499,22 +502,22 @@ export default function PaymentMethodsPanel() {
     <motion.div
       initial={{ opacity: 0, x: 20 }}
       animate={{ opacity: 1, x: 0 }}
-      className="bg-white rounded-[2rem] md:rounded-[2.5rem] p-6 md:p-10 border border-slate-200 shadow-sm"
+      className="bg-white rounded-3xl sm:rounded-[2rem] md:rounded-[2.5rem] p-4 sm:p-6 md:p-10 border border-slate-200 shadow-sm"
     >
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 md:mb-8">
         <div>
-          <h3 className="text-2xl font-black text-slate-900 flex items-center gap-3">
-            <CreditCard className="text-indigo-600" /> Métodos de Pago
+          <h3 className="text-lg sm:text-2xl font-black text-slate-900 flex items-center gap-2 sm:gap-3">
+            <CreditCard className="text-indigo-600 w-5 h-5 sm:w-6 sm:h-6" /> Métodos de Pago
           </h3>
-          <p className="text-slate-500 font-medium mt-1">
+          <p className="text-slate-500 font-medium mt-1 text-sm sm:text-base">
             Configura los métodos de pago que verán los usuarios al registrarse.
           </p>
         </div>
-        <div className="flex items-center gap-3">
-          <button onClick={loadMethods} disabled={loading} className="flex items-center gap-2 px-5 py-2.5 rounded-2xl border-2 border-slate-200 text-sm font-black text-slate-600 hover:bg-slate-50 transition-all disabled:opacity-50">
+        <div className="flex items-center gap-2 sm:gap-3">
+          <button onClick={loadMethods} disabled={loading} className="flex-1 sm:flex-initial flex items-center justify-center gap-2 px-4 sm:px-5 py-2.5 rounded-2xl border-2 border-slate-200 text-xs sm:text-sm font-black text-slate-600 hover:bg-slate-50 transition-all disabled:opacity-50">
             <RefreshCw size={15} className={loading ? "animate-spin" : ""} /> Actualizar
           </button>
-          <button onClick={openCreateModal} className="flex items-center gap-2 bg-indigo-600 text-white px-5 py-2.5 rounded-2xl font-black text-sm hover:bg-indigo-700 transition-all shadow-xl shadow-indigo-100">
+          <button onClick={openCreateModal} className="flex-1 sm:flex-initial flex items-center justify-center gap-2 bg-indigo-600 text-white px-4 sm:px-5 py-2.5 rounded-2xl font-black text-xs sm:text-sm hover:bg-indigo-700 transition-all shadow-xl shadow-indigo-100">
             <Plus size={16} /> Nuevo método
           </button>
         </div>
@@ -556,8 +559,8 @@ export default function PaymentMethodsPanel() {
         {isModalOpen && (
           <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setIsModalOpen(false)} className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
-            <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }} className="relative bg-white rounded-3xl p-8 max-w-lg w-full shadow-2xl max-h-[90vh] overflow-y-auto">
-              <h2 className="text-xl font-black mb-6">{draft.id ? "Editar método de pago" : "Nuevo método de pago"}</h2>
+            <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }} className="relative bg-white rounded-2xl sm:rounded-3xl p-5 sm:p-8 max-w-lg w-full shadow-2xl max-h-[90vh] overflow-y-auto">
+              <h2 className="text-lg sm:text-xl font-black mb-5 sm:mb-6">{draft.id ? "Editar método de pago" : "Nuevo método de pago"}</h2>
               <form onSubmit={handleSave} className="space-y-4">
                 <div>
                   <label className="text-[10px] font-black text-slate-400 uppercase tracking-wider block mb-1">Nombre</label>

@@ -172,28 +172,28 @@ export default function AnalyticsPanel() {
           value: formatNumber(overview.members.total),
           change: `+${formatNumber(overview.members.new_this_month)} este mes`,
           positive: true,
-          icon: <Users className="text-blue-600" />,
+          icon: <Users className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600" />,
         },
         {
           label: "Miembros Activos",
           value: formatNumber(overview.members.active),
           change: `${overview.members.total > 0 ? Math.round((overview.members.active / overview.members.total) * 100) : 0}% del total`,
           positive: true,
-          icon: <Activity className="text-purple-600" />,
+          icon: <Activity className="w-4 h-4 sm:w-5 sm:h-5 text-purple-600" />,
         },
         {
           label: "Ingresos del Mes",
           value: formatAmount(overview.revenue.this_month, bcvRate),
           change: `${formatAmount(overview.revenue.today, bcvRate)} hoy`,
           positive: true,
-          icon: <DollarSign className="text-green-600" />,
+          icon: <DollarSign className="w-4 h-4 sm:w-5 sm:h-5 text-green-600" />,
         },
         {
           label: "Pagos Pendientes",
           value: formatNumber(overview.revenue.payments_pending),
           change: `${formatNumber(overview.revenue.non_renewals)} sin renovar`,
           positive: overview.revenue.payments_pending === 0,
-          icon: <Clock className="text-amber-600" />,
+          icon: <Clock className="w-4 h-4 sm:w-5 sm:h-5 text-amber-600" />,
         },
       ]
     : [];
@@ -265,39 +265,39 @@ export default function AnalyticsPanel() {
       )}
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
         {stats.map((stat, i) => (
           <motion.div
             key={stat.label}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.1 }}
-            className="bg-white p-6 rounded-[2rem] border border-slate-200 shadow-sm"
+            className="bg-white p-3.5 sm:p-5 md:p-6 rounded-2xl sm:rounded-[1.75rem] md:rounded-[2rem] border border-slate-200 shadow-sm min-w-0"
           >
-            <div className="flex justify-between items-start mb-4">
-              <div className="p-3 bg-slate-50 rounded-2xl">{stat.icon}</div>
+            <div className="flex justify-between items-start mb-2 sm:mb-4">
+              <div className="p-1.5 sm:p-2.5 md:p-3 bg-slate-50 rounded-lg sm:rounded-xl md:rounded-2xl">{stat.icon}</div>
               <div className={`flex items-center text-xs font-black ${stat.positive ? "text-green-500" : "text-red-500"}`}>
-                {stat.positive ? <ArrowUpRight size={14} /> : <ArrowDownRight size={14} />}
+                {stat.positive ? <ArrowUpRight className="w-3 h-3 sm:w-3.5 sm:h-3.5" /> : <ArrowDownRight className="w-3 h-3 sm:w-3.5 sm:h-3.5" />}
               </div>
             </div>
-            <p className="text-slate-500 text-xs font-black uppercase tracking-[0.1em]">{stat.label}</p>
-            <p className="text-3xl font-black text-slate-900 mt-1">{stat.value}</p>
-            <p className="text-slate-400 text-xs font-bold mt-2">{stat.change}</p>
+            <p className="text-slate-500 text-[10px] sm:text-xs font-black uppercase tracking-wide sm:tracking-[0.1em] truncate">{stat.label}</p>
+            <p className="text-lg sm:text-2xl md:text-3xl font-black text-slate-900 mt-0.5 sm:mt-1 truncate">{stat.value}</p>
+            <p className="text-slate-400 text-[10px] sm:text-xs font-bold mt-1 sm:mt-2 truncate">{stat.change}</p>
           </motion.div>
         ))}
       </div>
 
       {/* Revenue history + new members */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        <div className="lg:col-span-8 bg-white p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] border border-slate-200 shadow-sm">
-          <h3 className="text-xl font-black text-slate-900 mb-1">Ingresos Diarios</h3>
-          <p className="text-slate-500 text-sm font-medium mb-8">Últimos {HISTORY_LIMIT} días con snapshot registrado.</p>
-          <div className="h-[350px] w-full">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6">
+        <div className="lg:col-span-8 bg-white p-4 sm:p-6 md:p-8 rounded-2xl sm:rounded-[2rem] md:rounded-[2.5rem] border border-slate-200 shadow-sm">
+          <h3 className="text-base sm:text-xl font-black text-slate-900 mb-1">Ingresos Diarios</h3>
+          <p className="text-slate-500 text-xs sm:text-sm font-medium mb-4 sm:mb-8">Últimos {HISTORY_LIMIT} días con snapshot registrado.</p>
+          <div className="h-[220px] sm:h-[280px] md:h-[350px] w-full">
             {history.length === 0 ? (
               <EmptyChartState label="Aún no hay snapshots históricos." />
             ) : (
               <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={history}>
+                <AreaChart data={history} margin={{ top: 4, right: 48, left: 0, bottom: 0 }}>
                   <defs>
                     <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
                       <stop offset="5%" stopColor="#4f46e5" stopOpacity={0.1} />
@@ -306,7 +306,7 @@ export default function AnalyticsPanel() {
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
                   <XAxis dataKey="snapshot_date" tickFormatter={formatShortDate} axisLine={false} tickLine={false} tick={axisTick} dy={10} />
-                  <YAxis axisLine={false} tickLine={false} tick={axisTick} />
+                  <YAxis axisLine={false} tickLine={false} tick={axisTick} width={48} />
                   <Tooltip
                     contentStyle={tooltipContentStyle}
                     labelFormatter={formatShortDate}
@@ -319,10 +319,10 @@ export default function AnalyticsPanel() {
           </div>
         </div>
 
-        <div className="lg:col-span-4 bg-slate-900 p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] border border-slate-800 shadow-xl text-white">
-          <h3 className="text-xl font-black mb-2">Nuevos Miembros</h3>
-          <p className="text-slate-400 text-sm font-medium mb-8">Registros diarios en los últimos {HISTORY_LIMIT} días.</p>
-          <div className="h-[300px] w-full">
+        <div className="lg:col-span-4 bg-slate-900 p-4 sm:p-6 md:p-8 rounded-2xl sm:rounded-[2rem] md:rounded-[2.5rem] border border-slate-800 shadow-xl text-white">
+          <h3 className="text-base sm:text-xl font-black mb-1 sm:mb-2">Nuevos Miembros</h3>
+          <p className="text-slate-400 text-xs sm:text-sm font-medium mb-4 sm:mb-8">Registros diarios en los últimos {HISTORY_LIMIT} días.</p>
+          <div className="h-[180px] sm:h-[240px] md:h-[300px] w-full">
             {history.length === 0 ? (
               <div className="h-full w-full flex items-center justify-center text-slate-600 font-bold text-sm">
                 Aún no hay snapshots históricos.
@@ -347,25 +347,103 @@ export default function AnalyticsPanel() {
               </ResponsiveContainer>
             )}
           </div>
-          <div className="mt-6 flex items-center justify-between">
+          <div className="mt-4 sm:mt-6 flex items-center justify-between">
             <div className="text-center">
-              <p className="text-xs font-black text-slate-500 uppercase tracking-widest">Hoy</p>
-              <p className="text-xl font-black">{overview ? formatNumber(overview.members.new_today) : "—"}</p>
+              <p className="text-[10px] sm:text-xs font-black text-slate-500 uppercase tracking-wide sm:tracking-widest">Hoy</p>
+              <p className="text-base sm:text-xl font-black">{overview ? formatNumber(overview.members.new_today) : "—"}</p>
             </div>
             <div className="text-center">
-              <p className="text-xs font-black text-slate-500 uppercase tracking-widest">Este mes</p>
-              <p className="text-xl font-black">{overview ? formatNumber(overview.members.new_this_month) : "—"}</p>
+              <p className="text-[10px] sm:text-xs font-black text-slate-500 uppercase tracking-wide sm:tracking-widest">Este mes</p>
+              <p className="text-base sm:text-xl font-black">{overview ? formatNumber(overview.members.new_this_month) : "—"}</p>
             </div>
             <div className="text-center">
-              <p className="text-xs font-black text-slate-500 uppercase tracking-widest">Total</p>
-              <p className="text-xl font-black">{overview ? formatNumber(overview.members.total) : "—"}</p>
+              <p className="text-[10px] sm:text-xs font-black text-slate-500 uppercase tracking-wide sm:tracking-widest">Total</p>
+              <p className="text-base sm:text-xl font-black">{overview ? formatNumber(overview.members.total) : "—"}</p>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Demographics: status, gender, age */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      {/* Demographics: geographic location, age, gender — one combined card on mobile, 3 cards on desktop */}
+      <div className="bg-white rounded-3xl sm:rounded-[2rem] md:rounded-[2.5rem] border border-slate-200 shadow-sm overflow-hidden lg:bg-transparent lg:border-0 lg:shadow-none lg:rounded-none">
+        <div className="grid grid-cols-1 lg:grid-cols-3 divide-y divide-slate-100 lg:divide-y-0 lg:gap-6">
+          <div className="p-5 sm:p-6 lg:p-8 lg:bg-white lg:rounded-[2rem] lg:border lg:border-slate-200 lg:shadow-sm">
+            <h3 className="text-base sm:text-lg font-black text-slate-900 mb-1 flex items-center gap-2">
+              <MapPin size={18} className="text-indigo-600" /> Miembros por Ciudad
+            </h3>
+            <p className="text-slate-500 text-xs sm:text-sm font-medium mb-4 sm:mb-6">Distribución geográfica de la comunidad.</p>
+            {locationData.length === 0 ? (
+              <div className="py-8 sm:py-12">
+                <EmptyChartState label="Sin datos disponibles." />
+              </div>
+            ) : (
+              <div className="space-y-3 sm:space-y-4">
+                {locationData.map((loc) => (
+                  <div key={loc.city}>
+                    <div className="flex items-center justify-between mb-1.5">
+                      <span className="text-sm font-bold text-slate-700">{loc.city || "Sin especificar"}</span>
+                      <span className="text-xs font-black text-slate-400">{formatNumber(loc.total)} · {loc.percentage}%</span>
+                    </div>
+                    <div className="h-2 rounded-full bg-slate-100 overflow-hidden">
+                      <div
+                        className="h-full rounded-full bg-linear-to-r from-indigo-500 to-violet-400 transition-all duration-700"
+                        style={{ width: `${Math.min(loc.percentage, 100)}%` }}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div className="p-5 sm:p-6 lg:p-8 lg:bg-white lg:rounded-[2rem] lg:border lg:border-slate-200 lg:shadow-sm">
+            <h3 className="text-base sm:text-lg font-black text-slate-900 mb-1 flex items-center gap-2">
+              <Cake size={18} className="text-indigo-600" /> Rangos de Edad
+            </h3>
+            <p className="text-slate-500 text-xs sm:text-sm font-medium mb-4 sm:mb-6">Miembros por rango etario.</p>
+            <div className="h-[200px] sm:h-[240px] w-full">
+              {ageData.length === 0 ? (
+                <EmptyChartState label="Sin datos disponibles." />
+              ) : (
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={ageData} margin={{ top: 4, left: -16 }}>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                    <XAxis dataKey="age_range" axisLine={false} tickLine={false} tick={{ fill: "#94a3b8", fontSize: 11, fontWeight: 700 }} dy={8} />
+                    <YAxis axisLine={false} tickLine={false} tick={axisTick} />
+                    <Tooltip contentStyle={tooltipContentStyle} formatter={(value: number) => formatNumber(value)} />
+                    <Bar dataKey="total" radius={[8, 8, 0, 0]} fill="#6366f1" />
+                  </BarChart>
+                </ResponsiveContainer>
+              )}
+            </div>
+          </div>
+
+          <div className="p-5 sm:p-6 lg:p-8 lg:bg-white lg:rounded-[2rem] lg:border lg:border-slate-200 lg:shadow-sm">
+            <h3 className="text-base sm:text-lg font-black text-slate-900 mb-1">Género</h3>
+            <p className="text-slate-500 text-xs sm:text-sm font-medium mb-4 sm:mb-6">Distribución de miembros por género.</p>
+            <div className="h-[180px] sm:h-[220px] w-full">
+              {genderData.length === 0 ? (
+                <EmptyChartState label="Sin datos disponibles." />
+              ) : (
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie data={genderData} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={45} outerRadius={75} paddingAngle={3}>
+                      {genderData.map((entry) => (
+                        <Cell key={entry.name} fill={GENDER_COLORS[entry.name] ?? "#cbd5e1"} />
+                      ))}
+                    </Pie>
+                    <Tooltip contentStyle={tooltipContentStyle} formatter={(value: number) => formatNumber(value)} />
+                    <Legend iconType="circle" formatter={(value) => <span className="text-xs font-bold text-slate-600">{value}</span>} />
+                  </PieChart>
+                </ResponsiveContainer>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Subscription status + Revenue by plan */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="bg-white p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] border border-slate-200 shadow-sm">
           <h3 className="text-lg font-black text-slate-900 mb-1">Estado de Miembros</h3>
           <p className="text-slate-500 text-sm font-medium mb-6">Distribución de suscripciones.</p>
@@ -386,82 +464,6 @@ export default function AnalyticsPanel() {
               </ResponsiveContainer>
             )}
           </div>
-        </div>
-
-        <div className="bg-white p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] border border-slate-200 shadow-sm">
-          <h3 className="text-lg font-black text-slate-900 mb-1">Género</h3>
-          <p className="text-slate-500 text-sm font-medium mb-6">Distribución de miembros por género.</p>
-          <div className="h-[220px] w-full">
-            {genderData.length === 0 ? (
-              <EmptyChartState label="Sin datos disponibles." />
-            ) : (
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie data={genderData} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={50} outerRadius={80} paddingAngle={3}>
-                    {genderData.map((entry) => (
-                      <Cell key={entry.name} fill={GENDER_COLORS[entry.name] ?? "#cbd5e1"} />
-                    ))}
-                  </Pie>
-                  <Tooltip contentStyle={tooltipContentStyle} formatter={(value: number) => formatNumber(value)} />
-                  <Legend iconType="circle" formatter={(value) => <span className="text-xs font-bold text-slate-600">{value}</span>} />
-                </PieChart>
-              </ResponsiveContainer>
-            )}
-          </div>
-        </div>
-
-        <div className="bg-white p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] border border-slate-200 shadow-sm">
-          <h3 className="text-lg font-black text-slate-900 mb-1 flex items-center gap-2">
-            <Cake size={18} className="text-indigo-600" /> Rangos de Edad
-          </h3>
-          <p className="text-slate-500 text-sm font-medium mb-6">Miembros por rango etario.</p>
-          <div className="h-[220px] w-full">
-            {ageData.length === 0 ? (
-              <EmptyChartState label="Sin datos disponibles." />
-            ) : (
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={ageData} layout="vertical" margin={{ left: 10 }}>
-                  <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#f1f5f9" />
-                  <XAxis type="number" axisLine={false} tickLine={false} tick={axisTick} />
-                  <YAxis type="category" dataKey="age_range" axisLine={false} tickLine={false} tick={{ fill: "#94a3b8", fontSize: 11, fontWeight: 700 }} width={90} />
-                  <Tooltip contentStyle={tooltipContentStyle} formatter={(value: number) => formatNumber(value)} />
-                  <Bar dataKey="total" radius={[0, 10, 10, 0]} fill="#6366f1" />
-                </BarChart>
-              </ResponsiveContainer>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* Locations + Revenue by plan */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-white p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] border border-slate-200 shadow-sm">
-          <h3 className="text-lg font-black text-slate-900 mb-1 flex items-center gap-2">
-            <MapPin size={18} className="text-indigo-600" /> Miembros por Ciudad
-          </h3>
-          <p className="text-slate-500 text-sm font-medium mb-6">Distribución geográfica de la comunidad.</p>
-          {locationData.length === 0 ? (
-            <div className="py-12">
-              <EmptyChartState label="Sin datos disponibles." />
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {locationData.map((loc) => (
-                <div key={loc.city}>
-                  <div className="flex items-center justify-between mb-1.5">
-                    <span className="text-sm font-bold text-slate-700">{loc.city || "Sin especificar"}</span>
-                    <span className="text-xs font-black text-slate-400">{formatNumber(loc.total)} · {loc.percentage}%</span>
-                  </div>
-                  <div className="h-2 rounded-full bg-slate-100 overflow-hidden">
-                    <div
-                      className="h-full rounded-full bg-linear-to-r from-indigo-500 to-violet-400 transition-all duration-700"
-                      style={{ width: `${Math.min(loc.percentage, 100)}%` }}
-                    />
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
         </div>
 
         <div className="bg-white p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] border border-slate-200 shadow-sm">
