@@ -27,6 +27,8 @@ import type { Payment, PlanType } from "../../types";
 import GamificationPanel from "./GamificationPanel";
 import AnalyticsPanel from "./AnalyticsPanel";
 import PaymentMethodsPanel from "./PaymentMethodsPanel";
+import RafflesPanel from "./RafflesPanel";
+import RoulettePanel from "./RoulettePanel";
 
 interface Invitation {
   id: string;
@@ -591,7 +593,7 @@ function PaymentsPanel() {
 }
 
 export default function AdminDashboard() {
-  const [activeTab, setActiveTab] = useState<"stats" | "settings" | "invitaciones" | "pagos" | "metodos-pago" | "gamification">("stats");
+  const [activeTab, setActiveTab] = useState<"stats" | "settings" | "invitaciones" | "pagos" | "metodos-pago" | "gamification" | "sorteos" | "ruleta">("stats");
   const [bankInfo, setBankInfo] = useState({
     accountHolder: "Sarah Jenkins",
     bankName: "Global Bank",
@@ -639,6 +641,18 @@ export default function AdminDashboard() {
             Niveles e Insignias
           </button>
           <button
+            onClick={() => setActiveTab("sorteos")}
+            className={`px-6 py-2.5 rounded-xl font-bold text-sm transition-all whitespace-nowrap ${activeTab === 'sorteos' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+          >
+            Sorteos
+          </button>
+          <button
+            onClick={() => setActiveTab("ruleta")}
+            className={`px-6 py-2.5 rounded-xl font-bold text-sm transition-all whitespace-nowrap ${activeTab === 'ruleta' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+          >
+            Ruleta
+          </button>
+          <button
             onClick={() => setActiveTab("settings")}
             className={`px-6 py-2.5 rounded-xl font-bold text-sm transition-all whitespace-nowrap ${activeTab === 'settings' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
           >
@@ -656,6 +670,10 @@ export default function AdminDashboard() {
       {activeTab === "metodos-pago" && <PaymentMethodsPanel />}
 
       {activeTab === "gamification" && <GamificationPanel />}
+
+      {activeTab === "sorteos" && <RafflesPanel />}
+
+      {activeTab === "ruleta" && <RoulettePanel />}
 
       {activeTab === "settings" && (
         <motion.div
