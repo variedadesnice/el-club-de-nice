@@ -5,7 +5,7 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { apiFetch } from "../../../lib/api";
-import type { PaymentMethod, PlanType } from "../../../types";
+import type { PaymentMethod, PlanType, Currency } from "../../../types";
 import logo from "../../../assets/logo.png";
 
 interface RegisterProps {
@@ -168,6 +168,10 @@ export default function Register({ onGoToLogin }: RegisterProps) {
   const [methodsLoading, setMethodsLoading] = useState(true);
   const [methodsError, setMethodsError] = useState<string | null>(null);
 
+  // Monedas activas (catálogo público)
+  const [currencies, setCurrencies] = useState<Currency[]>([]);
+  const [selectedCurrencyId, setSelectedCurrencyId] = useState("");
+
   // Paso 3 — comprobante
   const [receiptFileName, setReceiptFileName] = useState("");
   const [receiptPath, setReceiptPath] = useState("");
@@ -202,6 +206,18 @@ export default function Register({ onGoToLogin }: RegisterProps) {
     return () => {
       cancelled = true;
     };
+  }, []);
+
+  // Cargar monedas activas y pre-seleccionar VES (Bolívar)
+  useEffect(() => {
+    apiFetch<Currency[]>("/api/currencies/")
+      .then(({ data }) => {
+        setCurrencies(data);
+        // Intentamos pre-seleccionar VES; si no existe, tomamos la primera
+        const ves = data.find((c) => c.code === "VES" || c.code === "Bs" || c.code === "VED");
+        setSelectedCurrencyId(ves?.id ?? data[0]?.id ?? "");
+      })
+      .catch(() => { /* si falla, el campo quedará vacío */ });
   }, []);
 
   // Tasa BCV
@@ -318,6 +334,10 @@ export default function Register({ onGoToLogin }: RegisterProps) {
       setSubmitError("Selecciona un método de pago.");
       return;
     }
+    if (!selectedCurrencyId) {
+      setSubmitError("No se pudo determinar la moneda. Recarga la página e intenta de nuevo.");
+      return;
+    }
     setSubmitError(null);
     setIsSubmitting(true);
     try {
@@ -329,11 +349,14 @@ export default function Register({ onGoToLogin }: RegisterProps) {
           email: email.trim(),
           password,
           plan,
-          amount: Number(bsAmount ?? amount),
+          amount: parseFloat(selectedPlan?.price ?? "0"),   // USD
           payment_method_id: selectedMethodId,
           reference_number: referenceNumber.trim(),
           phone: `${countryCode}${phone.trim()}`,
           receipt_path: receiptPath,
+          currency_id: selectedCurrencyId,
+          amount_local: Number(bsAmount ?? amount),          // Bs.
+          exchange_rate: bcvRate ?? 1,                        // tasa BCV
         }),
       });
       setSubmitted(true);

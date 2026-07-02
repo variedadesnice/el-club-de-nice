@@ -71,6 +71,13 @@ export interface PaymentMethod {
   fields: PaymentMethodField[];
 }
 
+export interface Currency {
+  id: string;
+  code: string;
+  name: string;
+  symbol: string;
+}
+
 export interface AdminPaymentMethodField extends PaymentMethodField {
   id: string;
   is_required: boolean;
