@@ -20,6 +20,7 @@ import {
   ThumbsUp,
   ThumbsDown,
   Banknote,
+  ChevronDown,
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { useApiFetch } from "../../lib/api";
@@ -609,55 +610,38 @@ export default function AdminDashboard() {
           <h1 className="text-3xl font-black text-slate-900 tracking-tight">Panel de Administración</h1>
           <p className="text-slate-500 font-medium">Gestiona tu comunidad y finanzas desde un solo lugar.</p>
         </div>
-        <div className="flex bg-slate-100 p-1 rounded-2xl w-full md:w-fit overflow-x-auto">
-          <button
-            onClick={() => setActiveTab("stats")}
-            className={`px-6 py-2.5 rounded-xl font-bold text-sm transition-all whitespace-nowrap ${activeTab === 'stats' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+        {/* ── Navegación responsive ── */}
+        {/* Mobile: select desplegable */}
+        <div className="relative md:hidden w-full">
+          <select
+            value={activeTab}
+            onChange={(e) => setActiveTab(e.target.value as typeof activeTab)}
+            className="w-full appearance-none bg-slate-100 border-0 rounded-2xl px-5 py-3.5 pr-10 font-bold text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-200 cursor-pointer"
           >
-            Estadísticas
-          </button>
-          <button
-            onClick={() => setActiveTab("invitaciones")}
-            className={`px-6 py-2.5 rounded-xl font-bold text-sm transition-all whitespace-nowrap ${activeTab === 'invitaciones' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
-          >
-            Invitaciones
-          </button>
-          <button
-            onClick={() => setActiveTab("pagos")}
-            className={`px-6 py-2.5 rounded-xl font-bold text-sm transition-all whitespace-nowrap ${activeTab === 'pagos' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
-          >
-            Pagos
-          </button>
-          <button
-            onClick={() => setActiveTab("metodos-pago")}
-            className={`px-6 py-2.5 rounded-xl font-bold text-sm transition-all whitespace-nowrap ${activeTab === 'metodos-pago' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
-          >
-            Métodos de Pago
-          </button>
-          <button
-            onClick={() => setActiveTab("gamification")}
-            className={`px-6 py-2.5 rounded-xl font-bold text-sm transition-all whitespace-nowrap ${activeTab === 'gamification' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
-          >
-            Niveles e Insignias
-          </button>
-          <button
-            onClick={() => setActiveTab("sorteos")}
-            className={`px-6 py-2.5 rounded-xl font-bold text-sm transition-all whitespace-nowrap ${activeTab === 'sorteos' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
-          >
-            Sorteos
-          </button>
-          <button
-            onClick={() => setActiveTab("ruleta")}
-            className={`px-6 py-2.5 rounded-xl font-bold text-sm transition-all whitespace-nowrap ${activeTab === 'ruleta' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
-          >
-            Ruleta
-          </button>
-          <button
-            onClick={() => setActiveTab("settings")}
-            className={`px-6 py-2.5 rounded-xl font-bold text-sm transition-all whitespace-nowrap ${activeTab === 'settings' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
-          >
-            Configuración
-          </button>
+            <option value="stats">📊 Estadísticas</option>
+            <option value="invitaciones">✉️ Invitaciones</option>
+            <option value="pagos">💳 Pagos</option>
+            <option value="metodos-pago">🏦 Métodos de Pago</option>
+            <option value="gamification">🏆 Niveles e Insignias</option>
+            <option value="sorteos">🎁 Sorteos</option>
+            <option value="ruleta">🎡 Ruleta</option>
+            <option value="settings">⚙️ Configuración</option>
+          </select>
+          <div className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-slate-400">
+            <ChevronDown size={18} />
+          </div>
+        </div>
+
+        {/* Desktop: pills */}
+        <div className="hidden md:flex bg-slate-100 p-1 rounded-2xl w-fit">
+          <button onClick={() => setActiveTab("stats")} className={`px-6 py-2.5 rounded-xl font-bold text-sm transition-all whitespace-nowrap ${activeTab === 'stats' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>Estadísticas</button>
+          <button onClick={() => setActiveTab("invitaciones")} className={`px-6 py-2.5 rounded-xl font-bold text-sm transition-all whitespace-nowrap ${activeTab === 'invitaciones' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>Invitaciones</button>
+          <button onClick={() => setActiveTab("pagos")} className={`px-6 py-2.5 rounded-xl font-bold text-sm transition-all whitespace-nowrap ${activeTab === 'pagos' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>Pagos</button>
+          <button onClick={() => setActiveTab("metodos-pago")} className={`px-6 py-2.5 rounded-xl font-bold text-sm transition-all whitespace-nowrap ${activeTab === 'metodos-pago' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>Métodos de Pago</button>
+          <button onClick={() => setActiveTab("gamification")} className={`px-6 py-2.5 rounded-xl font-bold text-sm transition-all whitespace-nowrap ${activeTab === 'gamification' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>Niveles e Insignias</button>
+          <button onClick={() => setActiveTab("sorteos")} className={`px-6 py-2.5 rounded-xl font-bold text-sm transition-all whitespace-nowrap ${activeTab === 'sorteos' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>Sorteos</button>
+          <button onClick={() => setActiveTab("ruleta")} className={`px-6 py-2.5 rounded-xl font-bold text-sm transition-all whitespace-nowrap ${activeTab === 'ruleta' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>Ruleta</button>
+          <button onClick={() => setActiveTab("settings")} className={`px-6 py-2.5 rounded-xl font-bold text-sm transition-all whitespace-nowrap ${activeTab === 'settings' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>Configuración</button>
         </div>
       </div>
 
