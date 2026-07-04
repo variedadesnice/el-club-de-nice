@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "motion/react";
 import { Comment } from "../../../types";
 import { useAuth } from "../../../context/AuthContext";
 import { API_BASE } from "../../../lib/api";
+import { useProfileDrawer } from "../../../context/ProfileDrawerContext";
 
 const MAX_DEPTH = 4;
 
@@ -102,6 +103,7 @@ interface CommentItemProps {
 
 function CommentItem({ postId, comment, depth, onAddComment, onReact }: CommentItemProps) {
   const { user } = useAuth();
+  const { openProfile } = useProfileDrawer();
   const [replying, setReplying] = useState(false);
   const [showReplies, setShowReplies] = useState(false);
   const [replyValue, setReplyValue] = useState("");
@@ -148,13 +150,20 @@ function CommentItem({ postId, comment, depth, onAddComment, onReact }: CommentI
 
   return (
     <div className="flex gap-3">
-      {comment.avatar ? (
-        <img src={comment.avatar} alt={comment.author} className="w-8 h-8 rounded-xl object-cover shrink-0 mt-0.5" />
-      ) : (
-        <div className="w-8 h-8 rounded-xl bg-violet-100 flex items-center justify-center text-violet-600 font-bold text-sm shrink-0 mt-0.5">
-          {comment.author?.[0]?.toUpperCase() ?? "U"}
-        </div>
-      )}
+      <button
+        type="button"
+        onClick={() => comment.user_id && openProfile(comment.user_id)}
+        className="shrink-0 mt-0.5 hover:opacity-75 transition-opacity"
+        aria-label={`Ver perfil de ${comment.author}`}
+      >
+        {comment.avatar ? (
+          <img src={comment.avatar} alt={comment.author} className="w-8 h-8 rounded-xl object-cover" />
+        ) : (
+          <div className="w-8 h-8 rounded-xl bg-violet-100 flex items-center justify-center text-violet-600 font-bold text-sm">
+            {comment.author?.[0]?.toUpperCase() ?? "U"}
+          </div>
+        )}
+      </button>
 
       <div className="flex-1 min-w-0">
         {/* Burbuja original */}

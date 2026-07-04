@@ -7,6 +7,7 @@ import CommentSection from "./CommentSection";
 import { useAuth } from "../../../context/AuthContext";
 import { requireAdmin, isAdmin } from "../../../lib/permissions";
 import { useApiFetch } from "../../../lib/api";
+import { useProfileDrawer } from "../../../context/ProfileDrawerContext";
 
 const REACTIONS = [
   { type: "like",  emoji: "👍" },
@@ -40,6 +41,7 @@ interface PostCardProps {
 export default function PostCard({ post, index, onReact, onDelete, onEdit, onPin, onCommentAdded }: PostCardProps) {
   const { user } = useAuth();
   const api = useApiFetch();
+  const { openProfile } = useProfileDrawer();
   const { comments, totalCount, isLoading: commentsLoading, isOpen, toggle, addComment, reactToComment } = useComments(post.id);
   const [showPicker, setShowPicker] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
@@ -154,7 +156,11 @@ export default function PostCard({ post, index, onReact, onDelete, onEdit, onPin
 
       {/* Header */}
       <div className="flex justify-between items-start mb-6">
-        <div className="flex items-center gap-4">
+        <button
+          type="button"
+          onClick={() => post.user_id && openProfile(post.user_id)}
+          className="flex items-center gap-4 text-left hover:opacity-80 transition-opacity"
+        >
           <div className="w-11 h-11 rounded-2xl overflow-hidden shadow-sm border border-slate-100 group-hover:rotate-3 transition-transform">
             {post.avatar ? (
               <img src={post.avatar} alt={post.author} className="w-full h-full object-cover" />
@@ -170,7 +176,7 @@ export default function PostCard({ post, index, onReact, onDelete, onEdit, onPin
               {post.role} • {timeAgo(post.created_at)}
             </p>
           </div>
-        </div>
+        </button>
 
         {/* Menú tres puntos */}
         {canManage && (

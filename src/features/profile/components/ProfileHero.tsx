@@ -7,7 +7,7 @@ interface ProfileHeroProps {
   avatar?: string;
   subtitle?: string;
   levelIcon?: string;
-  onEdit: () => void;
+  onEdit?: () => void;
 }
 
 export default function ProfileHero({ name, avatar, subtitle, levelIcon, onEdit }: ProfileHeroProps) {
@@ -62,15 +62,17 @@ export default function ProfileHero({ name, avatar, subtitle, levelIcon, onEdit 
         <h1 className="mt-4 text-2xl font-black text-slate-900 tracking-tight">{name}</h1>
         <p className="mt-1 text-sm font-medium text-slate-500 text-center">{displaySubtitle}</p>
 
-        <div className="mt-5 w-full max-w-xs">
-          <button
-            type="button"
-            onClick={onEdit}
-            className="w-full py-3 rounded-2xl bg-brand-primary text-white text-sm font-bold shadow-md shadow-violet-950/10 hover:bg-brand-primary-hover active:scale-[0.98] transition-all"
-          >
-            Editar perfil
-          </button>
-        </div>
+        {onEdit && (
+          <div className="mt-5 w-full max-w-xs">
+            <button
+              type="button"
+              onClick={onEdit}
+              className="w-full py-3 rounded-2xl bg-brand-primary text-white text-sm font-bold shadow-md shadow-violet-950/10 hover:bg-brand-primary-hover active:scale-[0.98] transition-all"
+            >
+              Editar perfil
+            </button>
+          </div>
+        )}
       </div>
     </section>
   );

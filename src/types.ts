@@ -78,6 +78,34 @@ export interface Currency {
   symbol: string;
 }
 
+export interface PublicUserProfile {
+  id: string;
+  name: string | null;
+  avatar: string | null;
+  bio: string | null;
+  city: string | null;
+  role: string | null;
+  level: {
+    level: number;
+    xp_current: number;
+    xp_next: number;
+    tier?: { name: string; description?: string; icon_url?: string } | null;
+  } | null;
+  achievements: Array<{
+    earned_at: string;
+    achievement: {
+      code: string;
+      name: string;
+      description: string;
+      icon_url: string | null;
+      xp_reward: number;
+    } | null;
+  }>;
+  streak: { current_streak: number; longest_streak: number };
+  completed_courses: number;
+  social_impact: number;
+}
+
 export interface AdminPaymentMethodField extends PaymentMethodField {
   id: string;
   is_required: boolean;

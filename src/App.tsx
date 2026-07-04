@@ -8,6 +8,7 @@ import SessionExpired from "./features/auth/components/SessionExpired";
 import { needsActiveSubscription, hasActiveSubscription } from "./lib/permissions";
 import { authRoutes, appRoutes, AppRoute } from "./routes";
 import OnboardingModal, { needsOnboarding, markOnboardingDoneForUser, hasIncompleteProfile } from "./features/onboarding/OnboardingModal";
+import { ProfileDrawerProvider } from "./context/ProfileDrawerContext";
 
 function AnimatedRoutes({ routes, fallback }: { routes: AppRoute[]; fallback: string }) {
   const location = useLocation();
@@ -63,9 +64,11 @@ function AuthenticatedApp({ onLogout, userId }: { onLogout: () => void; userId?:
 
   return (
     <>
-      <Layout onLogout={onLogout}>
-        <AnimatedRoutes routes={appRoutes} fallback="/muro" />
-      </Layout>
+      <ProfileDrawerProvider>
+        <Layout onLogout={onLogout}>
+          <AnimatedRoutes routes={appRoutes} fallback="/muro" />
+        </Layout>
+      </ProfileDrawerProvider>
 
       <AnimatePresence>
         {showOnboarding && (
