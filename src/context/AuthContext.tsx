@@ -8,6 +8,7 @@ export interface User {
   avatar: string;
   bio?: string;
   subscription_status?: string | null;
+  subscription_expires_at?: string | null;
   gender?: string;
   city?: string;
   phone?: string;
@@ -19,7 +20,7 @@ interface AuthContextType {
   token: string | null;
   login: (user: User, token: string) => void;
   logout: () => void;
-  updateUser: (user: User) => void;
+  updateUser: (user: Partial<User>) => void;
   isAuthenticated: boolean;
   sessionExpired: boolean;
   expireSession: () => void;
@@ -53,9 +54,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.removeItem("edu_token");
   };
 
-  const updateUser = (userData: User) => {
-    setUser(userData);
-    localStorage.setItem("edu_user", JSON.stringify(userData));
+  const updateUser = (userData: Partial<User>) => {
+    setUser((prev) => {
+      if (!prev) return null;
+      const updated = { ...prev, ...userData };
+      localStorage.setItem("edu_user", JSON.stringify(updated));
+      return updated;
+    });
   };
 
   const expireSession = () => {

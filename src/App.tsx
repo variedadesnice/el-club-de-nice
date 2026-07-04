@@ -4,6 +4,7 @@ import { AnimatePresence, motion } from "motion/react";
 import { useAuth } from "./context/AuthContext";
 import Layout from "./shared/layout/Layout";
 import AccountStatus from "./features/auth/components/AccountStatus";
+import RenewalGateway from "./features/auth/components/RenewalGateway";
 import SessionExpired from "./features/auth/components/SessionExpired";
 import { needsActiveSubscription, hasActiveSubscription } from "./lib/permissions";
 import { authRoutes, appRoutes, AppRoute } from "./routes";
@@ -44,6 +45,9 @@ function AppContent() {
   }
 
   if (needsActiveSubscription(user?.role) && !hasActiveSubscription(user?.subscription_status)) {
+    if (user?.subscription_status === "expired") {
+      return <RenewalGateway />;
+    }
     return <AccountStatus />;
   }
 

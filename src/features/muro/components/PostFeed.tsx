@@ -5,6 +5,7 @@ import PostCard from "./PostCard";
 import Spinner from "../../../shared/ui/Spinner";
 import { API_BASE } from "../../../lib/api";
 import banner from "../../../assets/banner.png";
+import RenewalBanner from "./RenewalBanner";
 
 interface TagOption { id: string; name: string; }
 
@@ -47,6 +48,8 @@ export default function PostFeed() {
       <div className="w-full overflow-hidden rounded-3xl border border-slate-100/80 shadow-sm">
         <img src={banner} alt="Welcome Banner" className="w-full h-auto object-cover" />
       </div>
+
+      <RenewalBanner />
 
       {/* Main Feed */}
       <div className="space-y-3 md:space-y-6">
