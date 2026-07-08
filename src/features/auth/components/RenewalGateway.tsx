@@ -512,7 +512,7 @@ export default function RenewalGateway({ isModal = false, onClose }: { isModal?:
                       className="shrink-0 bg-slate-50 border-2 border-transparent focus:border-indigo-100 focus:bg-white rounded-2xl py-4 px-3 text-sm font-bold outline-none transition-all cursor-pointer"
                     >
                       {COUNTRY_CODES.map((c) => (
-                        <option key={c.code} value={c.code}>{c.flag} {c.code}</option>
+                        <option key={`${c.name}-${c.code}`} value={c.code}>{c.flag} {c.code}</option>
                       ))}
                     </select>
                     <div className="relative flex-1">
