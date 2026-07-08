@@ -1,8 +1,9 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence, useMotionValue, animate } from "motion/react";
-import { Gift, Plus, RotateCw, Trash2, Trophy, X, History, Power } from "lucide-react";
+import { Gift, Plus, RotateCw, Trash2, Trophy, X, History, Power, Eye } from "lucide-react";
 import { useApiFetch } from "../../lib/api";
 import RouletteWheel from "../../shared/ui/RouletteWheel";
+import RouletteModal from "../roulette/RouletteModal";
 import { RoulettePrize, RouletteSpinHistoryItem } from "../../types";
 
 const PALETTE = [
@@ -34,6 +35,7 @@ export default function RoulettePanel() {
 
   const [history, setHistory] = useState<RouletteSpinHistoryItem[]>([]);
   const [historyLoading, setHistoryLoading] = useState(true);
+  const [showUserPreview, setShowUserPreview] = useState(false);
 
   const rotationMV = useMotionValue(0);
   const totalRotationRef = useRef(0);
@@ -159,7 +161,7 @@ export default function RoulettePanel() {
   return (
     <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-6">
       {/* Toggle activo/inactivo */}
-      <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-5 sm:p-6 flex items-center justify-between gap-4">
+      <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h3 className="text-lg font-black text-slate-900 flex items-center gap-2">
             <Power size={18} className={isActive ? "text-emerald-500" : "text-slate-400"} /> Ruleta {isActive ? "activa" : "inactiva"}
@@ -170,18 +172,32 @@ export default function RoulettePanel() {
               : "Los miembros no ven la ruleta mientras esté desactivada."}
           </p>
         </div>
-        <button
-          onClick={toggleActive}
-          disabled={togglingActive}
-          className={`relative w-14 h-8 rounded-full transition-colors shrink-0 ${isActive ? "bg-emerald-500" : "bg-slate-300"} disabled:opacity-50`}
-        >
-          <motion.div
-            animate={{ x: isActive ? 24 : 4 }}
-            transition={{ type: "spring", stiffness: 500, damping: 30 }}
-            className="absolute top-1 w-6 h-6 rounded-full bg-white shadow-md"
-          />
-        </button>
+        <div className="flex items-center gap-3 shrink-0">
+          <button
+            onClick={() => setShowUserPreview(true)}
+            disabled={prizes.length < 2}
+            title={prizes.length < 2 ? "Agrega al menos 2 premios para previsualizar" : undefined}
+            className="flex items-center gap-2 px-4 py-2.5 rounded-2xl border-2 border-slate-200 text-xs sm:text-sm font-black text-slate-600 hover:bg-slate-50 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            <Eye size={15} /> Ver cómo lo verían los usuarios
+          </button>
+          <button
+            onClick={toggleActive}
+            disabled={togglingActive}
+            className={`relative w-14 h-8 rounded-full transition-colors shrink-0 ${isActive ? "bg-emerald-500" : "bg-slate-300"} disabled:opacity-50`}
+          >
+            <motion.div
+              animate={{ x: isActive ? 24 : 4 }}
+              transition={{ type: "spring", stiffness: 500, damping: 30 }}
+              className="absolute top-1 w-6 h-6 rounded-full bg-white shadow-md"
+            />
+          </button>
+        </div>
       </div>
+
+      {showUserPreview && (
+        <RouletteModal previewPrizes={prizes} onClose={() => setShowUserPreview(false)} />
+      )}
 
       {error && (
         <div className="bg-red-50 border border-red-200 text-red-600 text-sm font-bold rounded-2xl px-4 py-3">

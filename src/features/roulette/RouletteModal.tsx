@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { motion, AnimatePresence, useMotionValue, animate } from "motion/react";
-import { Gift, RotateCw, X, Sparkles, PartyPopper } from "lucide-react";
+import { Gift, RotateCw, X, Sparkles, PartyPopper, Eye } from "lucide-react";
 import { useApiFetch } from "../../lib/api";
 import RouletteWheel from "../../shared/ui/RouletteWheel";
 import { RoulettePrize, RouletteStatus, RouletteSpinResult } from "../../types";
@@ -42,7 +42,25 @@ function Confetti() {
   );
 }
 
-export default function RouletteModal() {
+function pickWeighted(prizes: RoulettePrize[]): RoulettePrize {
+  const total = prizes.reduce((sum, p) => sum + (p.weight ?? 1), 0);
+  let r = Math.random() * total;
+  for (const p of prizes) {
+    r -= p.weight ?? 1;
+    if (r <= 0) return p;
+  }
+  return prizes[prizes.length - 1];
+}
+
+interface RouletteModalProps {
+  /** Modo admin: pasa los premios en edición y no cuenta como giro real (sin llamar al backend, sin límite diario). */
+  previewPrizes?: RoulettePrize[];
+  /** Requerido en modo preview: el admin puede cerrar en cualquier momento. */
+  onClose?: () => void;
+}
+
+export default function RouletteModal({ previewPrizes, onClose }: RouletteModalProps = {}) {
+  const isPreview = !!previewPrizes;
   const api = useApiFetch();
   const [status, setStatus] = useState<RouletteStatus | null>(null);
   const [dismissed, setDismissed] = useState(false);
@@ -54,22 +72,34 @@ export default function RouletteModal() {
   const totalRotationRef = useRef(0);
 
   useEffect(() => {
+    if (isPreview) return;
     api<RouletteStatus>("/api/roulette/status")
       .then(({ data }) => setStatus(data))
       .catch(() => setStatus(null));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  if (!status || !status.is_active || status.already_spun_today || dismissed) return null;
+  if (!isPreview && (!status || !status.is_active || status.already_spun_today || dismissed)) return null;
+  if (isPreview && dismissed) return null;
 
-  const prizes: RoulettePrize[] = status.prizes;
+  const prizes: RoulettePrize[] = isPreview ? previewPrizes! : status!.prizes;
+
+  function handleClose() {
+    if (onClose) onClose();
+    else setDismissed(true);
+  }
 
   async function handleSpin() {
     if (spinning || prizes.length < 2) return;
     setSpinning(true);
     setError(null);
     try {
-      const { data } = await api<RouletteSpinResult>("/api/roulette/spin", { method: "POST" });
+      const data: RouletteSpinResult = isPreview
+        ? (() => {
+            const picked = pickWeighted(prizes);
+            return { prize_id: picked.id, label: picked.label, color: picked.color };
+          })()
+        : (await api<RouletteSpinResult>("/api/roulette/spin", { method: "POST" })).data;
 
       const idx = Math.max(0, prizes.findIndex(p => p.id === data.prize_id));
       const n = prizes.length;
@@ -92,7 +122,12 @@ export default function RouletteModal() {
 
   return (
     <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 overflow-y-auto">
-      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="absolute inset-0 bg-black/70 backdrop-blur-md" />
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        onClick={isPreview ? handleClose : undefined}
+        className="absolute inset-0 bg-black/70 backdrop-blur-md"
+      />
 
       <AnimatePresence mode="wait">
         {!winner ? (
@@ -101,25 +136,44 @@ export default function RouletteModal() {
             initial={{ scale: 0.9, opacity: 0, y: 10 }}
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.9, opacity: 0 }}
+            onClick={(e) => e.stopPropagation()}
             className="relative bg-white rounded-[2rem] max-w-md sm:max-w-lg w-full shadow-2xl text-center overflow-hidden my-8"
           >
+            {isPreview && (
+              <button
+                onClick={handleClose}
+                className="absolute top-4 right-4 z-30 p-1.5 rounded-full bg-white/20 text-white hover:bg-white/30 transition-colors"
+                aria-label="Cerrar vista previa"
+              >
+                <X size={18} />
+              </button>
+            )}
+
             {/* Header banner */}
             <div className="relative overflow-hidden bg-gradient-to-r from-violet-600 via-indigo-600 to-fuchsia-600 px-6 sm:px-10 pt-8 pb-14">
               <svg className="absolute inset-0 w-full h-full opacity-20 pointer-events-none" viewBox="0 0 400 100" preserveAspectRatio="none">
                 <path d="M0,40 C120,80 240,0 400,60 L400,100 L0,100 Z" fill="currentColor" className="text-white" />
               </svg>
-              <motion.div
-                animate={{ y: [0, -4, 0] }}
-                transition={{ duration: 2.4, repeat: Infinity, ease: "easeInOut" }}
-                className="relative inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 text-[11px] font-black uppercase tracking-widest text-white"
-              >
-                <Sparkles size={12} /> Ruleta diaria
-              </motion.div>
+              {isPreview ? (
+                <div className="relative inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 text-[11px] font-black uppercase tracking-widest text-white">
+                  <Eye size={12} /> Vista previa — así lo ven los miembros
+                </div>
+              ) : (
+                <motion.div
+                  animate={{ y: [0, -4, 0] }}
+                  transition={{ duration: 2.4, repeat: Infinity, ease: "easeInOut" }}
+                  className="relative inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 text-[11px] font-black uppercase tracking-widest text-white"
+                >
+                  <Sparkles size={12} /> Ruleta diaria
+                </motion.div>
+              )}
               <h2 className="relative text-2xl sm:text-3xl font-black text-white mt-3 tracking-tight drop-shadow-sm">
                 ¡Gira y gana un premio!
               </h2>
               <p className="relative text-xs sm:text-sm font-bold text-white/85 mt-1.5">
-                Tienes un giro gratis hoy — no se repite hasta mañana.
+                {isPreview
+                  ? "Puedes girar todas las veces que quieras — no cuenta como giro real."
+                  : "Tienes un giro gratis hoy — no se repite hasta mañana."}
               </p>
             </div>
 
@@ -165,10 +219,11 @@ export default function RouletteModal() {
             initial={{ scale: 0.75, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ type: "spring", stiffness: 320, damping: 22 }}
+            onClick={(e) => e.stopPropagation()}
             className="relative bg-white rounded-[2rem] max-w-md w-full shadow-2xl text-center overflow-hidden my-8"
           >
             <button
-              onClick={() => setDismissed(true)}
+              onClick={handleClose}
               className="absolute top-4 right-4 z-20 p-1.5 text-slate-400 hover:text-slate-600 transition-colors"
             >
               <X size={18} />
@@ -197,10 +252,12 @@ export default function RouletteModal() {
 
             <div className="px-8 pb-8 pt-2">
               <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
-                <p className="text-[11px] font-black text-indigo-500 uppercase tracking-widest mb-2">🎉 ¡Ganaste!</p>
+                <p className="text-[11px] font-black text-indigo-500 uppercase tracking-widest mb-2">
+                  {isPreview ? "Vista previa — resultado" : "🎉 ¡Ganaste!"}
+                </p>
                 <h2 className="text-3xl sm:text-4xl font-black text-slate-900 break-words">{winner.label}</h2>
                 <p className="text-xs sm:text-sm font-medium text-slate-400 mt-3">
-                  Vuelve mañana para girar de nuevo.
+                  {isPreview ? "Cierra cuando quieras y sigue ajustando los premios." : "Vuelve mañana para girar de nuevo."}
                 </p>
               </motion.div>
 
@@ -208,7 +265,7 @@ export default function RouletteModal() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.35 }}
-                onClick={() => setDismissed(true)}
+                onClick={handleClose}
                 className="mt-7 px-10 py-3.5 bg-indigo-600 text-white font-black rounded-2xl hover:bg-indigo-700 transition-colors text-sm shadow-xl shadow-indigo-100"
               >
                 ¡Genial!
