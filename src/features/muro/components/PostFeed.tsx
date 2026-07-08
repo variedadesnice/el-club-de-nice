@@ -7,6 +7,7 @@ import { API_BASE } from "../../../lib/api";
 import banner from "../../../assets/banner.png";
 import RenewalBanner from "./RenewalBanner";
 import RaffleBanner from "./RaffleBanner";
+import PromoBanner from "./PromoBanner";
 
 interface TagOption { id: string; name: string; }
 
@@ -52,6 +53,7 @@ export default function PostFeed() {
 
       <RenewalBanner />
       <RaffleBanner />
+      <PromoBanner />
 
       {/* Main Feed */}
       <div className="space-y-3 md:space-y-6">

@@ -132,6 +132,16 @@ export interface RouletteSpinHistoryItem {
   spun_at: string;
 }
 
+export interface PromoBanner {
+  id: string;
+  title: string;
+  description: string;
+  image_url: string;
+  link_url: string;
+  is_active: boolean;
+  created_at: string;
+}
+
 export interface PublicUserProfile {
   id: string;
   name: string | null;
