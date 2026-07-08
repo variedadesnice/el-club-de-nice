@@ -4,6 +4,7 @@ import { MessageSquare, School, User, Bell, LayoutGrid, LogOut, Shield, BookOpen
 import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { isAdmin } from "../../lib/permissions";
+import RouletteModal from "../../features/roulette/RouletteModal";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -163,6 +164,8 @@ export default function Layout({ children, onLogout }: LayoutProps) {
           })}
         </div>
       </nav>
+
+      {user && <RouletteModal />}
     </div>
   );
 }

@@ -100,6 +100,38 @@ export interface Raffle {
   winners: RaffleWinner[];
 }
 
+export interface RoulettePrize {
+  id: string;
+  label: string;
+  color: string;
+  weight?: number;
+}
+
+export interface RouletteSettings {
+  is_active: boolean;
+  prizes: RoulettePrize[];
+}
+
+export interface RouletteStatus {
+  is_active: boolean;
+  already_spun_today: boolean;
+  prizes: RoulettePrize[];
+}
+
+export interface RouletteSpinResult {
+  prize_id: string;
+  label: string;
+  color: string;
+}
+
+export interface RouletteSpinHistoryItem {
+  id: string;
+  user_id: string;
+  user_name: string;
+  prize_label: string;
+  spun_at: string;
+}
+
 export interface PublicUserProfile {
   id: string;
   name: string | null;
