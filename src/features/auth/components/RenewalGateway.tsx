@@ -607,10 +607,6 @@ export default function RenewalGateway({ isModal = false, onClose }: { isModal?:
             >
               <ChevronLeft size={18} /> Atrás
             </button>
-          ) : (
-            <button onClick={logout} className="flex items-center gap-2 px-6 py-3 rounded-2xl font-bold text-sm text-slate-500 hover:bg-slate-50 transition-all">
-              <LogOut size={18} /> Cerrar sesión
-            </button>
           ) : isModal && onClose ? (
             <button type="button" onClick={onClose} className="flex items-center gap-2 px-6 py-3 rounded-2xl font-bold text-sm text-slate-500 hover:bg-slate-50 transition-all">
               Cancelar
