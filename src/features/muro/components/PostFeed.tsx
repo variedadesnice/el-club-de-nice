@@ -6,6 +6,7 @@ import Spinner from "../../../shared/ui/Spinner";
 import { API_BASE } from "../../../lib/api";
 import banner from "../../../assets/banner.png";
 import RenewalBanner from "./RenewalBanner";
+import RaffleBanner from "./RaffleBanner";
 
 interface TagOption { id: string; name: string; }
 
@@ -50,6 +51,7 @@ export default function PostFeed() {
       </div>
 
       <RenewalBanner />
+      <RaffleBanner />
 
       {/* Main Feed */}
       <div className="space-y-3 md:space-y-6">

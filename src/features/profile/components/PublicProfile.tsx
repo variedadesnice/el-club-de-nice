@@ -4,7 +4,7 @@ import { X, MapPin, Flame, BookOpen, Users, Trophy, Award } from "lucide-react";
 import { useApiFetch } from "../../../lib/api";
 import type { PublicUserProfile } from "../../../types";
 import ProfileLevelCard from "./ProfileLevelCard";
-import ProfileAchievements, { UserAchievement } from "./ProfileAchievements";
+import ProfileAchievements, { UserAchievement, groupAchievements } from "./ProfileAchievements";
 
 interface Props {
   userId: string;
@@ -69,7 +69,7 @@ export default function PublicProfile({ userId, onClose }: Props) {
   const achievements: UserAchievement[] = (profile?.achievements ?? [])
     .filter((a) => a.achievement)
     .map((a) => ({
-      id: a.achievement!.code,
+      id: a.id,
       code: a.achievement!.code,
       name: a.achievement!.name,
       description: a.achievement!.description,
@@ -190,7 +190,7 @@ export default function PublicProfile({ userId, onClose }: Props) {
               <div className="px-5 mt-5 space-y-5">
                 <div className="grid grid-cols-2 gap-3">
                   <StatBox icon={Flame} value={profile.streak.current_streak} label="Días de Racha" color="text-orange-500" bg="bg-orange-50" />
-                  <StatBox icon={Trophy} value={profile.achievements.length} label="Insignias" color="text-amber-500" bg="bg-amber-50" />
+                  <StatBox icon={Trophy} value={groupAchievements(achievements).length} label="Insignias" color="text-amber-500" bg="bg-amber-50" />
                   <StatBox icon={BookOpen} value={profile.completed_courses} label="Cursos Completados" color="text-violet-600" bg="bg-violet-50" />
                   <StatBox icon={Users} value={profile.social_impact} label="Impacto Social" color="text-emerald-600" bg="bg-emerald-50" />
                 </div>

@@ -6,7 +6,7 @@ import { MapPin, Phone, User as UserIcon, Mail, Info, Camera, Flame, Calendar } 
 import ProfileHero from "./ProfileHero";
 import ProfileLevelCard from "./ProfileLevelCard";
 import ProfileStatsGrid from "./ProfileStatsGrid";
-import ProfileAchievements, { UserAchievement } from "./ProfileAchievements";
+import ProfileAchievements, { UserAchievement, groupAchievements } from "./ProfileAchievements";
 import ProfileEditSheet, { ProfileEditForm } from "./ProfileEditSheet";
 
 interface UserLevel {
@@ -231,7 +231,7 @@ export default function Profile() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <ProfileStatsGrid
-              badgeCount={achievementsLoading ? undefined : achievements.length}
+              badgeCount={achievementsLoading ? undefined : groupAchievements(achievements).length}
               streakDays={streakLoading ? undefined : streak?.current_streak}
               completedCourses={coursesLoading ? undefined : completedCourses}
               socialImpact={socialImpactLoading ? undefined : socialImpact}

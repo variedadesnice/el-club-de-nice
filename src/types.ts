@@ -78,6 +78,28 @@ export interface Currency {
   symbol: string;
 }
 
+export interface RaffleWinner {
+  id: string;
+  user_id: string;
+  position: number;
+  name: string;
+  avatar?: string | null;
+  email?: string | null;
+}
+
+export interface Raffle {
+  id: string;
+  title: string;
+  description: string | null;
+  image_url: string | null;
+  winner_count: number;
+  draw_at: string | null;
+  drawn_at: string | null;
+  is_active: boolean;
+  created_at: string;
+  winners: RaffleWinner[];
+}
+
 export interface PublicUserProfile {
   id: string;
   name: string | null;
@@ -92,6 +114,7 @@ export interface PublicUserProfile {
     tier?: { name: string; description?: string; icon_url?: string } | null;
   } | null;
   achievements: Array<{
+    id: string;
     earned_at: string;
     achievement: {
       code: string;

@@ -1,27 +1,20 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { Shuffle, Trash2, RefreshCw, Trophy, Plus, X, ChevronDown, ChevronUp, Star } from "lucide-react";
+import { Shuffle, Trash2, RefreshCw, Trophy, Plus, X, ChevronDown, ChevronUp, Star, Camera, CalendarClock, Clock3 } from "lucide-react";
 import { useApiFetch } from "../../lib/api";
-
-interface RaffleWinner {
-  id: string;
-  user_id: string;
-  position: number;
-  name: string;
-  avatar?: string | null;
-}
-
-interface Raffle {
-  id: string;
-  title: string;
-  winner_count: number;
-  created_at: string;
-  winners: RaffleWinner[];
-}
+import { Raffle, RaffleWinner } from "../../types";
 
 function formatDate(iso: string) {
   try {
     return new Date(iso).toLocaleDateString("es-ES", { day: "2-digit", month: "short", year: "numeric" });
+  } catch {
+    return iso;
+  }
+}
+
+function formatDateTime(iso: string) {
+  try {
+    return new Date(iso).toLocaleString("es-ES", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" });
   } catch {
     return iso;
   }
@@ -59,14 +52,26 @@ function WinnerCard({ winner, delay }: { winner: RaffleWinner; delay: number }) 
       <div className="text-center">
         <p className="text-[10px] font-black uppercase tracking-widest" style={{ color }}>{label}</p>
         <p className="font-black text-slate-900 text-sm mt-0.5">{winner.name}</p>
+        {winner.email && <p className="text-[11px] font-medium text-slate-400 mt-0.5 truncate max-w-40">{winner.email}</p>}
       </div>
     </motion.div>
   );
 }
 
-function RaffleHistoryCard({ raffle, onDelete }: { raffle: Raffle; onDelete: (id: string) => void }) {
+function RaffleHistoryCard({
+  raffle,
+  onDelete,
+  onDraw,
+  drawingId,
+}: {
+  raffle: Raffle;
+  onDelete: (id: string) => void;
+  onDraw: (id: string) => void;
+  drawingId: string | null;
+}) {
   const [expanded, setExpanded] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const isDrawing = drawingId === raffle.id;
 
   async function handleDelete() {
     if (!confirm(`¿Eliminar el sorteo "${raffle.title}"? Esta acción no se puede deshacer.`)) return;
@@ -77,16 +82,38 @@ function RaffleHistoryCard({ raffle, onDelete }: { raffle: Raffle; onDelete: (id
   return (
     <div className="bg-slate-50 border border-slate-200 rounded-2xl overflow-hidden">
       <div className="flex items-center gap-3 p-4">
-        <div className="w-9 h-9 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center flex-shrink-0">
-          <Trophy size={16} />
-        </div>
+        {raffle.image_url ? (
+          <img src={raffle.image_url} alt={raffle.title} className="w-9 h-9 rounded-xl object-cover flex-shrink-0" />
+        ) : (
+          <div className="w-9 h-9 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center flex-shrink-0">
+            <Trophy size={16} />
+          </div>
+        )}
         <div className="flex-1 min-w-0">
-          <p className="font-black text-slate-900 text-sm truncate">{raffle.title}</p>
+          <div className="flex items-center gap-2">
+            <p className="font-black text-slate-900 text-sm truncate">{raffle.title}</p>
+            <span className={`text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full flex-shrink-0 ${raffle.is_active ? "bg-amber-100 text-amber-600" : "bg-emerald-100 text-emerald-600"}`}>
+              {raffle.is_active ? "Programado" : "Finalizado"}
+            </span>
+          </div>
           <p className="text-xs font-medium text-slate-400 mt-0.5">
-            {formatDate(raffle.created_at)} · {raffle.winner_count} ganador{raffle.winner_count !== 1 ? "es" : ""}
+            {raffle.is_active && raffle.draw_at
+              ? `Se sortea el ${formatDateTime(raffle.draw_at)}`
+              : formatDate(raffle.created_at)}
+            {" · "}{raffle.winner_count} ganador{raffle.winner_count !== 1 ? "es" : ""}
           </p>
         </div>
         <div className="flex items-center gap-1.5 flex-shrink-0">
+          {raffle.is_active && (
+            <button
+              onClick={() => onDraw(raffle.id)}
+              disabled={isDrawing}
+              className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-indigo-600 text-white text-xs font-black hover:bg-indigo-700 transition-all disabled:opacity-50"
+            >
+              {isDrawing ? <RefreshCw size={13} className="animate-spin" /> : <Shuffle size={13} />}
+              Sortear ahora
+            </button>
+          )}
           <button
             onClick={() => setExpanded(v => !v)}
             className="p-2 rounded-xl bg-white border border-slate-200 text-slate-500 hover:bg-slate-100 transition-all"
@@ -112,18 +139,28 @@ function RaffleHistoryCard({ raffle, onDelete }: { raffle: Raffle; onDelete: (id
             className="overflow-hidden"
           >
             <div className="px-4 pb-4 pt-1 border-t border-slate-200 space-y-2">
-              {raffle.winners.map(w => (
-                <div key={w.id} className="flex items-center gap-3 bg-white rounded-xl px-3 py-2.5 border border-slate-100">
-                  <span
-                    className="text-[10px] font-black w-5 h-5 rounded-full flex items-center justify-center text-white flex-shrink-0"
-                    style={{ backgroundColor: POSITION_COLORS[w.position - 1] ?? "#6366f1" }}
-                  >
-                    {w.position}
-                  </span>
-                  <Avatar name={w.name} avatar={w.avatar} size="sm" />
-                  <span className="font-bold text-sm text-slate-800 truncate">{w.name}</span>
-                </div>
-              ))}
+              {raffle.description && (
+                <p className="text-xs font-medium text-slate-500 pt-2">{raffle.description}</p>
+              )}
+              {raffle.is_active ? (
+                <p className="text-xs font-bold text-slate-400 py-2">Aún no se ha sorteado.</p>
+              ) : (
+                raffle.winners.map(w => (
+                  <div key={w.id} className="flex items-center gap-3 bg-white rounded-xl px-3 py-2.5 border border-slate-100">
+                    <span
+                      className="text-[10px] font-black w-5 h-5 rounded-full flex items-center justify-center text-white flex-shrink-0"
+                      style={{ backgroundColor: POSITION_COLORS[w.position - 1] ?? "#6366f1" }}
+                    >
+                      {w.position}
+                    </span>
+                    <Avatar name={w.name} avatar={w.avatar} size="sm" />
+                    <div className="min-w-0">
+                      <p className="font-bold text-sm text-slate-800 truncate">{w.name}</p>
+                      {w.email && <p className="text-[11px] font-medium text-slate-400 truncate">{w.email}</p>}
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
           </motion.div>
         )}
@@ -140,11 +177,19 @@ export default function RafflesPanel() {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [drawAt, setDrawAt] = useState("");
   const [winnerCount, setWinnerCount] = useState(1);
-  const [running, setRunning] = useState(false);
-  const [runError, setRunError] = useState<string | null>(null);
+  const [imagePreview, setImagePreview] = useState("");
+  const [imageUrl, setImageUrl] = useState("");
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
+  const [drawingId, setDrawingId] = useState<string | null>(null);
   const [lastResult, setLastResult] = useState<Raffle | null>(null);
+
+  const activeRaffle = raffles.find(r => r.is_active) ?? null;
 
   const loadRaffles = useCallback(async () => {
     setError(null);
@@ -162,29 +207,89 @@ export default function RafflesPanel() {
 
   function openModal() {
     setTitle("");
+    setDescription("");
+    setDrawAt("");
     setWinnerCount(1);
-    setRunError(null);
+    setImagePreview("");
+    setImageUrl("");
+    setSaveError(null);
     setIsModalOpen(true);
+  }
+
+  function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setIsUploadingImage(true);
+    setSaveError(null);
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d");
+        const maxWidth = 800;
+        const scale = Math.min(maxWidth / img.width, 1);
+        canvas.width = img.width * scale;
+        canvas.height = img.height * scale;
+        ctx?.drawImage(img, 0, 0, canvas.width, canvas.height);
+        const dataUrl = canvas.toDataURL("image/jpeg", 0.8);
+        setImagePreview(dataUrl);
+
+        api<{ url: string }>("/api/admin/raffles/image", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ imageData: dataUrl }),
+        })
+          .then(({ data }) => setImageUrl(data.url))
+          .catch((err) => {
+            setSaveError(err instanceof Error ? err.message : "Error al subir imagen");
+            setImagePreview("");
+          })
+          .finally(() => setIsUploadingImage(false));
+      };
+      img.src = reader.result as string;
+    };
+    reader.readAsDataURL(file);
   }
 
   async function handleCreate(e: React.FormEvent) {
     e.preventDefault();
-    if (!title.trim()) return;
-    setRunning(true);
-    setRunError(null);
+    if (!title.trim() || !drawAt) return;
+    setSaving(true);
+    setSaveError(null);
     try {
       const { data } = await api<Raffle>("/api/admin/raffles/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title: title.trim(), winner_count: winnerCount }),
+        body: JSON.stringify({
+          title: title.trim(),
+          description: description.trim() || null,
+          image_url: imageUrl || null,
+          winner_count: winnerCount,
+          draw_at: new Date(drawAt).toISOString(),
+        }),
       });
       setRaffles(prev => [data, ...prev]);
-      setLastResult(data);
       setIsModalOpen(false);
     } catch (e: unknown) {
-      setRunError(e instanceof Error ? e.message : "Error al realizar el sorteo");
+      setSaveError(e instanceof Error ? e.message : "Error al programar el sorteo");
     } finally {
-      setRunning(false);
+      setSaving(false);
+    }
+  }
+
+  async function handleDraw(id: string) {
+    setDrawingId(id);
+    setError(null);
+    try {
+      const { data } = await api<Raffle>(`/api/admin/raffles/${id}/draw`, { method: "POST" });
+      setRaffles(prev => prev.map(r => (r.id === id ? data : r)));
+      setLastResult(data);
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : "Error al realizar el sorteo");
+    } finally {
+      setDrawingId(null);
     }
   }
 
@@ -208,7 +313,7 @@ export default function RafflesPanel() {
               <Shuffle className="text-indigo-600 w-5 h-5 sm:w-6 sm:h-6" /> Sorteos
             </h3>
             <p className="text-slate-500 font-medium mt-1 text-sm">
-              Selecciona ganadores aleatorios entre los miembros activos.
+              Programa sorteos con fecha e imagen. Se sortean automáticamente al llegar la fecha.
             </p>
           </div>
           <div className="flex items-center gap-2 sm:gap-3">
@@ -221,7 +326,9 @@ export default function RafflesPanel() {
             </button>
             <button
               onClick={openModal}
-              className="flex items-center gap-2 bg-indigo-600 text-white px-4 sm:px-5 py-2.5 rounded-2xl font-black text-xs sm:text-sm hover:bg-indigo-700 transition-all shadow-xl shadow-indigo-100"
+              disabled={!!activeRaffle}
+              title={activeRaffle ? "Ya hay un sorteo activo. Sortéalo o elimínalo antes de programar otro." : undefined}
+              className="flex items-center gap-2 bg-indigo-600 text-white px-4 sm:px-5 py-2.5 rounded-2xl font-black text-xs sm:text-sm hover:bg-indigo-700 transition-all shadow-xl shadow-indigo-100 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-indigo-600"
             >
               <Plus size={15} /> Nuevo sorteo
             </button>
@@ -231,6 +338,12 @@ export default function RafflesPanel() {
         {error && (
           <div className="bg-red-50 border border-red-200 text-red-600 text-sm font-bold rounded-2xl px-4 py-3 mb-4">
             {error}
+          </div>
+        )}
+
+        {activeRaffle && (
+          <div className="bg-amber-50 border border-amber-200 text-amber-700 text-xs sm:text-sm font-bold rounded-2xl px-4 py-3 mb-4">
+            Ya hay un sorteo activo (&quot;{activeRaffle.title}&quot;). Solo puede haber uno a la vez — sortéalo o elimínalo para programar otro.
           </div>
         )}
 
@@ -276,12 +389,12 @@ export default function RafflesPanel() {
         ) : raffles.length === 0 ? (
           <div className="text-center py-12 text-slate-400">
             <Shuffle size={36} className="mx-auto mb-3 opacity-30" />
-            <p className="font-bold text-sm">Aún no hay sorteos realizados.</p>
+            <p className="font-bold text-sm">Aún no hay sorteos programados.</p>
           </div>
         ) : (
           <div className="space-y-3">
             {raffles.map(r => (
-              <RaffleHistoryCard key={r.id} raffle={r} onDelete={handleDelete} />
+              <RaffleHistoryCard key={r.id} raffle={r} onDelete={handleDelete} onDraw={handleDraw} drawingId={drawingId} />
             ))}
           </div>
         )}
@@ -290,23 +403,23 @@ export default function RafflesPanel() {
       {/* Create modal */}
       <AnimatePresence>
         {isModalOpen && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 overflow-y-auto">
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              onClick={() => !running && setIsModalOpen(false)}
+              onClick={() => !saving && setIsModalOpen(false)}
               className="absolute inset-0 bg-black/50 backdrop-blur-sm"
             />
             <motion.div
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
-              className="relative bg-white rounded-2xl sm:rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl"
+              className="relative bg-white rounded-2xl sm:rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl my-8"
             >
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-lg sm:text-xl font-black text-slate-900">Nuevo Sorteo</h2>
-                <button onClick={() => !running && setIsModalOpen(false)} className="p-1.5 text-slate-400 hover:text-slate-600 transition-colors">
+                <button onClick={() => !saving && setIsModalOpen(false)} className="p-1.5 text-slate-400 hover:text-slate-600 transition-colors">
                   <X size={18} />
                 </button>
               </div>
@@ -324,6 +437,57 @@ export default function RafflesPanel() {
                     placeholder="Ej. Sorteo de Navidad"
                     className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold outline-none focus:border-indigo-400 transition-colors"
                   />
+                </div>
+
+                <div>
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-wider block mb-1.5">
+                    Qué se sortea (descripción)
+                  </label>
+                  <textarea
+                    value={description}
+                    onChange={e => setDescription(e.target.value)}
+                    placeholder="Ej. Una suscripción anual + merch exclusivo"
+                    rows={2}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold outline-none focus:border-indigo-400 transition-colors resize-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-wider block mb-1.5">
+                    Imagen del sorteo
+                  </label>
+                  <label className="flex items-center gap-3 bg-slate-50 border-2 border-dashed border-slate-200 rounded-xl px-4 py-3 cursor-pointer hover:border-indigo-300 transition-colors">
+                    {imagePreview ? (
+                      <img src={imagePreview} alt="Vista previa" className="w-10 h-10 rounded-lg object-cover flex-shrink-0" />
+                    ) : (
+                      <div className="w-10 h-10 rounded-lg bg-slate-200 flex items-center justify-center flex-shrink-0 text-slate-400">
+                        <Camera size={16} />
+                      </div>
+                    )}
+                    <span className="text-xs font-bold text-slate-500">
+                      {isUploadingImage ? "Subiendo..." : imageUrl ? "Cambiar imagen" : "Elegir imagen (opcional)"}
+                    </span>
+                    <input type="file" accept="image/*" className="hidden" onChange={handleImageUpload} disabled={isUploadingImage} />
+                  </label>
+                </div>
+
+                <div>
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-wider block mb-1.5">
+                    Fecha y hora del sorteo
+                  </label>
+                  <div className="relative">
+                    <CalendarClock size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+                    <input
+                      type="datetime-local"
+                      required
+                      value={drawAt}
+                      onChange={e => setDrawAt(e.target.value)}
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-11 pr-4 py-3 text-sm font-bold outline-none focus:border-indigo-400 transition-colors"
+                    />
+                  </div>
+                  <p className="text-[11px] text-slate-400 font-medium mt-1.5 flex items-center gap-1">
+                    <Clock3 size={11} /> El sorteo se realiza solo automáticamente en esta fecha; también puedes forzarlo antes desde el historial.
+                  </p>
                 </div>
 
                 <div>
@@ -355,30 +519,30 @@ export default function RafflesPanel() {
                   </div>
                 </div>
 
-                {runError && (
+                {saveError && (
                   <div className="bg-red-50 border border-red-200 text-red-600 text-xs font-bold rounded-xl px-4 py-3">
-                    {runError}
+                    {saveError}
                   </div>
                 )}
 
                 <div className="flex gap-3 pt-2">
                   <button
                     type="button"
-                    onClick={() => !running && setIsModalOpen(false)}
-                    disabled={running}
+                    onClick={() => !saving && setIsModalOpen(false)}
+                    disabled={saving}
                     className="flex-1 px-4 py-3 bg-slate-100 text-slate-600 font-bold rounded-xl hover:bg-slate-200 transition-colors disabled:opacity-50"
                   >
                     Cancelar
                   </button>
                   <button
                     type="submit"
-                    disabled={running || !title.trim()}
+                    disabled={saving || isUploadingImage || !title.trim() || !drawAt}
                     className="flex-1 flex items-center justify-center gap-2 bg-indigo-600 text-white font-black py-3 rounded-xl hover:bg-indigo-700 transition-colors disabled:opacity-50 shadow-lg shadow-indigo-200"
                   >
-                    {running ? (
-                      <><RefreshCw size={16} className="animate-spin" /> Sorteando...</>
+                    {saving ? (
+                      <><RefreshCw size={16} className="animate-spin" /> Programando...</>
                     ) : (
-                      <><Shuffle size={16} /> ¡Sortear!</>
+                      <><Shuffle size={16} /> Programar sorteo</>
                     )}
                   </button>
                 </div>

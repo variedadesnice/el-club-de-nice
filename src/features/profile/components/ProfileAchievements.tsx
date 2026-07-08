@@ -18,6 +18,35 @@ interface Props {
   loading?: boolean;
 }
 
+export interface GroupedAchievement extends UserAchievement {
+  count: number;
+}
+
+/**
+ * Los logros repetibles (ej. "Publicación Creada") generan una fila en
+ * user_achievements por cada vez que se ganan. Se agrupan por code para
+ * mostrar una sola insignia con contador en vez de una tarjeta repetida
+ * por cada instancia.
+ */
+export function groupAchievements(achievements: UserAchievement[]): GroupedAchievement[] {
+  const map = new Map<string, GroupedAchievement>();
+  for (const ach of achievements) {
+    const existing = map.get(ach.code);
+    if (!existing) {
+      map.set(ach.code, { ...ach, count: 1 });
+    } else {
+      existing.count += 1;
+      if (new Date(ach.obtained_at).getTime() > new Date(existing.obtained_at).getTime()) {
+        existing.obtained_at = ach.obtained_at;
+        existing.id = ach.id;
+      }
+    }
+  }
+  return Array.from(map.values()).sort(
+    (a, b) => new Date(b.obtained_at).getTime() - new Date(a.obtained_at).getTime()
+  );
+}
+
 function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString("es-ES", {
     day: "numeric",
@@ -45,11 +74,12 @@ function AchievementIcon({ iconUrl, name, size = 20 }: { iconUrl: string | null;
 }
 
 export default function ProfileAchievements({ achievements, loading = false }: Props) {
+  const grouped = groupAchievements(achievements);
   const [selectedId, setSelectedId] = useState<string | null>(
-    achievements.length > 0 ? achievements[0].id : null
+    grouped.length > 0 ? grouped[0].id : null
   );
 
-  const selected = achievements.find((a) => a.id === selectedId) ?? achievements[0] ?? null;
+  const selected = grouped.find((a) => a.id === selectedId) ?? grouped[0] ?? null;
 
   if (loading) {
     return (
@@ -99,14 +129,14 @@ export default function ProfileAchievements({ achievements, loading = false }: P
           Mis Logros & Insignias
         </h3>
         <span className="text-xs font-bold text-slate-500">
-          {achievements.length} {achievements.length === 1 ? "Desbloqueado" : "Desbloqueados"}
+          {grouped.length} {grouped.length === 1 ? "Desbloqueado" : "Desbloqueados"}
         </span>
       </div>
 
       {/* Badges Grid */}
       <div className="grid grid-cols-4 gap-4 mb-6">
         <AnimatePresence mode="popLayout">
-          {achievements.map((ach) => {
+          {grouped.map((ach) => {
             const isSelected = selectedId === ach.id;
             return (
               <motion.div
@@ -139,6 +169,12 @@ export default function ProfileAchievements({ achievements, loading = false }: P
                     >
                       <Sparkle size={10} className="fill-amber-400" />
                     </motion.div>
+                  )}
+
+                  {ach.count > 1 && (
+                    <span className="absolute -bottom-1 -right-1 min-w-4.5 h-4.5 px-1 rounded-full bg-indigo-600 text-white text-[9px] font-black flex items-center justify-center shadow-sm border-2 border-white">
+                      ×{ach.count}
+                    </span>
                   )}
                 </div>
 
@@ -179,6 +215,11 @@ export default function ProfileAchievements({ achievements, loading = false }: P
                 <span className="inline-flex px-2 py-0.5 rounded-full text-[9px] font-black bg-emerald-50 border border-emerald-100 text-emerald-600 uppercase tracking-wider mx-auto sm:mx-0 w-fit">
                   +{selected.xp_reward} XP
                 </span>
+                {selected.count > 1 && (
+                  <span className="inline-flex px-2 py-0.5 rounded-full text-[9px] font-black bg-indigo-50 border border-indigo-100 text-indigo-600 uppercase tracking-wider mx-auto sm:mx-0 w-fit">
+                    Obtenido ×{selected.count}
+                  </span>
+                )}
               </div>
 
               <p className="text-xs text-slate-600 mt-2 font-medium leading-relaxed">
