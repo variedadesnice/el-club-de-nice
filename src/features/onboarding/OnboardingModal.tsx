@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "motion/react";
 import { Camera, MapPin, Phone, User, Sparkles, ArrowRight, Check, X, Calendar } from "lucide-react";
 import { useAuth, type User as AuthUser } from "../../context/AuthContext";
 import { useApiFetch } from "../../lib/api";
+import { VENEZUELA_STATES } from "../../lib/venezuelaStates";
 
 const ONBOARDING_KEY = "onboarding_completed";
 
@@ -240,13 +241,16 @@ export default function OnboardingModal({ onComplete }: OnboardingModalProps) {
                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-wider ml-1 flex items-center gap-1">
                       <MapPin size={10} /> Ciudad
                     </label>
-                    <input
-                      type="text"
+                    <select
                       value={city}
                       onChange={(e) => setCity(e.target.value)}
-                      placeholder="Ej. Caracas"
-                      className="w-full mt-1 bg-slate-50 border-2 border-transparent focus:border-violet-200 focus:bg-white rounded-xl py-3 px-4 text-sm font-bold outline-none transition-all"
-                    />
+                      className="w-full mt-1 bg-slate-50 border-2 border-transparent focus:border-violet-200 focus:bg-white rounded-xl py-3 px-4 text-sm font-bold outline-none transition-all appearance-none cursor-pointer"
+                    >
+                      <option value="">No especificado</option>
+                      {VENEZUELA_STATES.map((state) => (
+                        <option key={state} value={state}>{state}</option>
+                      ))}
+                    </select>
                   </div>
 
                   {/* Género */}

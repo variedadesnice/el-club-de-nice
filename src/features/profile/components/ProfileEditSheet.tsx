@@ -1,6 +1,7 @@
 import React from "react";
 import { Camera, Save, X, MapPin, Phone, User, Calendar } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
+import { VENEZUELA_STATES } from "../../../lib/venezuelaStates";
 
 export interface ProfileEditForm {
   name: string;
@@ -134,13 +135,16 @@ export default function ProfileEditSheet({
                 <label className="text-[10px] font-black text-slate-400 uppercase tracking-wider ml-1 flex items-center gap-1">
                   <MapPin size={12} /> Ciudad
                 </label>
-                <input
-                  type="text"
+                <select
                   value={form.city}
-                  placeholder="Ej. Madrid, Barcelona..."
                   onChange={(e) => onChange({ ...form, city: e.target.value })}
-                  className="w-full mt-1 bg-slate-50 border-2 border-transparent focus:border-violet-200 focus:bg-white rounded-xl py-3 px-4 text-sm font-bold outline-none transition-all"
-                />
+                  className="w-full mt-1 bg-slate-50 border-2 border-transparent focus:border-violet-200 focus:bg-white rounded-xl py-3 px-4 text-sm font-bold outline-none transition-all appearance-none cursor-pointer"
+                >
+                  <option value="">No especificado</option>
+                  {VENEZUELA_STATES.map((state) => (
+                    <option key={state} value={state}>{state}</option>
+                  ))}
+                </select>
               </div>
 
               {/* Número de teléfono */}

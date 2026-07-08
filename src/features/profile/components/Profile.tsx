@@ -8,6 +8,7 @@ import ProfileLevelCard from "./ProfileLevelCard";
 import ProfileStatsGrid from "./ProfileStatsGrid";
 import ProfileAchievements, { UserAchievement, groupAchievements } from "./ProfileAchievements";
 import ProfileEditSheet, { ProfileEditForm } from "./ProfileEditSheet";
+import { VENEZUELA_STATES } from "../../../lib/venezuelaStates";
 
 interface UserLevel {
   level: number;
@@ -399,12 +400,16 @@ export default function Profile() {
                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-wider">
                       Ciudad
                     </label>
-                    <input
-                      type="text"
+                    <select
                       value={editForm.city}
                       onChange={(e) => setEditForm({ ...editForm, city: e.target.value })}
-                      className="w-full mt-1 bg-slate-50 border border-slate-100 rounded-xl py-2.5 px-4 text-sm font-bold outline-none focus:ring-2 focus:ring-violet-200"
-                    />
+                      className="w-full mt-1 bg-slate-50 border border-slate-100 rounded-xl py-2.5 px-3 text-sm font-bold outline-none focus:ring-2 focus:ring-violet-200 cursor-pointer"
+                    >
+                      <option value="">No especificado</option>
+                      {VENEZUELA_STATES.map((state) => (
+                        <option key={state} value={state}>{state}</option>
+                      ))}
+                    </select>
                   </div>
                 </div>
 
