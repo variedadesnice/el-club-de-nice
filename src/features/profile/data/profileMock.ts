@@ -20,13 +20,6 @@ export const XP_BREAKDOWN = [
   { action: "Mantener tu racha semanal", xp: "+100 XP", icon: "flame" },
 ];
 
-export const PROFILE_STATS = [
-  { label: "Días de Racha", value: "Próximamente", icon: "flame" as const, bg: "bg-slate-100", iconColor: "text-slate-400", comingSoon: true },
-  { label: "Impacto Social", value: "Próximamente", icon: "users" as const, bg: "bg-slate-100", iconColor: "text-slate-400", comingSoon: true },
-  { label: "Cursos Completados", value: "Próximamente", icon: "book" as const, bg: "bg-slate-100", iconColor: "text-slate-400", comingSoon: true },
-  { label: "Insignias", value: "8", icon: "trophy" as const, bg: "bg-sky-100", iconColor: "text-sky-600" },
-];
-
 export const PROFILE_ACHIEVEMENTS = [
   {
     id: "pionero",
