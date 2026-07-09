@@ -59,13 +59,11 @@ const PLAN_LABELS: Record<string, string> = {
   "1y": "1 año",
 };
 
-function formatAmount(amount: number, rate?: number | null) {
+function formatAmount(amount: number) {
   try {
-    const finalAmount = rate && rate > 0 ? amount / rate : amount;
-    return new Intl.NumberFormat("es-ES", { style: "currency", currency: "USD" }).format(finalAmount);
+    return new Intl.NumberFormat("es-ES", { style: "currency", currency: "USD" }).format(amount);
   } catch {
-    const finalAmount = rate && rate > 0 ? amount / rate : amount;
-    return `$${finalAmount.toFixed(2)}`;
+    return `$${amount.toFixed(2)}`;
   }
 }
 
@@ -104,7 +102,6 @@ export default function AnalyticsPanel() {
   const [members, setMembers] = useState<AnalyticsMembersDetail | null>(null);
   const [revenue, setRevenue] = useState<AnalyticsRevenue | null>(null);
   const [history, setHistory] = useState<AnalyticsSnapshot[]>([]);
-  const [bcvRate, setBcvRate] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [snapshotting, setSnapshotting] = useState(false);
@@ -114,18 +111,16 @@ export default function AnalyticsPanel() {
   const loadAll = useCallback(async () => {
     setError(null);
     try {
-      const [ov, mem, rev, hist, bcv] = await Promise.all([
+      const [ov, mem, rev, hist] = await Promise.all([
         api<AnalyticsOverview>("/api/admin/analytics/overview"),
         api<AnalyticsMembersDetail>("/api/admin/analytics/members"),
         api<AnalyticsRevenue>("/api/admin/analytics/revenue"),
         api<AnalyticsSnapshot[]>(`/api/admin/analytics/history?limit=${HISTORY_LIMIT}`),
-        fetch("https://ve.dolarapi.com/v1/dolares/oficial").then(r => r.json()).catch(() => null),
       ]);
       setOverview(ov.data);
       setMembers(mem.data);
       setRevenue(rev.data);
       setHistory([...hist.data].reverse());
-      if (bcv?.promedio) setBcvRate(bcv.promedio);
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : "Error al cargar las estadísticas");
     } finally {
@@ -183,8 +178,8 @@ export default function AnalyticsPanel() {
         },
         {
           label: "Ingresos del Mes",
-          value: formatAmount(overview.revenue.this_month, bcvRate),
-          change: `${formatAmount(overview.revenue.today, bcvRate)} hoy`,
+          value: formatAmount(overview.revenue.this_month),
+          change: `${formatAmount(overview.revenue.today)} hoy`,
           positive: true,
           icon: <DollarSign className="w-4 h-4 sm:w-5 sm:h-5 text-green-600" />,
         },
@@ -310,7 +305,7 @@ export default function AnalyticsPanel() {
                   <Tooltip
                     contentStyle={tooltipContentStyle}
                     labelFormatter={formatShortDate}
-                    formatter={(value: number) => [formatAmount(value, bcvRate), "Ingresos"]}
+                    formatter={(value: number) => [formatAmount(value), "Ingresos"]}
                   />
                   <Area type="monotone" dataKey="revenue_day" stroke="#4f46e5" strokeWidth={4} fillOpacity={1} fill="url(#colorRevenue)" />
                 </AreaChart>
@@ -477,8 +472,8 @@ export default function AnalyticsPanel() {
                 <BarChart data={planData}>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
                   <XAxis dataKey="name" axisLine={false} tickLine={false} tick={axisTick} dy={10} />
-                  <YAxis axisLine={false} tickLine={false} tick={axisTick} tickFormatter={(v) => formatAmount(v, bcvRate)} />
-                  <Tooltip contentStyle={tooltipContentStyle} formatter={(value: number) => formatAmount(value, bcvRate)} />
+                  <YAxis axisLine={false} tickLine={false} tick={axisTick} tickFormatter={(v) => formatAmount(v)} />
+                  <Tooltip contentStyle={tooltipContentStyle} formatter={(value: number) => formatAmount(value)} />
                   <Bar dataKey="value" radius={[10, 10, 0, 0]}>
                     {planData.map((_, index) => (
                       <Cell key={`plan-${index}`} fill={["#4f46e5", "#6366f1", "#818cf8", "#a5b4fc"][index % 4]} />
@@ -491,7 +486,7 @@ export default function AnalyticsPanel() {
           <div className="mt-6 grid grid-cols-2 gap-4">
             <div className="bg-slate-50 rounded-2xl p-4 text-center">
               <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.15em]">Ingresos Totales</p>
-              <p className="text-xl font-black text-slate-900 mt-1">{revenue ? formatAmount(revenue.total, bcvRate) : "—"}</p>
+              <p className="text-xl font-black text-slate-900 mt-1">{revenue ? formatAmount(revenue.total) : "—"}</p>
             </div>
             <div className="bg-slate-50 rounded-2xl p-4 text-center">
               <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.15em]">No Renovaron</p>
