@@ -12,6 +12,7 @@ import Login from "../features/auth/components/Login";
 import Register from "../features/auth/components/Register";
 import InviteRegister from "../features/auth/components/InviteRegister";
 import ForgotPassword from "../features/auth/components/ForgotPassword";
+import ResetPassword from "../features/auth/components/ResetPassword";
 
 function AdminRoute() {
   const { user } = useAuth();
@@ -49,6 +50,16 @@ function ForgotPasswordPage() {
   return <ForgotPassword onGoToLogin={() => navigate("/login")} />;
 }
 
+function ResetPasswordPage() {
+  const navigate = useNavigate();
+  return (
+    <ResetPassword
+      onGoToLogin={() => navigate("/login")}
+      onGoToForgotPassword={() => navigate("/forgot-password")}
+    />
+  );
+}
+
 function RegisterPage() {
   const navigate = useNavigate();
   return <Register onGoToLogin={() => navigate("/login")} />;
@@ -70,6 +81,7 @@ export const authRoutes: AppRoute[] = [
   { path: "/register", element: <RegisterPage /> },
   { path: "/invite", element: <InviteRegisterPage /> },
   { path: "/forgot-password", element: <ForgotPasswordPage /> },
+  { path: "/reset-password", element: <ResetPasswordPage /> },
 ];
 
 export const appRoutes: AppRoute[] = [
