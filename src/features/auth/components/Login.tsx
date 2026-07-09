@@ -7,9 +7,10 @@ import { API_BASE } from "../../../lib/api";
 
 interface LoginProps {
   onGoToRegister: () => void;
+  onForgotPassword: () => void;
 }
 
-export default function Login({ onGoToRegister }: LoginProps) {
+export default function Login({ onGoToRegister, onForgotPassword }: LoginProps) {
   const { login } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -99,7 +100,16 @@ export default function Login({ onGoToRegister }: LoginProps) {
             </div>
 
             <div className="space-y-2">
-              <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1">Contraseña</label>
+              <div className="flex items-center justify-between ml-1">
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Contraseña</label>
+                <button
+                  type="button"
+                  onClick={onForgotPassword}
+                  className="text-[11px] font-bold text-indigo-600 hover:underline"
+                >
+                  ¿Olvidaste tu contraseña?
+                </button>
+              </div>
               <div className="relative">
                 <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
                 <input
