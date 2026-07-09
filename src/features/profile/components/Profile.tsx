@@ -26,6 +26,14 @@ interface StreakInfo {
   achievement?: string;
 }
 
+interface ProfileSummary {
+  level: UserLevel | null;
+  achievements: UserAchievement[];
+  streak: StreakInfo | null;
+  completedCourses: number;
+  socialImpact: number;
+}
+
 export default function Profile() {
   const { user, updateUser } = useAuth();
   const api = useApiFetch();
@@ -43,31 +51,24 @@ export default function Profile() {
   const [socialImpactLoading, setSocialImpactLoading] = useState(true);
 
   useEffect(() => {
-    api<UserLevel>("/api/levels/me")
-      .then(({ data }) => setUserLevel(data))
+    // Un solo request agregador (backend) en vez de 5 por separado — incluye el
+    // check-in diario de racha, igual que antes hacía /api/streaks/checkin.
+    api<ProfileSummary>("/api/profile/me/summary")
+      .then(({ data }) => {
+        setUserLevel(data.level);
+        setAchievements(Array.isArray(data.achievements) ? data.achievements : []);
+        setStreak(data.streak);
+        setCompletedCourses(data.completedCourses);
+        setSocialImpact(data.socialImpact);
+      })
       .catch(console.error)
-      .finally(() => setLevelLoading(false));
-
-    api<UserAchievement[]>("/api/levels/me/achievements")
-      .then(({ data }) => setAchievements(Array.isArray(data) ? data : []))
-      .catch(console.error)
-      .finally(() => setAchievementsLoading(false));
-
-    // Registra el login diario y devuelve la racha actualizada para mostrarla.
-    api<StreakInfo>("/api/streaks/checkin")
-      .then(({ data }) => setStreak(data))
-      .catch(console.error)
-      .finally(() => setStreakLoading(false));
-
-    api<{ completedCourses: number }>("/api/classroom/me/completed-courses")
-      .then(({ data }) => setCompletedCourses(data.completedCourses))
-      .catch(console.error)
-      .finally(() => setCoursesLoading(false));
-
-    api<{ likes: number; comments: number; totalImpact: number }>("/api/posts/me/social-impact")
-      .then(({ data }) => setSocialImpact(data.totalImpact))
-      .catch(console.error)
-      .finally(() => setSocialImpactLoading(false));
+      .finally(() => {
+        setLevelLoading(false);
+        setAchievementsLoading(false);
+        setStreakLoading(false);
+        setCoursesLoading(false);
+        setSocialImpactLoading(false);
+      });
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
   const [editForm, setEditForm] = useState<ProfileEditForm>({
     name: user?.name || "",
