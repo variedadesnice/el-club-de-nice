@@ -67,6 +67,7 @@ export interface PaymentMethod {
   name: string;
   description: string | null;
   is_active: boolean;
+  auto_verify: boolean;
   sort_order: number;
   fields: PaymentMethodField[];
 }
@@ -182,6 +183,7 @@ export interface AdminPaymentMethod {
   name: string;
   description: string | null;
   is_active: boolean;
+  auto_verify: boolean;
   sort_order: number;
   fields: AdminPaymentMethodField[];
 }

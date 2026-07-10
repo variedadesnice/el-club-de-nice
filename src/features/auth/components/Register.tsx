@@ -307,7 +307,7 @@ export default function Register({ onGoToLogin }: RegisterProps) {
       setStepError("Completa todos los campos del pago para continuar.");
       return;
     }
-    const isPagoMovil = selectedMethod?.name.toLowerCase().includes("móvil") || selectedMethod?.name.toLowerCase().includes("movil");
+    const isPagoMovil = selectedMethod?.auto_verify === true;
     if (isPagoMovil) {
       if (!payerBank) {
         setStepError("Selecciona el banco de origen.");
@@ -391,7 +391,7 @@ export default function Register({ onGoToLogin }: RegisterProps) {
     setSubmitError(null);
     setIsSubmitting(true);
     try {
-      const isPagoMovil = selectedMethod?.name.toLowerCase().includes("móvil") || selectedMethod?.name.toLowerCase().includes("movil");
+      const isPagoMovil = selectedMethod?.auto_verify === true;
       const resp = await apiFetch<{ payment: { status: string } }>("/api/payments/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -627,7 +627,7 @@ export default function Register({ onGoToLogin }: RegisterProps) {
               )}
 
               {/* Campos dinámicos para verificación automática de Pago Móvil */}
-              {selectedMethod && (selectedMethod.name.toLowerCase().includes("móvil") || selectedMethod.name.toLowerCase().includes("movil")) && (
+              {selectedMethod?.auto_verify === true && (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                   <div className="space-y-2">
                     <label className={labelClass}>Banco de origen</label>
