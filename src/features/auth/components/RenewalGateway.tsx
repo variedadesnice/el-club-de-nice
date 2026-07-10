@@ -198,7 +198,9 @@ export default function RenewalGateway({ isModal = false, onClose }: { isModal?:
       setStepError("Completa todos los campos del pago para continuar.");
       return;
     }
-    const isPagoMovil = selectedMethod?.auto_verify === true;
+    const isPagoMovil = selectedMethod?.auto_verify === true ||
+      selectedMethod?.name.toLowerCase().includes("movil") ||
+      selectedMethod?.name.toLowerCase().includes("móvil");
     if (isPagoMovil) {
       if (!payerBank) {
         setStepError("Selecciona el banco de origen.");
@@ -291,7 +293,9 @@ export default function RenewalGateway({ isModal = false, onClose }: { isModal?:
     setSubmitError(null);
     setIsSubmitting(true);
     try {
-      const isPagoMovil = selectedMethod?.auto_verify === true;
+      const isPagoMovil = selectedMethod?.auto_verify === true ||
+        selectedMethod?.name.toLowerCase().includes("movil") ||
+        selectedMethod?.name.toLowerCase().includes("móvil");
       const resp = await api<{ payment: { status: string }; user?: User }>("/api/payments/renew", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -591,7 +595,9 @@ export default function RenewalGateway({ isModal = false, onClose }: { isModal?:
               )}
 
               {/* Campos dinámicos para verificación automática de Pago Móvil */}
-              {selectedMethod?.auto_verify === true && (
+              {(selectedMethod?.auto_verify === true ||
+                selectedMethod?.name.toLowerCase().includes("movil") ||
+                selectedMethod?.name.toLowerCase().includes("móvil")) && (
                 <div className="space-y-5">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-2">
