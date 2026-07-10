@@ -56,7 +56,7 @@ const ALPHANUMERIC_RE = /^(?=.*[a-zA-Z])(?=.*[0-9]).{6,}$/;
 
 const MAX_RECEIPT_SIZE = 5 * 1024 * 1024; // 5MB
 
-type Step = 1 | 2 | 3;
+type Step = 1 | 2 | 3 | 4;
 
 const inputClass =
   "w-full bg-slate-50 border-2 border-transparent focus:border-indigo-100 focus:bg-white rounded-2xl py-4 pl-12 pr-4 text-sm font-medium transition-all outline-none";
@@ -107,8 +107,9 @@ function CopyField({ label, value }: { label: string; value: string }) {
 function StepIndicator({ step }: { step: Step }) {
   const steps = [
     { n: 1, label: "Tus datos" },
-    { n: 2, label: "Plan y pago" },
-    { n: 3, label: "Comprobante" },
+    { n: 2, label: "Pagar" },
+    { n: 3, label: "Detalles" },
+    { n: 4, label: "Comprobante" },
   ];
   return (
     <div className="flex items-center gap-2 mb-8">
@@ -313,8 +314,17 @@ export default function Register({ onGoToLogin }: RegisterProps) {
   }
 
   function handleNextFromStep2() {
-    if (!amount.trim() || !selectedMethodId || !referenceNumber.trim() || !phone.trim()) {
-      setStepError("Completa todos los campos del pago para continuar.");
+    if (!selectedMethodId) {
+      setStepError("Selecciona un método de pago para continuar.");
+      return;
+    }
+    setStepError(null);
+    goToStep(3);
+  }
+
+  function handleNextFromStep3() {
+    if (!referenceNumber.trim() || !phone.trim()) {
+      setStepError("Completa la referencia y el teléfono de contacto.");
       return;
     }
     const isPagoMovil = selectedMethod?.auto_verify === true ||
@@ -343,7 +353,8 @@ export default function Register({ onGoToLogin }: RegisterProps) {
       setStepError("El número de teléfono debe tener entre 7 y 15 dígitos.");
       return;
     }
-    goToStep(3);
+    setStepError(null);
+    goToStep(4);
   }
 
   function handleReceiptChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -650,6 +661,30 @@ export default function Register({ onGoToLogin }: RegisterProps) {
                 </div>
               )}
 
+              <div className="bg-slate-50 border border-slate-100 rounded-2xl p-5 text-xs font-semibold text-slate-500 flex items-start gap-2.5 mt-3">
+                <span className="text-base leading-none">💡</span>
+                <p className="leading-relaxed">
+                  Realiza tu transferencia o Pago Móvil por el monto indicado usando los datos que se muestran arriba. En el siguiente paso te solicitaremos ingresar el número de referencia y detalles del pago.
+                </p>
+              </div>
+            </motion.div>
+          )}
+
+          {step === 3 && (
+            <motion.div
+              key="step3"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              className="space-y-5"
+            >
+              <div className="bg-indigo-50/50 border border-indigo-100 rounded-2xl p-5 text-xs font-semibold text-indigo-900 flex items-start gap-2.5">
+                <span className="text-base leading-none">📝</span>
+                <p className="leading-relaxed">
+                  Por favor, ingresa los datos reales del pago que realizaste. Estos campos son necesarios para la verificación automática.
+                </p>
+              </div>
+
               {/* Campos dinámicos para verificación automática de Pago Móvil */}
               {(selectedMethod?.auto_verify === true ||
                 selectedMethod?.name.toLowerCase().includes("movil") ||
@@ -751,9 +786,8 @@ export default function Register({ onGoToLogin }: RegisterProps) {
                 </div>
 
                 <div className="space-y-2">
-                  <label className={labelClass}>Teléfono</label>
+                  <label className={labelClass}>Teléfono de Contacto</label>
                   <div className="flex gap-2">
-                    {/* Country selector */}
                     <select
                       value={countryCode}
                       onChange={(e) => { setCountryCode(e.target.value); setPhone(""); }}
@@ -766,7 +800,6 @@ export default function Register({ onGoToLogin }: RegisterProps) {
                         </option>
                       ))}
                     </select>
-                    {/* Number input */}
                     <div className="relative flex-1">
                       <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
                       <input
@@ -789,14 +822,14 @@ export default function Register({ onGoToLogin }: RegisterProps) {
               </div>
 
               <p className="text-xs font-medium text-slate-400 bg-slate-50 px-4 py-3 rounded-xl">
-                Usaremos tu número de referencia para asociar tu comprobante — asegúrate de que coincida con el de tu pago.
+                Usaremos tu número de referencia para verificar tu pago automáticamente o de forma manual si es necesario.
               </p>
             </motion.div>
           )}
 
-          {step === 3 && (
+          {step === 4 && (
             <motion.div
-              key="step3"
+              key="step4"
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -20 }}
@@ -856,7 +889,7 @@ export default function Register({ onGoToLogin }: RegisterProps) {
                   ["Monto", amount],
                   ["Método de pago", selectedMethod?.name ?? ""],
                   ["Referencia", referenceNumber],
-                  ["Teléfono", phone],
+                  ["Teléfono de contacto", phone],
                 ].map(([k, v]) => (
                   <div key={k} className="flex items-center justify-between text-sm">
                     <span className="font-medium text-slate-400">{k}</span>
@@ -890,10 +923,14 @@ export default function Register({ onGoToLogin }: RegisterProps) {
             </button>
           )}
 
-          {step < 3 ? (
+          {step < 4 ? (
             <button
               type="button"
-              onClick={step === 1 ? handleNextFromStep1 : handleNextFromStep2}
+              onClick={
+                step === 1 ? handleNextFromStep1 :
+                step === 2 ? handleNextFromStep2 :
+                handleNextFromStep3
+              }
               className="flex items-center gap-2 bg-indigo-600 text-white px-8 py-3.5 rounded-2xl font-bold text-sm hover:bg-indigo-700 transition-all shadow-xl shadow-indigo-100 active:scale-[0.98]"
             >
               Continuar <ChevronRight size={18} />

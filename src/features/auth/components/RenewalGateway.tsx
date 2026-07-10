@@ -46,7 +46,7 @@ const VENEZUELAN_BANKS = [
 
 const MAX_RECEIPT_SIZE = 5 * 1024 * 1024; // 5MB
 
-type Step = 1 | 2;
+type Step = 1 | 2 | 3;
 
 const inputClass =
   "w-full bg-slate-50 border-2 border-transparent focus:border-indigo-100 focus:bg-white rounded-2xl py-4 pl-12 pr-4 text-sm font-medium transition-all outline-none";
@@ -193,9 +193,18 @@ export default function RenewalGateway({ isModal = false, onClose }: { isModal?:
   const selectedPlan = PLAN_OPTIONS.find((p) => p.value === plan);
   const bsAmount = bcvRate && selectedPlan ? (parseFloat(selectedPlan.price) * bcvRate).toFixed(2) : null;
 
-  function handleNextStep() {
-    if (!amount.trim() || !selectedMethodId || !referenceNumber.trim() || !phone.trim()) {
-      setStepError("Completa todos los campos del pago para continuar.");
+  function handleNextStep1() {
+    if (!selectedMethodId) {
+      setStepError("Selecciona un método de pago para continuar.");
+      return;
+    }
+    setStepError(null);
+    setStep(2);
+  }
+
+  function handleNextStep2() {
+    if (!referenceNumber.trim() || !phone.trim()) {
+      setStepError("Completa la referencia y el teléfono de contacto.");
       return;
     }
     const isPagoMovil = selectedMethod?.auto_verify === true ||
@@ -225,7 +234,7 @@ export default function RenewalGateway({ isModal = false, onClose }: { isModal?:
       return;
     }
     setStepError(null);
-    setStep(2);
+    setStep(3);
   }
 
   function handleReceiptChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -474,14 +483,21 @@ export default function RenewalGateway({ isModal = false, onClose }: { isModal?:
             <span className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-black ${
               step === 1 ? "bg-indigo-600 text-white" : "bg-indigo-100 text-indigo-600"
             }`}>1</span>
-            <span className={`text-xs font-bold ${step === 1 ? "text-slate-900" : "text-slate-400"}`}>Plan y Pago</span>
+            <span className={`text-xs font-bold ${step === 1 ? "text-slate-900" : "text-slate-400"}`}>Pagar</span>
           </div>
           <div className="w-8 h-0.5 bg-slate-100" />
           <div className="flex items-center gap-2">
             <span className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-black ${
-              step === 2 ? "bg-indigo-600 text-white" : "bg-slate-100 text-slate-400"
+              step === 2 ? "bg-indigo-600 text-white" : step > 2 ? "bg-indigo-100 text-indigo-600" : "bg-slate-100 text-slate-400"
             }`}>2</span>
-            <span className={`text-xs font-bold ${step === 2 ? "text-slate-900" : "text-slate-400"}`}>Comprobante</span>
+            <span className={`text-xs font-bold ${step === 2 ? "text-slate-900" : "text-slate-400"}`}>Detalles</span>
+          </div>
+          <div className="w-8 h-0.5 bg-slate-100" />
+          <div className="flex items-center gap-2">
+            <span className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-black ${
+              step === 3 ? "bg-indigo-600 text-white" : "bg-slate-100 text-slate-400"
+            }`}>3</span>
+            <span className={`text-xs font-bold ${step === 3 ? "text-slate-900" : "text-slate-400"}`}>Comprobante</span>
           </div>
         </div>
 
@@ -593,6 +609,28 @@ export default function RenewalGateway({ isModal = false, onClose }: { isModal?:
                   ))}
                 </div>
               )}
+
+              <div className="bg-slate-50 border border-slate-100 rounded-2xl p-5 text-xs font-semibold text-slate-500 flex items-start gap-2.5 mt-3">
+                <span className="text-base leading-none">💡</span>
+                <p className="leading-relaxed">
+                  Realiza tu transferencia o Pago Móvil por el monto indicado usando los datos que se muestran arriba. En el siguiente paso te solicitaremos ingresar el número de referencia y detalles del pago.
+                </p>
+              </div>
+            </motion.div>
+          ) : step === 2 ? (
+            <motion.div
+              key="step2"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              className="space-y-5"
+            >
+              <div className="bg-indigo-50/50 border border-indigo-100 rounded-2xl p-5 text-xs font-semibold text-indigo-900 flex items-start gap-2.5">
+                <span className="text-base leading-none">📝</span>
+                <p className="leading-relaxed">
+                  Por favor, ingresa los datos reales del pago que realizaste. Estos campos son necesarios para la verificación automática.
+                </p>
+              </div>
 
               {/* Campos dinámicos para verificación automática de Pago Móvil */}
               {(selectedMethod?.auto_verify === true ||
@@ -721,10 +759,14 @@ export default function RenewalGateway({ isModal = false, onClose }: { isModal?:
                   </div>
                 </div>
               </div>
+
+              <p className="text-xs font-medium text-slate-400 bg-slate-50 px-4 py-3 rounded-xl">
+                Usaremos tu número de referencia para verificar tu pago automáticamente o de forma manual si es necesario.
+              </p>
             </motion.div>
           ) : (
             <motion.div
-              key="step2"
+              key="step3"
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -20 }}
@@ -781,6 +823,7 @@ export default function RenewalGateway({ isModal = false, onClose }: { isModal?:
                 <div className="flex justify-between text-sm"><span className="text-slate-400">Monto total</span><span className="font-bold text-slate-700">Bs. {parseFloat(bsAmount ?? amount).toLocaleString("es-VE", { minimumFractionDigits: 2 })}</span></div>
                 <div className="flex justify-between text-sm"><span className="text-slate-400">Método de pago</span><span className="font-bold text-slate-700">{selectedMethod?.name}</span></div>
                 <div className="flex justify-between text-sm"><span className="text-slate-400">Referencia</span><span className="font-bold text-slate-700">{referenceNumber}</span></div>
+                <div className="flex justify-between text-sm"><span className="text-slate-400">Teléfono de contacto</span><span className="font-bold text-slate-700">{phone}</span></div>
               </div>
             </motion.div>
           )}
@@ -791,10 +834,10 @@ export default function RenewalGateway({ isModal = false, onClose }: { isModal?:
 
         {/* Footer controls */}
         <div className="flex items-center justify-between gap-4 mt-8 pt-6 border-t border-slate-100">
-          {step === 2 ? (
+          {step > 1 ? (
             <button
               type="button"
-              onClick={() => setStep(1)}
+              onClick={() => setStep((step - 1) as Step)}
               className="flex items-center gap-2 px-6 py-3 rounded-2xl font-bold text-sm text-slate-500 hover:bg-slate-50 transition-all"
             >
               <ChevronLeft size={18} /> Atrás
@@ -809,10 +852,10 @@ export default function RenewalGateway({ isModal = false, onClose }: { isModal?:
             </button>
           )}
 
-          {step === 1 ? (
+          {step < 3 ? (
             <button
               type="button"
-              onClick={handleNextStep}
+              onClick={step === 1 ? handleNextStep1 : handleNextStep2}
               className="flex items-center gap-2 bg-indigo-600 text-white px-8 py-3.5 rounded-2xl font-bold text-sm hover:bg-indigo-700 transition-all shadow-xl shadow-indigo-100 active:scale-[0.98]"
             >
               Continuar <ChevronRight size={18} />
