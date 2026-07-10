@@ -290,7 +290,8 @@ export default function Register({ onGoToLogin }: RegisterProps) {
 
   // Bs equivalente del plan seleccionado
   const selectedPlan = PLAN_OPTIONS.find((p) => p.value === plan);
-  const bsAmount = bcvRate && selectedPlan ? (parseFloat(selectedPlan.price) * bcvRate).toFixed(2) : null;
+  // TEST: Hardcoded to 0.10 Bs for payment gateway testing
+  const bsAmount = "0.10";
 
   function goToStep(target: Step) {
     setStepError(null);
@@ -439,7 +440,7 @@ export default function Register({ onGoToLogin }: RegisterProps) {
           phone: `${countryCode}${phone.trim()}`,
           receipt_path: receiptPath,
           currency_id: selectedCurrencyId,
-          amount_local: Number(bsAmount ?? amount),          // Bs.
+          amount_local: 0.1,                                 // TEST: Hardcoded to 0.1 Bs.
           exchange_rate: bcvRate ?? 1,                        // tasa BCV
           banco_origen: isPagoMovil ? payerBank : null,
           cedula_pagador: isPagoMovil ? `${payerIdType}${payerIdNumber.trim()}` : null,
