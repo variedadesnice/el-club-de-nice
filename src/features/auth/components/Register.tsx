@@ -33,6 +33,25 @@ const COUNTRY_CODES: { flag: string; code: string; name: string; digits: number 
   { flag: "🇩🇴", code: "+1",   name: "Rep. Dominicana",digits: 10 },
 ];
 
+const VENEZUELAN_BANKS = [
+  { code: "0102", name: "Banco de Venezuela" },
+  { code: "0134", name: "Banesco" },
+  { code: "0105", name: "Mercantil" },
+  { code: "0108", name: "Provincial" },
+  { code: "0172", name: "Bancamiga" },
+  { code: "0114", name: "Bancaribe" },
+  { code: "0115", name: "Banco Exterior" },
+  { code: "0128", name: "Banco Caroní" },
+  { code: "0151", name: "BFC Banco Fondo Común" },
+  { code: "0163", name: "100% Banco" },
+  { code: "0168", name: "Bancrecer" },
+  { code: "0171", name: "Banco Activo" },
+  { code: "0174", name: "Banplus" },
+  { code: "0175", name: "Banco Bicentenario" },
+  { code: "0177", name: "BANFANB" },
+  { code: "0191", name: "Banco Nacional de Crédito BNC" },
+];
+
 const ALPHANUMERIC_RE = /^(?=.*[a-zA-Z])(?=.*[0-9]).{6,}$/;
 
 const MAX_RECEIPT_SIZE = 5 * 1024 * 1024; // 5MB
@@ -118,7 +137,7 @@ function StepIndicator({ step }: { step: Step }) {
   );
 }
 
-function SuccessScreen({ onGoToLogin }: { onGoToLogin: () => void }) {
+function SuccessScreen({ onGoToLogin, isAutoApproved }: { onGoToLogin: () => void; isAutoApproved?: boolean }) {
   return (
     <div className="min-h-[80vh] flex items-center justify-center p-4">
       <motion.div
@@ -126,15 +145,29 @@ function SuccessScreen({ onGoToLogin }: { onGoToLogin: () => void }) {
         animate={{ opacity: 1, y: 0 }}
         className="w-full max-w-lg bg-white rounded-[2.5rem] p-12 border border-slate-200 shadow-sm text-center"
       >
-        <div className="w-16 h-16 bg-amber-50 rounded-2xl flex items-center justify-center mx-auto mb-6">
-          <Clock size={32} className="text-amber-500" />
-        </div>
-        <h2 className="text-2xl font-black text-slate-900 mb-3">Tu registro está en revisión</h2>
-        <p className="text-slate-500 font-medium mb-8 leading-relaxed">
-          Creamos tu cuenta y recibimos tu comprobante de pago. Un administrador lo revisará
-          pronto y activará tu acceso. Te notificaremos por email cuando esté listo — también
-          puedes iniciar sesión para ver el estado de tu suscripción.
-        </p>
+        {isAutoApproved ? (
+          <>
+            <div className="w-16 h-16 bg-emerald-50 rounded-2xl flex items-center justify-center mx-auto mb-6 text-emerald-500">
+              <CheckCircle2 size={32} />
+            </div>
+            <h2 className="text-2xl font-black text-slate-900 mb-3">¡Tu cuenta está activa!</h2>
+            <p className="text-slate-500 font-medium mb-8 leading-relaxed">
+              Tu pago ha sido verificado automáticamente con éxito. Ya puedes iniciar sesión para acceder a toda la comunidad y sus contenidos de inmediato.
+            </p>
+          </>
+        ) : (
+          <>
+            <div className="w-16 h-16 bg-amber-50 rounded-2xl flex items-center justify-center mx-auto mb-6">
+              <Clock size={32} className="text-amber-500" />
+            </div>
+            <h2 className="text-2xl font-black text-slate-900 mb-3">Tu registro está en revisión</h2>
+            <p className="text-slate-500 font-medium mb-8 leading-relaxed">
+              Creamos tu cuenta y recibimos tu comprobante de pago. Un administrador lo revisará
+              pronto y activará tu acceso. Te notificaremos por email cuando esté listo — también
+              puedes iniciar sesión para ver el estado de tu suscripción.
+            </p>
+          </>
+        )}
         <button
           onClick={onGoToLogin}
           className="w-full bg-indigo-600 text-white py-4 rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-indigo-700 transition-all shadow-xl shadow-indigo-100 active:scale-[0.98]"
@@ -161,6 +194,12 @@ export default function Register({ onGoToLogin }: RegisterProps) {
   const [referenceNumber, setReferenceNumber] = useState("");
   const [countryCode, setCountryCode] = useState("+58");
   const [phone, setPhone] = useState("");
+
+  // Pago Móvil automatic verification states
+  const [payerBank, setPayerBank] = useState("");
+  const [payerIdType, setPayerIdType] = useState("V");
+  const [payerIdNumber, setPayerIdNumber] = useState("");
+  const [isAutoApproved, setIsAutoApproved] = useState(false);
 
   // Métodos de pago activos (catálogo público)
   const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([]);
@@ -268,6 +307,17 @@ export default function Register({ onGoToLogin }: RegisterProps) {
       setStepError("Completa todos los campos del pago para continuar.");
       return;
     }
+    const isPagoMovil = selectedMethod?.name.toLowerCase().includes("móvil") || selectedMethod?.name.toLowerCase().includes("movil");
+    if (isPagoMovil) {
+      if (!payerBank) {
+        setStepError("Selecciona el banco de origen.");
+        return;
+      }
+      if (!payerIdNumber.trim()) {
+        setStepError("Ingresa la cédula del pagador.");
+        return;
+      }
+    }
     const digitsOnly = phone.replace(/\D/g, "");
     if (digitsOnly.length < 7 || digitsOnly.length > 15) {
       setStepError("El número de teléfono debe tener entre 7 y 15 dígitos.");
@@ -341,7 +391,8 @@ export default function Register({ onGoToLogin }: RegisterProps) {
     setSubmitError(null);
     setIsSubmitting(true);
     try {
-      await apiFetch("/api/payments/register", {
+      const isPagoMovil = selectedMethod?.name.toLowerCase().includes("móvil") || selectedMethod?.name.toLowerCase().includes("movil");
+      const resp = await apiFetch<{ payment: { status: string } }>("/api/payments/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -357,8 +408,14 @@ export default function Register({ onGoToLogin }: RegisterProps) {
           currency_id: selectedCurrencyId,
           amount_local: Number(bsAmount ?? amount),          // Bs.
           exchange_rate: bcvRate ?? 1,                        // tasa BCV
+          banco_origen: isPagoMovil ? payerBank : null,
+          cedula_pagador: isPagoMovil ? `${payerIdType}${payerIdNumber.trim()}` : null,
         }),
       });
+      
+      if (resp?.data?.payment?.status === "success") {
+        setIsAutoApproved(true);
+      }
       setSubmitted(true);
     } catch (err) {
       setSubmitError(err instanceof Error ? err.message : "Error al registrar tu pago. Intenta de nuevo.");
@@ -368,7 +425,7 @@ export default function Register({ onGoToLogin }: RegisterProps) {
   }
 
   if (submitted) {
-    return <SuccessScreen onGoToLogin={onGoToLogin} />;
+    return <SuccessScreen onGoToLogin={onGoToLogin} isAutoApproved={isAutoApproved} />;
   }
 
   return (
@@ -566,6 +623,52 @@ export default function Register({ onGoToLogin }: RegisterProps) {
                   <p className="text-[10px] text-indigo-400 font-medium pt-1 pl-1">
                     💡 Toca cualquier campo para copiarlo al portapapeles
                   </p>
+                </div>
+              )}
+
+              {/* Campos dinámicos para verificación automática de Pago Móvil */}
+              {selectedMethod && (selectedMethod.name.toLowerCase().includes("móvil") || selectedMethod.name.toLowerCase().includes("movil")) && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                  <div className="space-y-2">
+                    <label className={labelClass}>Banco de origen</label>
+                    <select
+                      value={payerBank}
+                      onChange={(e) => setPayerBank(e.target.value)}
+                      className="w-full bg-slate-50 border-2 border-transparent focus:border-indigo-100 focus:bg-white rounded-2xl py-4 px-4 text-sm font-medium transition-all outline-none cursor-pointer appearance-none"
+                    >
+                      <option value="">Selecciona tu banco</option>
+                      {VENEZUELAN_BANKS.map((b) => (
+                        <option key={b.code} value={b.code}>
+                          {b.name} ({b.code})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className={labelClass}>Cédula del pagador</label>
+                    <div className="flex gap-2">
+                      <select
+                        value={payerIdType}
+                        onChange={(e) => setPayerIdType(e.target.value)}
+                        className="shrink-0 bg-slate-50 border-2 border-transparent focus:border-indigo-100 focus:bg-white rounded-2xl py-4 px-3 text-sm font-bold outline-none transition-all cursor-pointer"
+                      >
+                        <option value="V">V</option>
+                        <option value="E">E</option>
+                        <option value="J">J</option>
+                      </select>
+                      <div className="relative flex-1">
+                        <input
+                          type="text"
+                          required
+                          value={payerIdNumber}
+                          onChange={(e) => setPayerIdNumber(e.target.value.replace(/[^0-9]/g, ""))}
+                          placeholder="Ej. 12177212"
+                          className={inputClass}
+                        />
+                      </div>
+                    </div>
+                  </div>
                 </div>
               )}
 

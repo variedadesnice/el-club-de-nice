@@ -25,6 +25,25 @@ const COUNTRY_CODES = [
   { flag: "🇩🇴", code: "+1",   name: "Rep. Dominicana",digits: 10 },
 ];
 
+const VENEZUELAN_BANKS = [
+  { code: "0102", name: "Banco de Venezuela" },
+  { code: "0134", name: "Banesco" },
+  { code: "0105", name: "Mercantil" },
+  { code: "0108", name: "Provincial" },
+  { code: "0172", name: "Bancamiga" },
+  { code: "0114", name: "Bancaribe" },
+  { code: "0115", name: "Banco Exterior" },
+  { code: "0128", name: "Banco Caroní" },
+  { code: "0151", name: "BFC Banco Fondo Común" },
+  { code: "0163", name: "100% Banco" },
+  { code: "0168", name: "Bancrecer" },
+  { code: "0171", name: "Banco Activo" },
+  { code: "0174", name: "Banplus" },
+  { code: "0175", name: "Banco Bicentenario" },
+  { code: "0177", name: "BANFANB" },
+  { code: "0191", name: "Banco Nacional de Crédito BNC" },
+];
+
 const MAX_RECEIPT_SIZE = 5 * 1024 * 1024; // 5MB
 
 type Step = 1 | 2;
@@ -88,6 +107,12 @@ export default function RenewalGateway({ isModal = false, onClose }: { isModal?:
   const [referenceNumber, setReferenceNumber] = useState("");
   const [countryCode, setCountryCode] = useState("+58");
   const [phone, setPhone] = useState("");
+
+  // Pago Móvil automatic verification states
+  const [payerBank, setPayerBank] = useState("");
+  const [payerIdType, setPayerIdType] = useState("V");
+  const [payerIdNumber, setPayerIdNumber] = useState("");
+  const [isAutoApproved, setIsAutoApproved] = useState(false);
 
   const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([]);
   const [selectedMethodId, setSelectedMethodId] = useState("");
@@ -163,6 +188,17 @@ export default function RenewalGateway({ isModal = false, onClose }: { isModal?:
       setStepError("Completa todos los campos del pago para continuar.");
       return;
     }
+    const isPagoMovil = selectedMethod?.name.toLowerCase().includes("móvil") || selectedMethod?.name.toLowerCase().includes("movil");
+    if (isPagoMovil) {
+      if (!payerBank) {
+        setStepError("Selecciona el banco de origen.");
+        return;
+      }
+      if (!payerIdNumber.trim()) {
+        setStepError("Ingresa la cédula del pagador.");
+        return;
+      }
+    }
     const digitsOnly = phone.replace(/\D/g, "");
     if (digitsOnly.length < 7 || digitsOnly.length > 15) {
       setStepError("El número de teléfono debe tener entre 7 y 15 dígitos.");
@@ -237,7 +273,8 @@ export default function RenewalGateway({ isModal = false, onClose }: { isModal?:
     setSubmitError(null);
     setIsSubmitting(true);
     try {
-      await api("/api/payments/renew", {
+      const isPagoMovil = selectedMethod?.name.toLowerCase().includes("móvil") || selectedMethod?.name.toLowerCase().includes("movil");
+      const resp = await api<{ payment: { status: string }; user?: User }>("/api/payments/renew", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -250,8 +287,17 @@ export default function RenewalGateway({ isModal = false, onClose }: { isModal?:
           currency_id: selectedCurrencyId,
           amount_local: Number(bsAmount ?? amount),
           exchange_rate: bcvRate ?? 1,
+          banco_origen: isPagoMovil ? payerBank : null,
+          cedula_pagador: isPagoMovil ? `${payerIdType}${payerIdNumber.trim()}` : null,
         }),
       });
+
+      if (resp?.data?.payment?.status === "success") {
+        setIsAutoApproved(true);
+        if (resp.data.user) {
+          updateUser(resp.data.user);
+        }
+      }
       setSubmitted(true);
     } catch (err) {
       setSubmitError(err instanceof Error ? err.message : "Error al registrar tu renovación. Intenta de nuevo.");
@@ -294,34 +340,65 @@ export default function RenewalGateway({ isModal = false, onClose }: { isModal?:
           <X size={20} />
         </button>
       )}
-      <div className="w-16 h-16 bg-amber-50 rounded-2xl flex items-center justify-center mx-auto mb-6 text-amber-500">
-        <Clock size={32} />
-      </div>
-      <h2 className="text-2xl font-black text-slate-900 mb-3">Renovación en revisión</h2>
-      <p className="text-slate-500 font-medium mb-8 leading-relaxed">
-        Recibimos tu comprobante de renovación. Un administrador lo revisará pronto y reactivará tu acceso.
-        Te avisaremos en cuanto esté validado.
-      </p>
-      <div className="flex flex-col sm:flex-row gap-3">
-        <button
-          onClick={handleRefreshStatus}
-          disabled={isRefreshing}
-          className="flex-1 flex items-center justify-center gap-2 bg-indigo-600 text-white py-4 rounded-2xl font-bold text-sm hover:bg-indigo-700 transition-all shadow-xl shadow-indigo-100 active:scale-[0.98] disabled:opacity-60"
-        >
-          <RefreshCw size={18} className={isRefreshing ? "animate-spin" : ""} />
-          Actualizar estado
-        </button>
-        {(!isModal || !onClose) && (
-          <button
-            onClick={logout}
-            className="flex items-center justify-center gap-2 px-6 py-4 rounded-2xl font-bold text-sm text-slate-500 hover:bg-slate-50 transition-all"
-          >
-            <LogOut size={18} /> Cerrar sesión
-          </button>
-        )}
-      </div>
-      {refreshNotice && (
-        <p className="text-xs font-bold text-indigo-600 mt-4">{refreshNotice}</p>
+      {isAutoApproved ? (
+        <>
+          <div className="w-16 h-16 bg-emerald-50 rounded-2xl flex items-center justify-center mx-auto mb-6 text-emerald-500">
+            <CheckCircle2 size={32} />
+          </div>
+          <h2 className="text-2xl font-black text-slate-900 mb-3">¡Membresía activa!</h2>
+          <p className="text-slate-500 font-medium mb-8 leading-relaxed">
+            Tu pago de renovación ha sido verificado automáticamente con éxito. Tu acceso a la comunidad ha sido reactivado de inmediato.
+          </p>
+          <div className="flex justify-center">
+            {isModal && onClose ? (
+              <button
+                onClick={onClose}
+                className="w-full bg-indigo-600 text-white py-4 rounded-2xl font-bold text-sm hover:bg-indigo-700 transition-all shadow-xl shadow-indigo-100 active:scale-[0.98]"
+              >
+                Comenzar a navegar
+              </button>
+            ) : (
+              <button
+                onClick={() => window.location.reload()}
+                className="w-full bg-indigo-600 text-white py-4 rounded-2xl font-bold text-sm hover:bg-indigo-700 transition-all shadow-xl shadow-indigo-100 active:scale-[0.98]"
+              >
+                Ir al inicio
+              </button>
+            )}
+          </div>
+        </>
+      ) : (
+        <>
+          <div className="w-16 h-16 bg-amber-50 rounded-2xl flex items-center justify-center mx-auto mb-6 text-amber-500">
+            <Clock size={32} />
+          </div>
+          <h2 className="text-2xl font-black text-slate-900 mb-3">Renovación en revisión</h2>
+          <p className="text-slate-500 font-medium mb-8 leading-relaxed">
+            Recibimos tu comprobante de renovación. Un administrador lo revisará pronto y reactivará tu acceso.
+            Te avisaremos en cuanto esté validado.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-3">
+            <button
+              onClick={handleRefreshStatus}
+              disabled={isRefreshing}
+              className="flex-1 flex items-center justify-center gap-2 bg-indigo-600 text-white py-4 rounded-2xl font-bold text-sm hover:bg-indigo-700 transition-all shadow-xl shadow-indigo-100 active:scale-[0.98] disabled:opacity-60"
+            >
+              <RefreshCw size={18} className={isRefreshing ? "animate-spin" : ""} />
+              Actualizar estado
+            </button>
+            {(!isModal || !onClose) && (
+              <button
+                onClick={logout}
+                className="flex items-center justify-center gap-2 px-6 py-4 rounded-2xl font-bold text-sm text-slate-500 hover:bg-slate-50 transition-all"
+              >
+                <LogOut size={18} /> Cerrar sesión
+              </button>
+            )}
+          </div>
+          {refreshNotice && (
+            <p className="text-xs font-bold text-indigo-600 mt-4">{refreshNotice}</p>
+          )}
+        </>
       )}
     </motion.div>
   );
@@ -490,6 +567,52 @@ export default function RenewalGateway({ isModal = false, onClose }: { isModal?:
                   {selectedMethod.fields.map((f) => (
                     <CopyField key={f.field_key} label={f.field_label} value={f.value ?? "—"} />
                   ))}
+                </div>
+              )}
+
+              {/* Campos dinámicos para verificación automática de Pago Móvil */}
+              {selectedMethod && (selectedMethod.name.toLowerCase().includes("móvil") || selectedMethod.name.toLowerCase().includes("movil")) && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className={labelClass}>Banco de origen</label>
+                    <select
+                      value={payerBank}
+                      onChange={(e) => setPayerBank(e.target.value)}
+                      className="w-full bg-slate-50 border-2 border-transparent focus:border-indigo-100 focus:bg-white rounded-2xl py-4 px-4 text-sm font-medium transition-all outline-none cursor-pointer appearance-none"
+                    >
+                      <option value="">Selecciona tu banco</option>
+                      {VENEZUELAN_BANKS.map((b) => (
+                        <option key={b.code} value={b.code}>
+                          {b.name} ({b.code})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className={labelClass}>Cédula del pagador</label>
+                    <div className="flex gap-2">
+                      <select
+                        value={payerIdType}
+                        onChange={(e) => setPayerIdType(e.target.value)}
+                        className="shrink-0 bg-slate-50 border-2 border-transparent focus:border-indigo-100 focus:bg-white rounded-2xl py-4 px-3 text-sm font-bold outline-none transition-all cursor-pointer"
+                      >
+                        <option value="V">V</option>
+                        <option value="E">E</option>
+                        <option value="J">J</option>
+                      </select>
+                      <div className="relative flex-1">
+                        <input
+                          type="text"
+                          required
+                          value={payerIdNumber}
+                          onChange={(e) => setPayerIdNumber(e.target.value.replace(/[^0-9]/g, ""))}
+                          placeholder="Ej. 12177212"
+                          className={inputClass}
+                        />
+                      </div>
+                    </div>
+                  </div>
                 </div>
               )}
 
