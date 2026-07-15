@@ -12,6 +12,10 @@ export default defineConfig(({mode}) => {
       // base64 into the JS bundle (bloats parse time on every page, even ones that
       // don't render that image).
       assetsInlineLimit: 0,
+      // Vite's default target assumes fairly recent evergreen browsers. Widen it so
+      // the bundle also runs on the older Android Chrome/WebView versions still
+      // common on budget devices, rather than silently failing to execute.
+      target: 'es2017',
     },
     define: {
       'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY),
