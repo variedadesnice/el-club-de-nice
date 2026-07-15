@@ -4,7 +4,7 @@ import CreatePost from "./CreatePost";
 import PostCard from "./PostCard";
 import Spinner from "../../../shared/ui/Spinner";
 import { API_BASE } from "../../../lib/api";
-import banner from "../../../assets/banner.png";
+import banner from "../../../assets/banner.webp";
 import RenewalBanner from "./RenewalBanner";
 import RaffleBanner from "./RaffleBanner";
 import PromoBanner from "./PromoBanner";

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { Suspense, useState } from "react";
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { AnimatePresence, motion } from "motion/react";
 import { useAuth } from "./context/AuthContext";
@@ -22,12 +22,14 @@ function AnimatedRoutes({ routes, fallback }: { routes: AppRoute[]; fallback: st
         exit={{ opacity: 0, x: -20 }}
         transition={{ duration: 0.2 }}
       >
-        <Routes location={location}>
-          {routes.map((route) => (
-            <Route key={route.path} path={route.path} element={route.element} />
-          ))}
-          <Route path="*" element={<Navigate to={fallback} replace />} />
-        </Routes>
+        <Suspense fallback={null}>
+          <Routes location={location}>
+            {routes.map((route) => (
+              <Route key={route.path} path={route.path} element={route.element} />
+            ))}
+            <Route path="*" element={<Navigate to={fallback} replace />} />
+          </Routes>
+        </Suspense>
       </motion.div>
     </AnimatePresence>
   );

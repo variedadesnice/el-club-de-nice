@@ -1,18 +1,21 @@
-import React from "react";
+import React, { lazy } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { isAdmin } from "../lib/permissions";
-import PostFeed from "../features/muro/components/PostFeed";
-import Classroom from "../features/classroom/components/Classroom";
-import Profile from "../features/profile/components/Profile";
-import LiveView from "../features/live/components/LiveView";
-import AdminDashboard from "../features/admin/AdminDashboard";
 import Landing from "../features/landing/landing";
 import Login from "../features/auth/components/Login";
-import Register from "../features/auth/components/Register";
-import InviteRegister from "../features/auth/components/InviteRegister";
-import ForgotPassword from "../features/auth/components/ForgotPassword";
-import ResetPassword from "../features/auth/components/ResetPassword";
+
+// Cargados bajo demanda: reducen el bundle inicial que descarga cualquier
+// visitante no autenticado (login/landing) a solo lo que realmente se renderiza.
+const PostFeed = lazy(() => import("../features/muro/components/PostFeed"));
+const Classroom = lazy(() => import("../features/classroom/components/Classroom"));
+const Profile = lazy(() => import("../features/profile/components/Profile"));
+const LiveView = lazy(() => import("../features/live/components/LiveView"));
+const AdminDashboard = lazy(() => import("../features/admin/AdminDashboard"));
+const Register = lazy(() => import("../features/auth/components/Register"));
+const InviteRegister = lazy(() => import("../features/auth/components/InviteRegister"));
+const ForgotPassword = lazy(() => import("../features/auth/components/ForgotPassword"));
+const ResetPassword = lazy(() => import("../features/auth/components/ResetPassword"));
 
 function AdminRoute() {
   const { user } = useAuth();

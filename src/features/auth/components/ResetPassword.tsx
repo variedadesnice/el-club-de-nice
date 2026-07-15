@@ -1,5 +1,9 @@
 import React, { useEffect, useState } from "react";
 import logo from "../../../assets/logo.png";
+import avatar1 from "../../../assets/avatars/auth1.jpg";
+import avatar2 from "../../../assets/avatars/auth2.jpg";
+import avatar3 from "../../../assets/avatars/auth3.jpg";
+import avatar4 from "../../../assets/avatars/auth4.jpg";
 import { Lock, ArrowRight, ArrowLeft, CheckCircle2, ShieldAlert } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { apiFetch } from "../../../lib/api";
@@ -88,9 +92,9 @@ export default function ResetPassword({ onGoToLogin, onGoToForgotPassword }: Res
           </div>
 
           <div className="relative z-10 flex -space-x-3 mt-12">
-            {[1, 2, 3, 4].map((i) => (
+            {[avatar1, avatar2, avatar3, avatar4].map((avatar, i) => (
               <div key={i} className="w-12 h-12 rounded-full border-4 border-slate-900 bg-slate-800 shadow-sm overflow-hidden">
-                <img src={`https://i.pravatar.cc/100?u=auth${i}`} alt="user" />
+                <img src={avatar} alt="user" />
               </div>
             ))}
             <div className="w-12 h-12 rounded-full border-4 border-slate-900 bg-indigo-600 text-[10px] flex items-center justify-center font-bold text-white shadow-sm">

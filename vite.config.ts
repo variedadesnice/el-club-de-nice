@@ -7,6 +7,12 @@ export default defineConfig(({mode}) => {
   const env = loadEnv(mode, '.', '');
   return {
     plugins: [react(), tailwindcss()],
+    build: {
+      // Keep small images as separate cacheable files instead of inlining them as
+      // base64 into the JS bundle (bloats parse time on every page, even ones that
+      // don't render that image).
+      assetsInlineLimit: 0,
+    },
     define: {
       'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY),
     },

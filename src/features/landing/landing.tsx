@@ -2,6 +2,9 @@ import { useState } from "react";
 import { Play, Users, Zap, ArrowRight, ShieldCheck, Globe } from "lucide-react";
 import { motion } from "motion/react";
 import logo from "../../assets/logo.png";
+import avatarFeat1 from "../../assets/avatars/feat1.jpg";
+import avatarFeat2 from "../../assets/avatars/feat2.jpg";
+import avatarFeat3 from "../../assets/avatars/feat3.jpg";
 
 interface LandingProps {
   onViewChange: (view: "login" | "register") => void;
@@ -179,9 +182,9 @@ export default function Landing({ onViewChange }: LandingProps) {
 
           <div className="md:col-span-4 bg-indigo-50 rounded-[2.5rem] p-10 flex flex-col justify-between border border-indigo-100">
             <div className="flex -space-x-4">
-              {[1, 2, 3].map(i => (
+              {[avatarFeat1, avatarFeat2, avatarFeat3].map((avatar, i) => (
                 <div key={i} className="w-12 h-12 rounded-full border-4 border-white bg-slate-100 overflow-hidden">
-                  <img src={`https://i.pravatar.cc/100?u=feat${i}`} alt="user" />
+                  <img src={avatar} alt="user" />
                 </div>
               ))}
             </div>
