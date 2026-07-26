@@ -33,25 +33,6 @@ const COUNTRY_CODES: { flag: string; code: string; name: string; digits: number 
   { flag: "🇩🇴", code: "+1",   name: "Rep. Dominicana",digits: 10 },
 ];
 
-const VENEZUELAN_BANKS = [
-  { code: "0102", name: "Banco de Venezuela" },
-  { code: "0134", name: "Banesco" },
-  { code: "0105", name: "Mercantil" },
-  { code: "0108", name: "Provincial" },
-  { code: "0172", name: "Bancamiga" },
-  { code: "0114", name: "Bancaribe" },
-  { code: "0115", name: "Banco Exterior" },
-  { code: "0128", name: "Banco Caroní" },
-  { code: "0151", name: "BFC Banco Fondo Común" },
-  { code: "0163", name: "100% Banco" },
-  { code: "0168", name: "Bancrecer" },
-  { code: "0171", name: "Banco Activo" },
-  { code: "0174", name: "Banplus" },
-  { code: "0175", name: "Banco Bicentenario" },
-  { code: "0177", name: "BANFANB" },
-  { code: "0191", name: "Banco Nacional de Crédito BNC" },
-];
-
 const ALPHANUMERIC_RE = /^(?=.*[a-zA-Z])(?=.*[0-9]).{6,}$/;
 
 const MAX_RECEIPT_SIZE = 5 * 1024 * 1024; // 5MB
@@ -196,21 +177,7 @@ export default function Register({ onGoToLogin }: RegisterProps) {
   const [countryCode, setCountryCode] = useState("+58");
   const [phone, setPhone] = useState("");
 
-  // Pago Móvil automatic verification states
-  const [payerBank, setPayerBank] = useState("");
-  const [payerIdType, setPayerIdType] = useState("V");
-  const [payerIdNumber, setPayerIdNumber] = useState("");
   const [isAutoApproved, setIsAutoApproved] = useState(false);
-  const [payerPhoneCode, setPayerPhoneCode] = useState("+58");
-  const [payerPhone, setPayerPhone] = useState("");
-  const [paymentDate, setPaymentDate] = useState(() => new Date().toLocaleDateString("sv-SE"));
-
-  useEffect(() => {
-    if (!payerPhone) {
-      setPayerPhone(phone);
-    }
-  }, [phone]);
-
 
   // Métodos de pago activos (catálogo público)
   const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([]);
@@ -290,8 +257,8 @@ export default function Register({ onGoToLogin }: RegisterProps) {
 
   // Bs equivalente del plan seleccionado
   const selectedPlan = PLAN_OPTIONS.find((p) => p.value === plan);
-  // TEST: Hardcoded to 0.10 Bs for payment gateway testing
-  const bsAmount = "0.10";
+  // TEST: Hardcoded to 1 Bs for payment gateway testing
+  const bsAmount = "1";
 
   function goToStep(target: Step) {
     setStepError(null);
@@ -327,27 +294,6 @@ export default function Register({ onGoToLogin }: RegisterProps) {
     if (!referenceNumber.trim() || !phone.trim()) {
       setStepError("Completa la referencia y el teléfono de contacto.");
       return;
-    }
-    const isPagoMovil = selectedMethod?.auto_verify === true ||
-      selectedMethod?.name.toLowerCase().includes("movil") ||
-      selectedMethod?.name.toLowerCase().includes("móvil");
-    if (isPagoMovil) {
-      if (!payerBank) {
-        setStepError("Selecciona el banco de origen.");
-        return;
-      }
-      if (!payerIdNumber.trim()) {
-        setStepError("Ingresa la cédula del pagador.");
-        return;
-      }
-      if (!payerPhone.trim()) {
-        setStepError("Ingresa el teléfono del pagador.");
-        return;
-      }
-      if (!paymentDate.trim()) {
-        setStepError("Selecciona la fecha del pago.");
-        return;
-      }
     }
     const digitsOnly = phone.replace(/\D/g, "");
     if (digitsOnly.length < 7 || digitsOnly.length > 15) {
@@ -423,9 +369,6 @@ export default function Register({ onGoToLogin }: RegisterProps) {
     setSubmitError(null);
     setIsSubmitting(true);
     try {
-      const isPagoMovil = selectedMethod?.auto_verify === true ||
-        selectedMethod?.name.toLowerCase().includes("movil") ||
-        selectedMethod?.name.toLowerCase().includes("móvil");
       const resp = await apiFetch<{ payment: { status: string } }>("/api/payments/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -440,12 +383,8 @@ export default function Register({ onGoToLogin }: RegisterProps) {
           phone: `${countryCode}${phone.trim()}`,
           receipt_path: receiptPath,
           currency_id: selectedCurrencyId,
-          amount_local: 0.1,                                 // TEST: Hardcoded to 0.1 Bs.
+          amount_local: 1,                                   // TEST: Hardcoded to 1 Bs.
           exchange_rate: bcvRate ?? 1,                        // tasa BCV
-          banco_origen: isPagoMovil ? payerBank : null,
-          cedula_pagador: isPagoMovil ? `${payerIdType}${payerIdNumber.trim()}` : null,
-          telefono_pagador: isPagoMovil ? `${payerPhoneCode}${payerPhone.trim()}` : null,
-          payment_date: isPagoMovil ? paymentDate : null,
         }),
       });
       
@@ -686,104 +625,16 @@ export default function Register({ onGoToLogin }: RegisterProps) {
                 </p>
               </div>
 
-              {/* Campos dinámicos para verificación automática de Pago Móvil */}
-              {(selectedMethod?.auto_verify === true ||
-                selectedMethod?.name.toLowerCase().includes("movil") ||
-                selectedMethod?.name.toLowerCase().includes("móvil")) && (
-                <div className="space-y-5">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                    <div className="space-y-2">
-                      <label className={labelClass}>Banco de origen</label>
-                      <select
-                        value={payerBank}
-                        onChange={(e) => setPayerBank(e.target.value)}
-                        className="w-full bg-slate-50 border-2 border-transparent focus:border-indigo-100 focus:bg-white rounded-2xl py-4 px-4 text-sm font-medium transition-all outline-none cursor-pointer appearance-none"
-                      >
-                        <option value="">Selecciona tu banco</option>
-                        {VENEZUELAN_BANKS.map((b) => (
-                          <option key={b.code} value={b.code}>
-                            {b.name} ({b.code})
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-
-                    <div className="space-y-2">
-                      <label className={labelClass}>Cédula del pagador</label>
-                      <div className="flex gap-2">
-                        <select
-                          value={payerIdType}
-                          onChange={(e) => setPayerIdType(e.target.value)}
-                          className="shrink-0 bg-slate-50 border-2 border-transparent focus:border-indigo-100 focus:bg-white rounded-2xl py-4 px-3 text-sm font-bold outline-none transition-all cursor-pointer"
-                        >
-                          <option value="V">V</option>
-                          <option value="E">E</option>
-                          <option value="J">J</option>
-                        </select>
-                        <div className="relative flex-1">
-                          <input
-                            type="text"
-                            required
-                            value={payerIdNumber}
-                            onChange={(e) => setPayerIdNumber(e.target.value.replace(/[^0-9]/g, ""))}
-                            placeholder="Ej. 12177212"
-                            className={inputClass}
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                    <div className="space-y-2">
-                      <label className={labelClass}>Teléfono del pagador</label>
-                      <div className="flex gap-2">
-                        <select
-                          value={payerPhoneCode}
-                          onChange={(e) => setPayerPhoneCode(e.target.value)}
-                          className="shrink-0 bg-slate-50 border-2 border-transparent focus:border-indigo-100 focus:bg-white rounded-2xl py-4 px-3 text-sm font-bold outline-none transition-all cursor-pointer"
-                        >
-                          {COUNTRY_CODES.map((c) => (
-                            <option key={`payer-${c.name}-${c.code}`} value={c.code}>
-                              {c.flag} {c.code}
-                            </option>
-                          ))}
-                        </select>
-                        <div className="relative flex-1">
-                          <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-                          <input
-                            type="tel"
-                            required
-                            value={payerPhone}
-                            onChange={(e) => setPayerPhone(e.target.value.replace(/[^0-9]/g, ""))}
-                            placeholder="Ej. 04246296646"
-                            className={inputClass}
-                          />
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="space-y-2">
-                      <label className={labelClass}>Fecha del pago</label>
-                      <input
-                        type="date"
-                        required
-                        value={paymentDate}
-                        onChange={(e) => setPaymentDate(e.target.value)}
-                        className="w-full bg-slate-50 border-2 border-transparent focus:border-indigo-100 focus:bg-white rounded-2xl py-4 px-4 text-sm font-medium transition-all outline-none cursor-pointer"
-                      />
-                    </div>
-                  </div>
-                </div>
-              )}
-
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                 <div className="space-y-2">
-                  <label className={labelClass}>Número de referencia</label>
+                  <label className={labelClass}>Número de Referencia Completa</label>
                   <div className="relative">
                     <Hash className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
                     <input type="text" required value={referenceNumber} onChange={(e) => setReferenceNumber(e.target.value)} placeholder="Ej. 0001234567" className={inputClass} />
                   </div>
+                  <p className="text-[11px] text-indigo-600 font-bold ml-1">
+                    ⚠️ Ingresa la referencia completa, tal como aparece en tu comprobante — no la abrevies ni la trunques.
+                  </p>
                 </div>
 
                 <div className="space-y-2">
