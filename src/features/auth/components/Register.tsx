@@ -200,6 +200,11 @@ export default function Register({ onGoToLogin }: RegisterProps) {
   const [submitted, setSubmitted] = useState(false);
 
   const selectedMethod = paymentMethods.find((m) => m.id === selectedMethodId) ?? null;
+  const isPagoMovil = selectedMethod?.name?.toLowerCase().includes("móvil") ?? false;
+
+  useEffect(() => {
+    if (isPagoMovil) setCountryCode("+58");
+  }, [isPagoMovil]);
 
   useEffect(() => {
     let cancelled = false;
@@ -638,20 +643,22 @@ export default function Register({ onGoToLogin }: RegisterProps) {
                 </div>
 
                 <div className="space-y-2">
-                  <label className={labelClass}>Teléfono de Contacto</label>
+                  <label className={labelClass}>{isPagoMovil ? "Teléfono del Emisor" : "Teléfono de Contacto"}</label>
                   <div className="flex gap-2">
-                    <select
-                      value={countryCode}
-                      onChange={(e) => { setCountryCode(e.target.value); setPhone(""); }}
-                      className="shrink-0 bg-slate-50 border-2 border-transparent focus:border-indigo-100 focus:bg-white rounded-2xl py-4 px-3 text-sm font-bold outline-none transition-all appearance-none cursor-pointer"
-                      style={{ minWidth: "90px" }}
-                    >
-                      {COUNTRY_CODES.map((c) => (
-                        <option key={`${c.name}-${c.code}`} value={c.code}>
-                          {c.flag} {c.code}
-                        </option>
-                      ))}
-                    </select>
+                    {!isPagoMovil && (
+                      <select
+                        value={countryCode}
+                        onChange={(e) => { setCountryCode(e.target.value); setPhone(""); }}
+                        className="shrink-0 bg-slate-50 border-2 border-transparent focus:border-indigo-100 focus:bg-white rounded-2xl py-4 px-3 text-sm font-bold outline-none transition-all appearance-none cursor-pointer"
+                        style={{ minWidth: "90px" }}
+                      >
+                        {COUNTRY_CODES.map((c) => (
+                          <option key={`${c.name}-${c.code}`} value={c.code}>
+                            {c.flag} {c.code}
+                          </option>
+                        ))}
+                      </select>
+                    )}
                     <div className="relative flex-1">
                       <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
                       <input
