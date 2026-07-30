@@ -49,7 +49,20 @@ export interface ChapterPdf {
 
 export type View = "muro" | "classroom" | "profile" | "admin";
 
-export type PlanType = "1m" | "3m" | "6m" | "1y" | "indefinido";
+// Código de un plan activo en la tabla `plans` del backend (admin-configurable
+// vía /api/admin/plans) — ya no es un set fijo de valores.
+export type PlanType = string;
+
+export interface Plan {
+  id: string;
+  code: string;
+  name: string;
+  sublabel: string | null;
+  duration_days: number | null;
+  price_usd: number;
+  is_active: boolean;
+  sort_order: number;
+}
 
 export type PaymentStatus = "pending" | "success" | "failed";
 

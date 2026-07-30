@@ -5,33 +5,14 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { apiFetch } from "../../../lib/api";
-import type { PaymentMethod, PlanType, Currency } from "../../../types";
+import type { PaymentMethod, PlanType, Plan, Currency } from "../../../types";
 import logo from "../../../assets/logo.png";
 
 interface RegisterProps {
   onGoToLogin: () => void;
 }
 
-const PLAN_OPTIONS: { value: PlanType; label: string; sublabel: string; price: string }[] = [
-  { value: "1m", label: "1 mes", sublabel: "Acceso mensual", price: "25" },
-  // { value: "3m", label: "3 meses", sublabel: "Plan trimestral", price: "" },   // oculto temporalmente
-  // { value: "6m", label: "6 meses", sublabel: "Plan semestral", price: "" },    // oculto temporalmente
-  { value: "1y", label: "1 año", sublabel: "Plan anual", price: "197" },
-  // { value: "indefinido", label: "Indefinido", sublabel: "Pago único, sin vencimiento", price: "" }, // oculto temporalmente
-];
-
-const COUNTRY_CODES: { flag: string; code: string; name: string; digits: number }[] = [
-  { flag: "🇻🇪", code: "+58",  name: "Venezuela",      digits: 10 },
-  { flag: "🇺🇸", code: "+1",   name: "EE.UU.",         digits: 10 },
-  { flag: "🇲🇽", code: "+52",  name: "México",         digits: 10 },
-  { flag: "🇨🇴", code: "+57",  name: "Colombia",       digits: 10 },
-  { flag: "🇦🇷", code: "+54",  name: "Argentina",      digits: 10 },
-  { flag: "🇵🇪", code: "+51",  name: "Perú",           digits: 9  },
-  { flag: "🇨🇱", code: "+56",  name: "Chile",          digits: 9  },
-  { flag: "🇪🇸", code: "+34",  name: "España",         digits: 9  },
-  { flag: "🇵🇦", code: "+507", name: "Panamá",         digits: 8  },
-  { flag: "🇩🇴", code: "+1",   name: "Rep. Dominicana",digits: 10 },
-];
+const COUNTRY_CODE = "+58";
 
 const ALPHANUMERIC_RE = /^(?=.*[a-zA-Z])(?=.*[0-9]).{6,}$/;
 
@@ -171,13 +152,17 @@ export default function Register({ onGoToLogin }: RegisterProps) {
   const [password, setPassword] = useState("");
 
   // Paso 2 — plan y datos de pago
-  const [plan, setPlan] = useState<PlanType>("1m");
-  const [amount, setAmount] = useState("25");
+  const [plan, setPlan] = useState<PlanType>("");
+  const [amount, setAmount] = useState("");
   const [referenceNumber, setReferenceNumber] = useState("");
-  const [countryCode, setCountryCode] = useState("+58");
   const [phone, setPhone] = useState("");
 
   const [isAutoApproved, setIsAutoApproved] = useState(false);
+
+  // Planes activos (catálogo público)
+  const [plans, setPlans] = useState<Plan[]>([]);
+  const [plansLoading, setPlansLoading] = useState(true);
+  const [plansError, setPlansError] = useState<string | null>(null);
 
   // Métodos de pago activos (catálogo público)
   const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([]);
@@ -200,11 +185,31 @@ export default function Register({ onGoToLogin }: RegisterProps) {
   const [submitted, setSubmitted] = useState(false);
 
   const selectedMethod = paymentMethods.find((m) => m.id === selectedMethodId) ?? null;
-  const isPagoMovil = selectedMethod?.name?.toLowerCase().includes("móvil") ?? false;
+  const selectedPlan = plans.find((p) => p.code === plan) ?? null;
 
   useEffect(() => {
-    if (isPagoMovil) setCountryCode("+58");
-  }, [isPagoMovil]);
+    let cancelled = false;
+    async function loadPlans() {
+      setPlansLoading(true);
+      setPlansError(null);
+      try {
+        const { data } = await apiFetch<Plan[]>("/api/plans/");
+        if (cancelled) return;
+        setPlans(data);
+        setPlan((prev) => prev || data[0]?.code || "");
+      } catch (err) {
+        if (!cancelled) {
+          setPlansError(err instanceof Error ? err.message : "No se pudieron cargar los planes.");
+        }
+      } finally {
+        if (!cancelled) setPlansLoading(false);
+      }
+    }
+    loadPlans();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -252,18 +257,20 @@ export default function Register({ onGoToLogin }: RegisterProps) {
       .then((data) => {
         if (data?.promedio) {
           setBcvRate(data.promedio);
-          // Pre-fill amount in Bs for the default plan (1m = $25)
-          setAmount((25 * data.promedio).toFixed(2));
         }
       })
       .catch(() => { /* si falla la API, el campo quedará editable */ })
       .finally(() => setBcvLoading(false));
   }, []);
 
-  // Bs equivalente del plan seleccionado
-  const selectedPlan = PLAN_OPTIONS.find((p) => p.value === plan);
-  // TEST: Hardcoded to 1 Bs for payment gateway testing
-  const bsAmount = "1";
+  // Recalcula el monto en Bs cada vez que cambia el plan seleccionado, la
+  // lista de planes (llega async) o la tasa BCV.
+  useEffect(() => {
+    if (!selectedPlan) return;
+    setAmount(
+      bcvRate ? (selectedPlan.price_usd * bcvRate).toFixed(2) : String(selectedPlan.price_usd)
+    );
+  }, [selectedPlan, bcvRate]);
 
   function goToStep(target: Step) {
     setStepError(null);
@@ -287,6 +294,10 @@ export default function Register({ onGoToLogin }: RegisterProps) {
   }
 
   function handleNextFromStep2() {
+    if (!plan) {
+      setStepError("Selecciona un plan para continuar.");
+      return;
+    }
     if (!selectedMethodId) {
       setStepError("Selecciona un método de pago para continuar.");
       return;
@@ -382,13 +393,13 @@ export default function Register({ onGoToLogin }: RegisterProps) {
           email: email.trim(),
           password,
           plan,
-          amount: parseFloat(selectedPlan?.price ?? "0"),   // USD
+          amount: selectedPlan?.price_usd ?? 0,               // USD
           payment_method_id: selectedMethodId,
           reference_number: referenceNumber.trim(),
-          phone: `${countryCode}${phone.trim()}`,
+          phone: `${COUNTRY_CODE}${phone.trim()}`,
           receipt_path: receiptPath,
           currency_id: selectedCurrencyId,
-          amount_local: 1,                                   // TEST: Hardcoded to 1 Bs.
+          amount_local: parseFloat(amount) || 0,              // Bs. (calculado por tasa BCV)
           exchange_rate: bcvRate ?? 1,                        // tasa BCV
         }),
       });
@@ -504,35 +515,41 @@ export default function Register({ onGoToLogin }: RegisterProps) {
             >
               <div className="space-y-2">
                 <label className={labelClass}>Plan</label>
-                <div className="grid grid-cols-2 gap-3">
-                  {PLAN_OPTIONS.map((p) => (
-                    <button
-                      key={p.value}
-                      type="button"
-                      onClick={() => {
-                        setPlan(p.value);
-                        const bs = bcvRate ? (parseFloat(p.price) * bcvRate).toFixed(2) : p.price;
-                        setAmount(bs);
-                      }}
-                      className={`text-left p-4 rounded-2xl border-2 transition-all ${
-                        plan === p.value
-                          ? "border-indigo-600 bg-indigo-50"
-                          : "border-slate-100 bg-slate-50 hover:border-slate-200"
-                      }`}
-                    >
-                      <p className={`font-black text-sm ${plan === p.value ? "text-indigo-600" : "text-slate-800"}`}>{p.label}</p>
-                      <p className={`font-black text-lg mt-1 ${plan === p.value ? "text-indigo-700" : "text-slate-900"}`}>
-                        ${p.price} <span className="text-xs font-medium text-slate-400">USD</span>
-                      </p>
-                      {bcvRate ? (
-                        <p className="text-xs font-bold text-emerald-600 mt-0.5">
-                          Bs. {(parseFloat(p.price) * bcvRate).toLocaleString("es-VE", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                {plansLoading ? (
+                  <p className="text-sm font-medium text-slate-400 bg-slate-50 px-4 py-3 rounded-xl">Cargando planes...</p>
+                ) : plansError ? (
+                  <FieldError message={plansError} />
+                ) : plans.length === 0 ? (
+                  <p className="text-sm font-medium text-slate-400 bg-slate-50 px-4 py-3 rounded-xl">
+                    No hay planes disponibles por el momento.
+                  </p>
+                ) : (
+                  <div className="grid grid-cols-2 gap-3">
+                    {plans.map((p) => (
+                      <button
+                        key={p.code}
+                        type="button"
+                        onClick={() => setPlan(p.code)}
+                        className={`text-left p-4 rounded-2xl border-2 transition-all ${
+                          plan === p.code
+                            ? "border-indigo-600 bg-indigo-50"
+                            : "border-slate-100 bg-slate-50 hover:border-slate-200"
+                        }`}
+                      >
+                        <p className={`font-black text-sm ${plan === p.code ? "text-indigo-600" : "text-slate-800"}`}>{p.name}</p>
+                        <p className={`font-black text-lg mt-1 ${plan === p.code ? "text-indigo-700" : "text-slate-900"}`}>
+                          ${p.price_usd} <span className="text-xs font-medium text-slate-400">USD</span>
                         </p>
-                      ) : null}
-                      <p className="text-[11px] font-medium text-slate-400 mt-0.5">{p.sublabel}</p>
-                    </button>
-                  ))}
-                </div>
+                        {bcvRate ? (
+                          <p className="text-xs font-bold text-emerald-600 mt-0.5">
+                            Bs. {(p.price_usd * bcvRate).toLocaleString("es-VE", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                          </p>
+                        ) : null}
+                        {p.sublabel && <p className="text-[11px] font-medium text-slate-400 mt-0.5">{p.sublabel}</p>}
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
 
               <div className="space-y-2">
@@ -548,7 +565,7 @@ export default function Register({ onGoToLogin }: RegisterProps) {
                     <input
                       type="text"
                       readOnly
-                      value={bsAmount ? `Bs. ${parseFloat(bsAmount).toLocaleString("es-VE", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : amount}
+                      value={amount ? `Bs. ${parseFloat(amount).toLocaleString("es-VE", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : ""}
                       className={`${inputClass} cursor-not-allowed bg-slate-100 text-slate-600 font-bold select-none`}
                       title="El monto es calculado automáticamente según la tasa BCV"
                     />
@@ -643,40 +660,25 @@ export default function Register({ onGoToLogin }: RegisterProps) {
                 </div>
 
                 <div className="space-y-2">
-                  <label className={labelClass}>{isPagoMovil ? "Teléfono del Emisor" : "Teléfono de Contacto"}</label>
-                  <div className="flex gap-2">
-                    {!isPagoMovil && (
-                      <select
-                        value={countryCode}
-                        onChange={(e) => { setCountryCode(e.target.value); setPhone(""); }}
-                        className="shrink-0 bg-slate-50 border-2 border-transparent focus:border-indigo-100 focus:bg-white rounded-2xl py-4 px-3 text-sm font-bold outline-none transition-all appearance-none cursor-pointer"
-                        style={{ minWidth: "90px" }}
-                      >
-                        {COUNTRY_CODES.map((c) => (
-                          <option key={`${c.name}-${c.code}`} value={c.code}>
-                            {c.flag} {c.code}
-                          </option>
-                        ))}
-                      </select>
-                    )}
-                    <div className="relative flex-1">
-                      <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-                      <input
-                        type="tel"
-                        required
-                        value={phone}
-                        onChange={(e) => setPhone(e.target.value.replace(/[^0-9]/g, ""))}
-                        placeholder={countryCode === "+58" ? "04121234567" : "Número sin prefijo"}
-                        maxLength={15}
-                        className={inputClass}
-                      />
-                    </div>
+                  <label className={labelClass}>Teléfono de Contacto</label>
+                  <div className="relative">
+                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-sm font-bold text-slate-400">
+                      {COUNTRY_CODE}
+                    </span>
+                    <Phone className="absolute left-14 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                    <input
+                      type="tel"
+                      required
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value.replace(/[^0-9]/g, ""))}
+                      placeholder="04121234567"
+                      maxLength={15}
+                      className={`${inputClass} pl-24`}
+                    />
                   </div>
-                  {countryCode === "+58" && (
-                    <p className="text-[10px] text-slate-400 font-medium ml-1">
-                      Venezuela: 0412, 0414, 0416, 0424, 0426 + 7 dígitos
-                    </p>
-                  )}
+                  <p className="text-[10px] text-slate-400 font-medium ml-1">
+                    Venezuela: 0412, 0414, 0416, 0424, 0426 + 7 dígitos
+                  </p>
                 </div>
               </div>
 
@@ -744,7 +746,7 @@ export default function Register({ onGoToLogin }: RegisterProps) {
               <div className="bg-slate-50 rounded-2xl p-6 space-y-2">
                 <p className="text-xs font-black text-slate-400 uppercase tracking-[0.15em] mb-3">Resumen de tu solicitud</p>
                 {[
-                  ["Plan", PLAN_OPTIONS.find((p) => p.value === plan)?.label ?? plan],
+                  ["Plan", selectedPlan?.name ?? plan],
                   ["Monto", amount],
                   ["Método de pago", selectedMethod?.name ?? ""],
                   ["Referencia", referenceNumber],
