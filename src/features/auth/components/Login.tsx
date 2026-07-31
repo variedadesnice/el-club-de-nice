@@ -61,9 +61,9 @@ export default function Login({ onGoToRegister, onForgotPassword }: LoginProps) 
               <img src={logo} alt="Logo" className="w-12 h-12 object-contain" />
               <span className="font-bold text-2xl tracking-tight">El Club de Nice</span>
             </div>
-            <h1 className="text-5xl font-black mb-6 leading-[1.1] tracking-tight">La comunidad de<br />Ecommerce más<br />grande de Venezuela.</h1>
+            <h1 className="text-5xl font-black mb-6 leading-[1.1] tracking-tight">La comunidad de<br />repostería y pastelería<br />más grande de Venezuela.</h1>
             <p className="text-slate-400 text-lg font-medium max-w-sm">
-              Aprende de los mejores, escala tus tiendas online y conecta con los principales referentes del comercio electrónico en el país.
+              Aprende recetas y técnicas paso a paso, comparte tus creaciones y crece junto a una comunidad que vive la repostería tanto como tú.
             </p>
           </div>
 
