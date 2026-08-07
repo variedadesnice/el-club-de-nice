@@ -38,6 +38,7 @@ function LandingPage() {
   );
 }
 
+
 function LoginPage() {
   const navigate = useNavigate();
   return (
@@ -80,6 +81,7 @@ export interface AppRoute {
 
 export const authRoutes: AppRoute[] = [
   { path: "/", element: <Navigate to="/login" replace /> },
+  { path: "/landing", element: <LandingPage /> },
   { path: "/login", element: <LoginPage /> },
   { path: "/register", element: <RegisterPage /> },
   { path: "/invite", element: <InviteRegisterPage /> },
