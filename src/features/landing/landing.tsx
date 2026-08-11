@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { motion, useInView, useMotionValue, useSpring } from "motion/react";
+import { motion, AnimatePresence, useInView, useMotionValue, useSpring } from "motion/react";
 import {
   Play,
   Users,
@@ -16,6 +16,15 @@ import {
   MessageCircle,
   TrendingUp,
   Lock,
+  Check,
+  ChevronDown,
+  Calendar,
+  RefreshCw,
+  Instagram,
+  Youtube,
+  Palette,
+  Clock,
+  BadgeCheck,
 } from "lucide-react";
 import logo from "../../assets/logo.png";
 import avatarFeat1 from "../../assets/avatars/feat1.jpg";
@@ -24,6 +33,9 @@ import avatarFeat3 from "../../assets/avatars/feat3.jpg";
 import avatarAuth1 from "../../assets/avatars/auth1.jpg";
 import avatarAuth2 from "../../assets/avatars/auth2.jpg";
 import avatarAuth3 from "../../assets/avatars/auth3.jpg";
+import avatarAuth4 from "../../assets/avatars/auth4.jpg";
+import { apiFetch, API_BASE } from "../../lib/api";
+import type { Plan } from "../../types";
 
 interface LandingProps {
   onViewChange: (view: "login" | "register") => void;
@@ -149,7 +161,7 @@ function TestimonialCard({
         ))}
       </div>
       <p className="text-white/70 text-sm font-medium leading-relaxed flex-1">
-        "{text}"
+        &ldquo;{text}&rdquo;
       </p>
       <div className="flex items-center gap-3">
         <img
@@ -166,15 +178,354 @@ function TestimonialCard({
   );
 }
 
+// ─── FAQ Item ──────────────────────────────────────────────────────────────────
+function FaqItem({ question, answer, index }: { question: string; answer: string; index: number }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 16 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-40px" }}
+      transition={{ delay: index * 0.08, duration: 0.5 }}
+      className="border border-white/10 rounded-2xl overflow-hidden backdrop-blur-sm"
+    >
+      <button
+        onClick={() => setOpen(!open)}
+        className="w-full flex items-center justify-between px-7 py-5 text-left gap-4 hover:bg-white/5 transition-colors"
+      >
+        <span className="font-bold text-white text-sm md:text-base leading-snug">{question}</span>
+        <motion.div animate={{ rotate: open ? 180 : 0 }} transition={{ duration: 0.25 }} className="flex-shrink-0">
+          <ChevronDown size={18} className="text-pink-400" />
+        </motion.div>
+      </button>
+      <AnimatePresence initial={false}>
+        {open && (
+          <motion.div
+            key="content"
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.3, ease: "easeInOut" }}
+            className="overflow-hidden"
+          >
+            <p className="px-7 pb-6 text-sm text-white/55 font-medium leading-relaxed">{answer}</p>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.div>
+  );
+}
+
+// ─── Plan Card ─────────────────────────────────────────────────────────────────
+function PlanCard({
+  plan,
+  highlighted,
+  onSelect,
+}: {
+  plan: Plan;
+  highlighted: boolean;
+  onSelect: () => void;
+}) {
+  const monthlyEquivalent =
+    plan.duration_days && plan.duration_days > 31
+      ? (plan.price_usd / (plan.duration_days / 30)).toFixed(0)
+      : null;
+
+  const durationLabel =
+    plan.duration_days === null
+      ? "Acceso vitalicio"
+      : plan.duration_days <= 31
+      ? "1 mes"
+      : plan.duration_days <= 95
+      ? "3 meses"
+      : plan.duration_days <= 185
+      ? "6 meses"
+      : "1 año";
+
+  return (
+    <motion.div
+      whileHover={{ y: -6, scale: 1.02 }}
+      transition={{ type: "spring", stiffness: 280, damping: 22 }}
+      onClick={onSelect}
+      className={`relative rounded-3xl p-8 flex flex-col gap-6 cursor-pointer border transition-all ${
+        highlighted
+          ? "bg-gradient-to-br from-pink-600 to-rose-700 border-pink-400/60 shadow-2xl shadow-pink-900/40"
+          : "bg-white/5 border-white/10 backdrop-blur-sm hover:border-white/20"
+      }`}
+    >
+      {highlighted && (
+        <>
+          <div className="absolute -top-20 -right-20 w-56 h-56 bg-white/10 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute top-4 right-4">
+            <span className="inline-flex items-center gap-1.5 bg-white/20 text-white text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full">
+              <Sparkles size={10} /> Más popular
+            </span>
+          </div>
+        </>
+      )}
+
+      <div>
+        <p className={`text-xs font-black uppercase tracking-widest mb-2 ${highlighted ? "text-pink-100" : "text-pink-400"}`}>
+          {durationLabel}
+        </p>
+        <h3 className="text-2xl font-black text-white">{plan.name}</h3>
+        {plan.sublabel && (
+          <p className={`text-sm font-medium mt-1 ${highlighted ? "text-pink-100" : "text-white/50"}`}>
+            {plan.sublabel}
+          </p>
+        )}
+      </div>
+
+      <div className="flex items-end gap-1">
+        <span className={`text-5xl font-black ${highlighted ? "text-white" : "text-white"}`}>
+          ${plan.price_usd}
+        </span>
+        <span className={`text-sm font-semibold mb-2 ${highlighted ? "text-pink-100" : "text-white/40"}`}>
+          USD
+        </span>
+      </div>
+
+      {monthlyEquivalent && (
+        <p className={`text-xs font-bold -mt-4 ${highlighted ? "text-pink-100" : "text-white/40"}`}>
+          ≈ ${monthlyEquivalent} USD / mes
+        </p>
+      )}
+
+      <ul className="flex flex-col gap-3">
+        {[
+          "Acceso completo a todos los cursos",
+          "Lives semanales con expertos",
+          "Muro comunitario",
+          "Sistema de logros y niveles",
+          "Módulo de negocio y emprendimiento",
+        ].map((feat) => (
+          <li key={feat} className="flex items-start gap-2.5 text-sm font-semibold">
+            <Check
+              size={15}
+              className={`flex-shrink-0 mt-0.5 ${highlighted ? "text-white" : "text-pink-400"}`}
+            />
+            <span className={highlighted ? "text-white" : "text-white/70"}>{feat}</span>
+          </li>
+        ))}
+      </ul>
+
+      <button
+        onClick={onSelect}
+        className={`w-full py-4 rounded-2xl font-black text-sm transition-all ${
+          highlighted
+            ? "bg-white text-pink-600 hover:bg-pink-50 shadow-xl"
+            : "bg-pink-600/20 text-pink-300 border border-pink-500/30 hover:bg-pink-600/30"
+        }`}
+      >
+        Empezar con este plan
+      </button>
+    </motion.div>
+  );
+}
+
+// ─── Product Preview Mock ──────────────────────────────────────────────────────
+function ProductPreview() {
+  const [activeTab, setActiveTab] = useState<"muro" | "cursos" | "lives">("muro");
+  const tabs = [
+    { id: "muro" as const, label: "Muro", icon: <MessageCircle size={14} /> },
+    { id: "cursos" as const, label: "Cursos", icon: <BookOpen size={14} /> },
+    { id: "lives" as const, label: "Lives", icon: <Video size={14} /> },
+  ];
+
+  return (
+    <div className="relative rounded-[2rem] overflow-hidden border border-white/10 bg-[#0e0a12] shadow-2xl">
+      {/* Fake browser chrome */}
+      <div className="flex items-center gap-2 px-5 py-3.5 border-b border-white/8 bg-white/4">
+        <div className="w-2.5 h-2.5 rounded-full bg-red-500/70" />
+        <div className="w-2.5 h-2.5 rounded-full bg-yellow-500/70" />
+        <div className="w-2.5 h-2.5 rounded-full bg-green-500/70" />
+        <div className="ml-3 flex-1 bg-white/8 rounded-lg h-6 flex items-center px-3">
+          <span className="text-white/30 text-[10px] font-mono">clubdenice.com/muro</span>
+        </div>
+      </div>
+
+      {/* App nav tabs */}
+      <div className="flex items-center gap-1 px-5 pt-4 pb-2">
+        {tabs.map((tab) => (
+          <button
+            key={tab.id}
+            onClick={() => setActiveTab(tab.id)}
+            className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+              activeTab === tab.id
+                ? "bg-pink-600/20 text-pink-300 border border-pink-500/30"
+                : "text-white/40 hover:text-white/60"
+            }`}
+          >
+            {tab.icon}
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
+      {/* Content preview */}
+      <AnimatePresence mode="wait">
+        {activeTab === "muro" && (
+          <motion.div
+            key="muro"
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            className="p-5 flex flex-col gap-3"
+          >
+            {[
+              { avatar: avatarFeat1, name: "María G.", text: "¡Acabo de terminar mis primeros macarons de frambuesa! 🍓 Gracias a la técnica del live de hoy...", likes: 47, time: "hace 2h" },
+              { avatar: avatarAuth1, name: "Carolina R.", text: "Compartiéndoles mi torta de fondant de esta semana. Estoy obsesionada con las flores de azúcar 🌸", likes: 83, time: "hace 4h" },
+              { avatar: avatarFeat2, name: "Laura M.", text: "¡Primer pedido de encargo completado! 🎂 Esta comunidad me dio el empujón que necesitaba para empezar.", likes: 124, time: "hace 6h" },
+            ].map((post, i) => (
+              <div key={i} className="bg-white/5 border border-white/8 rounded-2xl p-4 flex gap-3">
+                <img src={post.avatar} alt={post.name} className="w-8 h-8 rounded-full object-cover flex-shrink-0 border border-pink-500/20" />
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="text-white font-bold text-xs">{post.name}</span>
+                    <span className="text-white/30 text-[10px]">{post.time}</span>
+                  </div>
+                  <p className="text-white/60 text-xs leading-relaxed line-clamp-2">{post.text}</p>
+                  <div className="flex items-center gap-3 mt-2">
+                    <span className="flex items-center gap-1 text-pink-400 text-[10px] font-bold">
+                      <Heart size={10} className="fill-pink-400" /> {post.likes}
+                    </span>
+                    <span className="flex items-center gap-1 text-white/30 text-[10px]">
+                      <MessageCircle size={10} /> Comentar
+                    </span>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </motion.div>
+        )}
+        {activeTab === "cursos" && (
+          <motion.div
+            key="cursos"
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            className="p-5 grid grid-cols-2 gap-3"
+          >
+            {[
+              { emoji: "🥐", title: "Croissants artesanales", progress: 65, lessons: 12 },
+              { emoji: "🎂", title: "Pasteles de fondant", progress: 100, lessons: 8 },
+              { emoji: "🍫", title: "Bombones y trufas", progress: 20, lessons: 15 },
+              { emoji: "🥧", title: "Tartas francesas", progress: 0, lessons: 10 },
+            ].map((course, i) => (
+              <div key={i} className="bg-white/5 border border-white/8 rounded-2xl p-4">
+                <div className="text-2xl mb-2">{course.emoji}</div>
+                <p className="text-white font-bold text-xs mb-1 leading-tight">{course.title}</p>
+                <p className="text-white/30 text-[10px] mb-2">{course.lessons} lecciones</p>
+                <div className="w-full bg-white/10 rounded-full h-1">
+                  <div
+                    className="h-1 rounded-full bg-gradient-to-r from-pink-500 to-rose-400"
+                    style={{ width: `${course.progress}%` }}
+                  />
+                </div>
+                <p className="text-white/40 text-[10px] mt-1">{course.progress}% completado</p>
+              </div>
+            ))}
+          </motion.div>
+        )}
+        {activeTab === "lives" && (
+          <motion.div
+            key="lives"
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            className="p-5 flex flex-col gap-3"
+          >
+            <div className="bg-pink-600/15 border border-pink-500/30 rounded-2xl p-4 flex items-center gap-3">
+              <div className="w-8 h-8 rounded-xl bg-pink-500/20 flex items-center justify-center flex-shrink-0">
+                <div className="w-2 h-2 rounded-full bg-pink-400 animate-pulse" />
+              </div>
+              <div>
+                <p className="text-[10px] font-black text-pink-400 uppercase tracking-widest mb-0.5">EN VIVO AHORA</p>
+                <p className="text-white font-bold text-xs">Decoración con manga pastelera avanzada</p>
+                <p className="text-white/40 text-[10px]">con Chef Nicola • 347 viendo</p>
+              </div>
+            </div>
+            {[
+              { day: "Mié 14", title: "Técnicas de isomalt y caramelo artístico", host: "Chef Valentina" },
+              { day: "Vie 16", title: "Negocio: Fijación de precios en repostería", host: "Nice González" },
+              { day: "Lun 19", title: "Macarons de lavanda y tonka", host: "Chef Carlos" },
+            ].map((live, i) => (
+              <div key={i} className="bg-white/5 border border-white/8 rounded-2xl p-4 flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-white/8 flex items-center justify-center flex-shrink-0">
+                  <span className="text-[10px] font-black text-white/50 text-center leading-tight">{live.day}</span>
+                </div>
+                <div>
+                  <p className="text-white font-bold text-xs leading-tight">{live.title}</p>
+                  <p className="text-white/40 text-[10px] mt-0.5">{live.host}</p>
+                </div>
+              </div>
+            ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
 // ─── Main Landing ──────────────────────────────────────────────────────────────
 export default function Landing({ onViewChange }: LandingProps) {
   const [isVideoPlaying, setIsVideoPlaying] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [plans, setPlans] = useState<Plan[]>([]);
+  const [plansLoading, setPlansLoading] = useState(true);
 
   const statsRef = useRef(null);
   const featuresRef = useRef(null);
   const statsInView = useInView(statsRef, { once: true });
   const featuresInView = useInView(featuresRef, { once: true });
+
+  // Fetch plans
+  useEffect(() => {
+    apiFetch<Plan[]>("/api/plans/")
+      .then(({ data }) => {
+        setPlans(data.filter((p) => p.is_active).sort((a, b) => a.sort_order - b.sort_order));
+      })
+      .catch(() => setPlans([]))
+      .finally(() => setPlansLoading(false));
+  }, []);
+
+  // Close mobile menu on resize
+  useEffect(() => {
+    const handleResize = () => { if (window.innerWidth >= 768) setMobileMenuOpen(false); };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  const faqItems = [
+    {
+      question: "¿Qué incluye exactamente la membresía?",
+      answer: "Obtienes acceso completo a todos los cursos en video bajo demanda (más de 30 cursos), participación en los lives semanales con chefs expertos, acceso al muro comunitario, el sistema de logros y niveles, y el módulo de negocio y emprendimiento. Todo en un solo lugar.",
+    },
+    {
+      question: "¿Puedo cancelar en cualquier momento?",
+      answer: "Sí. Tu membresía es por el período que elijas (1, 3 o 6 meses). Al terminar el período simplemente no se renueva automáticamente — no hay cargos sorpresa. Puedes renovar cuando quieras.",
+    },
+    {
+      question: "¿Qué pasa si no soy experta en repostería?",
+      answer: "¡Perfecto! La comunidad está diseñada para todos los niveles. Tenemos cursos que van desde lo más básico hasta técnicas avanzadas. El 40% de nuestros miembros son principiantes o intermedios que llegaron sin experiencia previa.",
+    },
+    {
+      question: "¿Cómo funciona el pago?",
+      answer: "Aceptamos múltiples métodos de pago (transferencia, Zelle, Binance, entre otros). Una vez que realizas tu pago y envías el comprobante, un administrador verifica y activa tu cuenta. El proceso suele tomar menos de 24 horas.",
+    },
+    {
+      question: "¿Puedo ver los cursos desde mi celular?",
+      answer: "Sí, la plataforma es 100% responsive y funciona perfectamente desde cualquier dispositivo: celular, tablet o computadora. Los videos están optimizados para todo tipo de conexión.",
+    },
+    {
+      question: "¿Los lives quedan grabados?",
+      answer: "Sí. Si no puedes ver el live en vivo, la grabación queda disponible en la plataforma para que la veas cuando quieras. Nada se pierde.",
+    },
+  ];
+
+  const highlightedPlanIndex = plans.length === 1 ? 0 : plans.findIndex((p) =>
+    p.duration_days !== null && p.duration_days >= 85 && p.duration_days <= 100
+  );
 
   return (
     <div
@@ -217,22 +568,16 @@ export default function Landing({ onViewChange }: LandingProps) {
           transition={{ delay: 0.1 }}
           className="hidden md:flex items-center gap-8"
         >
-          <a
-            href="#beneficios"
-            className="text-sm font-semibold text-white/60 hover:text-white transition-colors"
-          >
+          <a href="#beneficios" className="text-sm font-semibold text-white/60 hover:text-white transition-colors">
             Beneficios
           </a>
-          <a
-            href="#para-quien"
-            className="text-sm font-semibold text-white/60 hover:text-white transition-colors"
-          >
-            ¿Para quién?
+          <a href="#preview" className="text-sm font-semibold text-white/60 hover:text-white transition-colors">
+            La plataforma
           </a>
-          <a
-            href="#testimonios"
-            className="text-sm font-semibold text-white/60 hover:text-white transition-colors"
-          >
+          <a href="#planes" className="text-sm font-semibold text-white/60 hover:text-white transition-colors">
+            Planes
+          </a>
+          <a href="#testimonios" className="text-sm font-semibold text-white/60 hover:text-white transition-colors">
             Testimonios
           </a>
           <button
@@ -253,23 +598,71 @@ export default function Landing({ onViewChange }: LandingProps) {
         </motion.div>
 
         {/* Mobile Nav Toggle */}
-        <div className="flex md:hidden items-center gap-3">
+        <div className="flex md:hidden items-center gap-2">
           <button
             onClick={() => onViewChange("login")}
-            className="px-4 py-2 text-sm font-bold text-white/70 border border-white/10 rounded-xl"
+            className="px-3 py-2 text-sm font-bold text-white/70 border border-white/10 rounded-xl"
           >
             Entrar
           </button>
-          <motion.button
-            whileTap={{ scale: 0.95 }}
-            onClick={() => onViewChange("register")}
-            style={{ background: "linear-gradient(135deg, #db2777, #9d174d)" }}
-            className="px-4 py-2 text-sm font-black text-white rounded-xl"
+          <button
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="w-10 h-10 flex flex-col items-center justify-center gap-1.5 rounded-xl border border-white/10"
           >
-            Únete
-          </motion.button>
+            <motion.span
+              animate={{ rotate: mobileMenuOpen ? 45 : 0, y: mobileMenuOpen ? 6 : 0 }}
+              className="block w-5 h-0.5 bg-white origin-center"
+            />
+            <motion.span
+              animate={{ opacity: mobileMenuOpen ? 0 : 1 }}
+              className="block w-5 h-0.5 bg-white"
+            />
+            <motion.span
+              animate={{ rotate: mobileMenuOpen ? -45 : 0, y: mobileMenuOpen ? -6 : 0 }}
+              className="block w-5 h-0.5 bg-white origin-center"
+            />
+          </button>
         </div>
       </nav>
+
+      {/* Mobile Menu Dropdown */}
+      <AnimatePresence>
+        {mobileMenuOpen && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            className="relative z-40 md:hidden border-b border-white/8 bg-black/60 backdrop-blur-xl overflow-hidden"
+          >
+            <div className="flex flex-col px-6 py-4 gap-1">
+              {[
+                { href: "#beneficios", label: "Beneficios" },
+                { href: "#preview", label: "La plataforma" },
+                { href: "#planes", label: "Planes y precios" },
+                { href: "#testimonios", label: "Testimonios" },
+                { href: "#faq", label: "Preguntas frecuentes" },
+              ].map((link) => (
+                <a
+                  key={link.href}
+                  href={link.href}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="py-3 text-sm font-semibold text-white/70 hover:text-white border-b border-white/5 last:border-none transition-colors"
+                >
+                  {link.label}
+                </a>
+              ))}
+              <motion.button
+                whileTap={{ scale: 0.97 }}
+                onClick={() => { onViewChange("register"); setMobileMenuOpen(false); }}
+                style={{ background: "linear-gradient(135deg, #db2777, #9d174d)" }}
+                className="mt-3 w-full py-3.5 text-sm font-black text-white rounded-2xl"
+              >
+                Únete Ahora
+              </motion.button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* ── Hero ─────────────────────────────────────────────────────── */}
       <section className="relative z-10 max-w-7xl mx-auto px-6 pt-16 pb-24 text-center">
@@ -363,10 +756,7 @@ export default function Landing({ onViewChange }: LandingProps) {
                   className="relative z-10 flex flex-col items-center gap-3 cursor-pointer"
                 >
                   <div className="relative w-20 h-20 bg-white rounded-full flex items-center justify-center shadow-2xl">
-                    <Play
-                      className="text-pink-600 fill-pink-600 ml-1"
-                      size={32}
-                    />
+                    <Play className="text-pink-600 fill-pink-600 ml-1" size={32} />
                     <div className="absolute inset-0 rounded-full bg-white/30 animate-ping" />
                   </div>
                   <span className="text-white font-bold text-sm bg-black/40 px-4 py-1.5 rounded-full backdrop-blur-sm">
@@ -480,7 +870,6 @@ export default function Landing({ onViewChange }: LandingProps) {
           transition={{ delay: 0.2 }}
           className="grid grid-cols-1 md:grid-cols-12 gap-5"
         >
-          {/* Main large cell */}
           <div className="md:col-span-7">
             <FeatureCard
               large
@@ -524,6 +913,78 @@ export default function Landing({ onViewChange }: LandingProps) {
             />
           </div>
         </motion.div>
+      </section>
+
+      {/* ── Product Preview ───────────────────────────────────────────── */}
+      <section id="preview" className="relative z-10 py-24">
+        <div
+          style={{ background: "linear-gradient(180deg, transparent, rgba(219,39,119,0.06) 50%, transparent)" }}
+          className="absolute inset-0 pointer-events-none"
+        />
+        <div className="relative max-w-7xl mx-auto px-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+            <motion.div
+              initial={{ opacity: 0, x: -30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true, margin: "-80px" }}
+              transition={{ duration: 0.7 }}
+            >
+              <p className="text-pink-400 font-bold uppercase tracking-widest text-xs mb-4">
+                La plataforma
+              </p>
+              <h2 className="text-4xl md:text-5xl font-black text-white mb-6 leading-tight">
+                Diseñada para{" "}
+                <span
+                  style={{
+                    background: "linear-gradient(135deg, #db2777, #f472b6)",
+                    WebkitBackgroundClip: "text",
+                    WebkitTextFillColor: "transparent",
+                  }}
+                >
+                  inspirarte
+                </span>{" "}
+                cada día
+              </h2>
+              <p className="text-white/55 font-medium leading-relaxed mb-10">
+                Una experiencia pensada para reposteras. Navega entre el muro de la comunidad,
+                tus cursos favoritos y el calendario de lives — todo desde un solo lugar, en cualquier dispositivo.
+              </p>
+              <div className="flex flex-col gap-4">
+                {[
+                  { icon: <Palette size={18} className="text-pink-400" />, title: "Interfaz intuitiva y bella", desc: "Diseño premium hecho para inspirar tu creatividad." },
+                  { icon: <RefreshCw size={18} className="text-blue-400" />, title: "Siempre actualizado", desc: "Nuevo contenido cada semana: cursos, lives y tips." },
+                  { icon: <Calendar size={18} className="text-emerald-400" />, title: "Calendario de lives en vivo", desc: "Nunca te pierdas una clase — recibe recordatorios." },
+                ].map((item, i) => (
+                  <motion.div
+                    key={i}
+                    initial={{ opacity: 0, x: -16 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: i * 0.12, duration: 0.5 }}
+                    className="flex items-start gap-4 bg-white/4 border border-white/8 rounded-2xl p-4"
+                  >
+                    <div className="w-9 h-9 rounded-xl bg-white/8 flex items-center justify-center flex-shrink-0">
+                      {item.icon}
+                    </div>
+                    <div>
+                      <p className="text-white font-bold text-sm">{item.title}</p>
+                      <p className="text-white/45 text-sm font-medium mt-0.5">{item.desc}</p>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, x: 30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true, margin: "-80px" }}
+              transition={{ duration: 0.7 }}
+            >
+              <ProductPreview />
+            </motion.div>
+          </div>
+        </div>
       </section>
 
       {/* ── For Whom ─────────────────────────────────────────────────── */}
@@ -610,6 +1071,188 @@ export default function Landing({ onViewChange }: LandingProps) {
         </div>
       </section>
 
+      {/* ── Instructor / Quién soy ─────────────────────────────────── */}
+      <section id="quien-es-nice" className="relative z-10 py-24">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="relative rounded-[3rem] overflow-hidden border border-white/8 p-10 md:p-16"
+            style={{ background: "linear-gradient(135deg, #130a18 0%, #1c0d22 100%)" }}
+          >
+            {/* Glows */}
+            <div className="absolute -top-24 -left-24 w-80 h-80 rounded-full blur-[120px] opacity-20"
+              style={{ background: "#db2777" }} />
+            <div className="absolute -bottom-24 -right-12 w-60 h-60 rounded-full blur-[100px] opacity-15"
+              style={{ background: "#f472b6" }} />
+
+            <div className="relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+              <motion.div
+                initial={{ opacity: 0, x: -30 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true, margin: "-60px" }}
+                transition={{ duration: 0.7 }}
+              >
+                <p className="text-pink-400 font-bold uppercase tracking-widest text-xs mb-4">
+                  Tu instructora
+                </p>
+                <h2 className="text-4xl md:text-5xl font-black text-white mb-6 leading-tight">
+                  Hola, soy{" "}
+                  <span
+                    style={{
+                      background: "linear-gradient(135deg, #db2777, #f472b6)",
+                      WebkitBackgroundClip: "text",
+                      WebkitTextFillColor: "transparent",
+                    }}
+                  >
+                    Nice
+                  </span>{" "}
+                  👋
+                </h2>
+                <p className="text-white/65 font-medium leading-relaxed mb-6">
+                  Soy pastelera y emprendedora con más de 10 años transformando ingredientes simples
+                  en obras de arte comestibles. Fundé El Club de Nice porque quise crear el espacio
+                  que yo necesitaba cuando empecé: una comunidad donde aprender, crecer y construir
+                  un negocio real con mi pasión.
+                </p>
+                <p className="text-white/65 font-medium leading-relaxed mb-10">
+                  Hoy más de 500 reposteras en toda Latinoamérica son parte de esta familia. Y tú
+                  puedes ser la próxima.
+                </p>
+                <div className="grid grid-cols-3 gap-4">
+                  {[
+                    { value: "10+", label: "Años de experiencia" },
+                    { value: "500+", label: "Alumnas formadas" },
+                    { value: "100+", label: "Lives impartidos" },
+                  ].map((stat, i) => (
+                    <div key={i} className="bg-white/5 border border-white/8 rounded-2xl p-4 text-center">
+                      <p className="text-2xl font-black text-pink-400">{stat.value}</p>
+                      <p className="text-xs font-bold text-white/40 mt-1 leading-tight">{stat.label}</p>
+                    </div>
+                  ))}
+                </div>
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, x: 30 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true, margin: "-60px" }}
+                transition={{ duration: 0.7 }}
+                className="flex flex-col gap-4"
+              >
+                {/* Avatar + name card */}
+                <div className="bg-white/5 border border-white/10 rounded-3xl p-6 flex items-center gap-5">
+                  <div className="relative">
+                    <img
+                      src={avatarAuth4}
+                      alt="Nice González"
+                      className="w-20 h-20 rounded-2xl object-cover border-2 border-pink-500/40"
+                    />
+                    <div className="absolute -bottom-2 -right-2 w-7 h-7 bg-pink-500 rounded-lg flex items-center justify-center">
+                      <BadgeCheck size={14} className="text-white" />
+                    </div>
+                  </div>
+                  <div>
+                    <p className="text-white font-black text-lg">Nice González</p>
+                    <p className="text-white/50 text-sm font-medium">Fundadora · Chef Pastelera</p>
+                    <div className="flex items-center gap-1 mt-2">
+                      {[...Array(5)].map((_, i) => (
+                        <Star key={i} size={12} className="text-pink-400 fill-pink-400" />
+                      ))}
+                      <span className="text-white/40 text-xs ml-1">5.0 · 500+ alumnas</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Achievements */}
+                {[
+                  { icon: <Award size={18} className="text-yellow-400" />, text: "Premiada como mejor instructora de repostería online 2023" },
+                  { icon: <Users size={18} className="text-blue-400" />, text: "Comunidad de +50k seguidores en Instagram y TikTok" },
+                  { icon: <Video size={18} className="text-pink-400" />, text: "Más de 100 lives y clases magistrales impartidas" },
+                  { icon: <TrendingUp size={18} className="text-emerald-400" />, text: "El 78% de sus alumnas monetizaron su pasión en 6 meses" },
+                ].map((item, i) => (
+                  <motion.div
+                    key={i}
+                    initial={{ opacity: 0, x: 20 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: i * 0.1, duration: 0.5 }}
+                    className="bg-white/4 border border-white/8 rounded-2xl p-4 flex items-start gap-3"
+                  >
+                    <div className="w-8 h-8 rounded-xl bg-white/8 flex items-center justify-center flex-shrink-0">
+                      {item.icon}
+                    </div>
+                    <p className="text-white/70 text-sm font-medium leading-snug">{item.text}</p>
+                  </motion.div>
+                ))}
+              </motion.div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── Gallery / Member Work ─────────────────────────────────────── */}
+      <section className="relative z-10 py-12 overflow-hidden">
+        <div className="max-w-7xl mx-auto px-6 mb-8 text-center">
+          <p className="text-pink-400 font-bold uppercase tracking-widest text-xs mb-3">
+            Trabajos de nuestra comunidad
+          </p>
+          <h2 className="text-3xl md:text-4xl font-black text-white">
+            Lo que crean nuestras{" "}
+            <span
+              style={{
+                background: "linear-gradient(135deg, #db2777, #f472b6)",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+              }}
+            >
+              miembros
+            </span>
+          </h2>
+        </div>
+
+        {/* Infinite scroll gallery */}
+        <div className="relative">
+          <div className="absolute left-0 top-0 bottom-0 w-24 z-10 pointer-events-none"
+            style={{ background: "linear-gradient(90deg, #0a0a0f, transparent)" }} />
+          <div className="absolute right-0 top-0 bottom-0 w-24 z-10 pointer-events-none"
+            style={{ background: "linear-gradient(-90deg, #0a0a0f, transparent)" }} />
+          <motion.div
+            animate={{ x: ["0%", "-50%"] }}
+            transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
+            className="flex gap-4 w-max"
+          >
+            {[
+              { emoji: "🎂", bg: "from-pink-900/40 to-rose-900/30", label: "Torta de bodas" },
+              { emoji: "🥐", bg: "from-amber-900/40 to-yellow-900/30", label: "Croissants de mantequilla" },
+              { emoji: "🍫", bg: "from-purple-900/40 to-indigo-900/30", label: "Bombones artesanales" },
+              { emoji: "🌸", bg: "from-pink-900/40 to-fuchsia-900/30", label: "Flores de azúcar" },
+              { emoji: "🥧", bg: "from-blue-900/40 to-cyan-900/30", label: "Tarta de limón" },
+              { emoji: "🍰", bg: "from-emerald-900/40 to-teal-900/30", label: "Layer cake de vainilla" },
+              { emoji: "🧁", bg: "from-violet-900/40 to-purple-900/30", label: "Cupcakes decorados" },
+              { emoji: "🎂", bg: "from-pink-900/40 to-rose-900/30", label: "Torta de bodas" },
+              { emoji: "🥐", bg: "from-amber-900/40 to-yellow-900/30", label: "Croissants de mantequilla" },
+              { emoji: "🍫", bg: "from-purple-900/40 to-indigo-900/30", label: "Bombones artesanales" },
+              { emoji: "🌸", bg: "from-pink-900/40 to-fuchsia-900/30", label: "Flores de azúcar" },
+              { emoji: "🥧", bg: "from-blue-900/40 to-cyan-900/30", label: "Tarta de limón" },
+              { emoji: "🍰", bg: "from-emerald-900/40 to-teal-900/30", label: "Layer cake de vainilla" },
+              { emoji: "🧁", bg: "from-violet-900/40 to-purple-900/30", label: "Cupcakes decorados" },
+            ].map((item, i) => (
+              <div
+                key={i}
+                className={`flex-shrink-0 w-44 h-44 rounded-3xl bg-gradient-to-br ${item.bg} border border-white/8 flex flex-col items-center justify-center gap-2`}
+              >
+                <span className="text-5xl">{item.emoji}</span>
+                <span className="text-xs font-bold text-white/50 text-center px-3 leading-tight">{item.label}</span>
+              </div>
+            ))}
+          </motion.div>
+        </div>
+
+        <div className="text-center mt-8">
+          <p className="text-white/40 text-sm font-medium">
+            Sube tu propia creación al muro y recibe feedback de la comunidad ✨
+          </p>
+        </div>
+      </section>
+
       {/* ── Testimonials ─────────────────────────────────────────────── */}
       <section id="testimonios" className="relative z-10 max-w-7xl mx-auto px-6 py-24">
         <div className="text-center mb-16">
@@ -676,6 +1319,184 @@ export default function Landing({ onViewChange }: LandingProps) {
         </div>
       </section>
 
+      {/* ── Pricing ───────────────────────────────────────────────────── */}
+      <section id="planes" className="relative z-10 py-24">
+        <div
+          style={{ background: "linear-gradient(180deg, transparent, rgba(219,39,119,0.07) 50%, transparent)" }}
+          className="absolute inset-0 pointer-events-none"
+        />
+        <div className="relative max-w-7xl mx-auto px-6">
+          <div className="text-center mb-16">
+            <p className="text-pink-400 font-bold uppercase tracking-widest text-xs mb-4">
+              Elige tu plan
+            </p>
+            <h2 className="text-4xl md:text-5xl font-black text-white mb-4">
+              Invierte en tu{" "}
+              <span
+                style={{
+                  background: "linear-gradient(135deg, #db2777, #f472b6)",
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                }}
+              >
+                pasión
+              </span>
+            </h2>
+            <p className="text-white/50 font-medium max-w-xl mx-auto">
+              Sin renovaciones automáticas. Sin sorpresas. Elige el plan que mejor se adapte a tu ritmo.
+            </p>
+          </div>
+
+          {plansLoading ? (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {[0, 1, 2].map((i) => (
+                <div key={i} className="h-96 rounded-3xl bg-white/5 border border-white/8 animate-pulse" />
+              ))}
+            </div>
+          ) : plans.length === 0 ? (
+            // Fallback static plans if API fails
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {[
+                { name: "Mensual", price: 25, duration: "1 mes", highlighted: false },
+                { name: "Trimestral", price: 60, duration: "3 meses", highlighted: true },
+                { name: "Semestral", price: 100, duration: "6 meses", highlighted: false },
+              ].map((p, i) => (
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: i * 0.1, duration: 0.5 }}
+                  whileHover={{ y: -6 }}
+                  onClick={() => onViewChange("register")}
+                  className={`relative rounded-3xl p-8 flex flex-col gap-6 cursor-pointer border ${
+                    p.highlighted
+                      ? "bg-gradient-to-br from-pink-600 to-rose-700 border-pink-400/60 shadow-2xl shadow-pink-900/40"
+                      : "bg-white/5 border-white/10 backdrop-blur-sm"
+                  }`}
+                >
+                  {p.highlighted && (
+                    <div className="absolute top-4 right-4">
+                      <span className="inline-flex items-center gap-1.5 bg-white/20 text-white text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full">
+                        <Sparkles size={10} /> Más popular
+                      </span>
+                    </div>
+                  )}
+                  <div>
+                    <p className={`text-xs font-black uppercase tracking-widest mb-2 ${p.highlighted ? "text-pink-100" : "text-pink-400"}`}>{p.duration}</p>
+                    <h3 className="text-2xl font-black text-white">{p.name}</h3>
+                  </div>
+                  <div className="flex items-end gap-1">
+                    <span className="text-5xl font-black text-white">${p.price}</span>
+                    <span className={`text-sm font-semibold mb-2 ${p.highlighted ? "text-pink-100" : "text-white/40"}`}>USD</span>
+                  </div>
+                  <ul className="flex flex-col gap-3">
+                    {["Todos los cursos", "Lives semanales", "Muro comunitario", "Sistema de logros", "Módulo negocio"].map((f) => (
+                      <li key={f} className="flex items-center gap-2.5 text-sm font-semibold">
+                        <Check size={15} className={`flex-shrink-0 ${p.highlighted ? "text-white" : "text-pink-400"}`} />
+                        <span className={p.highlighted ? "text-white" : "text-white/70"}>{f}</span>
+                      </li>
+                    ))}
+                  </ul>
+                  <button
+                    onClick={() => onViewChange("register")}
+                    className={`w-full py-4 rounded-2xl font-black text-sm transition-all ${
+                      p.highlighted
+                        ? "bg-white text-pink-600 hover:bg-pink-50 shadow-xl"
+                        : "bg-pink-600/20 text-pink-300 border border-pink-500/30 hover:bg-pink-600/30"
+                    }`}
+                  >
+                    Empezar con este plan
+                  </button>
+                </motion.div>
+              ))}
+            </div>
+          ) : (
+            <div className={`grid grid-cols-1 gap-6 ${plans.length === 2 ? "md:grid-cols-2 max-w-3xl mx-auto" : plans.length >= 3 ? "md:grid-cols-3" : "max-w-sm mx-auto"}`}>
+              {plans.map((plan, i) => (
+                <motion.div
+                  key={plan.id}
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: i * 0.1, duration: 0.5 }}
+                >
+                  <PlanCard
+                    plan={plan}
+                    highlighted={i === (highlightedPlanIndex >= 0 ? highlightedPlanIndex : Math.floor(plans.length / 2))}
+                    onSelect={() => onViewChange("register")}
+                  />
+                </motion.div>
+              ))}
+            </div>
+          )}
+
+          {/* Guarantee */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="mt-12 flex flex-col sm:flex-row items-center justify-center gap-4 bg-white/4 border border-white/8 rounded-3xl px-8 py-6 max-w-2xl mx-auto"
+          >
+            <div className="w-14 h-14 rounded-2xl bg-green-500/15 border border-green-500/25 flex items-center justify-center flex-shrink-0">
+              <ShieldCheck size={24} className="text-green-400" />
+            </div>
+            <div className="text-center sm:text-left">
+              <p className="text-white font-black text-base mb-1">Garantía de satisfacción</p>
+              <p className="text-white/50 text-sm font-medium leading-relaxed">
+                Si en los primeros 7 días sientes que el Club de Nice no es para ti, te devolvemos tu dinero.
+                Sin preguntas, sin complicaciones.
+              </p>
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* ── FAQ ───────────────────────────────────────────────────────── */}
+      <section id="faq" className="relative z-10 max-w-4xl mx-auto px-6 py-24">
+        <div className="text-center mb-14">
+          <p className="text-pink-400 font-bold uppercase tracking-widest text-xs mb-4">
+            Preguntas frecuentes
+          </p>
+          <h2 className="text-4xl md:text-5xl font-black text-white">
+            Todo lo que{" "}
+            <span
+              style={{
+                background: "linear-gradient(135deg, #db2777, #f472b6)",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+              }}
+            >
+              necesitas saber
+            </span>
+          </h2>
+        </div>
+
+        <div className="flex flex-col gap-3">
+          {faqItems.map((item, i) => (
+            <FaqItem key={i} question={item.question} answer={item.answer} index={i} />
+          ))}
+        </div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="mt-10 text-center bg-white/4 border border-white/8 rounded-3xl p-8"
+        >
+          <p className="text-white/60 font-medium mb-4">¿Tienes más dudas? Escríbenos directamente.</p>
+          <a
+            href="https://instagram.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl border border-pink-500/30 text-pink-300 font-bold text-sm hover:bg-pink-500/10 transition-colors"
+          >
+            <Instagram size={16} /> Contáctanos en Instagram
+          </a>
+        </motion.div>
+      </section>
+
       {/* ── Final CTA ────────────────────────────────────────────────── */}
       <section className="relative z-10 max-w-7xl mx-auto px-6 pb-24">
         <motion.div
@@ -702,7 +1523,7 @@ export default function Landing({ onViewChange }: LandingProps) {
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-pink-500/30 bg-pink-500/10 mb-8">
               <Zap size={14} className="text-pink-400" />
               <span className="text-xs font-bold text-pink-300 uppercase tracking-widest">
-                Plazas limitadas — únete hoy
+                Únete hoy y empieza a crear
               </span>
             </div>
 
@@ -746,11 +1567,11 @@ export default function Landing({ onViewChange }: LandingProps) {
             <div className="flex flex-wrap items-center justify-center gap-8 mt-10 text-white/30">
               <div className="flex items-center gap-2 text-sm font-semibold">
                 <ShieldCheck size={15} className="text-green-400" />
-                <span>Pago seguro</span>
+                <span>Garantía 7 días</span>
               </div>
               <div className="flex items-center gap-2 text-sm font-semibold">
-                <Users size={15} className="text-blue-400" />
-                <span>Comunidad activa</span>
+                <Clock size={15} className="text-blue-400" />
+                <span>Activación en menos de 24h</span>
               </div>
               <div className="flex items-center gap-2 text-sm font-semibold">
                 <Star size={15} className="text-pink-400 fill-pink-400" />
@@ -762,38 +1583,76 @@ export default function Landing({ onViewChange }: LandingProps) {
       </section>
 
       {/* ── Footer ───────────────────────────────────────────────────── */}
-      <footer className="relative z-10 border-t border-white/5 py-12">
-        <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="flex items-center gap-3">
-            <img src={logo} alt="El Club de Nice" className="w-8 h-8 object-contain" />
-            <span className="font-black text-lg text-white/90 tracking-tight">
-              El Club de Nice
-            </span>
+      <footer className="relative z-10 border-t border-white/5 py-14">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-8 mb-10">
+            <div className="flex items-center gap-3">
+              <img src={logo} alt="El Club de Nice" className="w-8 h-8 object-contain" />
+              <span className="font-black text-lg text-white/90 tracking-tight">
+                El Club de Nice
+              </span>
+            </div>
+
+            <nav className="flex flex-wrap items-center justify-center gap-6">
+              {[
+                { href: "#beneficios", label: "Beneficios" },
+                { href: "#preview", label: "La plataforma" },
+                { href: "#planes", label: "Planes" },
+                { href: "#testimonios", label: "Testimonios" },
+                { href: "#faq", label: "FAQ" },
+              ].map((link) => (
+                <a
+                  key={link.href}
+                  href={link.href}
+                  className="text-sm font-semibold text-white/40 hover:text-white/80 transition-colors"
+                >
+                  {link.label}
+                </a>
+              ))}
+            </nav>
+
+            <div className="flex items-center gap-4">
+              <a
+                href="https://instagram.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-9 h-9 rounded-xl border border-white/10 flex items-center justify-center text-white/40 hover:text-pink-400 hover:border-pink-500/40 transition-all"
+              >
+                <Instagram size={16} />
+              </a>
+              <a
+                href="https://youtube.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-9 h-9 rounded-xl border border-white/10 flex items-center justify-center text-white/40 hover:text-red-400 hover:border-red-500/40 transition-all"
+              >
+                <Youtube size={16} />
+              </a>
+              <a
+                href="https://tiktok.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-9 h-9 rounded-xl border border-white/10 flex items-center justify-center text-white/40 hover:text-white hover:border-white/30 transition-all"
+              >
+                <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">
+                  <path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.69a8.18 8.18 0 004.78 1.52V6.76a4.85 4.85 0 01-1.01-.07z" />
+                </svg>
+              </a>
+            </div>
           </div>
 
-          <p className="text-white/30 text-sm font-medium text-center">
-            © {new Date().getFullYear()} El Club de Nice · Comunidad de Repostería y Pastelería
-          </p>
-
-          <div className="flex items-center gap-6">
-            <a
-              href="#"
-              className="text-sm font-bold text-white/40 hover:text-pink-400 transition-colors"
-            >
-              Instagram
-            </a>
-            <a
-              href="#"
-              className="text-sm font-bold text-white/40 hover:text-pink-400 transition-colors"
-            >
-              YouTube
-            </a>
-            <a
-              href="#"
-              className="text-sm font-bold text-white/40 hover:text-pink-400 transition-colors"
-            >
-              TikTok
-            </a>
+          <div className="border-t border-white/5 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
+            <p className="text-white/25 text-sm font-medium text-center">
+              © {new Date().getFullYear()} El Club de Nice · Comunidad de Repostería y Pastelería
+            </p>
+            <div className="flex items-center gap-6">
+              <a href="#" className="text-white/25 text-xs font-medium hover:text-white/50 transition-colors">
+                Términos y condiciones
+              </a>
+              <a href="#" className="text-white/25 text-xs font-medium hover:text-white/50 transition-colors">
+                Política de privacidad
+              </a>
+            </div>
           </div>
         </div>
       </footer>
