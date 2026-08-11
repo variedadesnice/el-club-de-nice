@@ -683,12 +683,7 @@ export default function Landing({ onViewChange }: LandingProps) {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7 }}
           >
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-pink-200 bg-white/70 backdrop-blur-md mb-8 shadow-sm">
-              <Sparkles size={14} className="text-pink-500" />
-              <span className="text-xs font-bold text-pink-600 uppercase tracking-widest">
-                La comunidad #1 de repostería en Latam
-              </span>
-            </div>
+
 
             <h1 className="text-5xl md:text-7xl lg:text-8xl font-black text-slate-900 mb-6 leading-[1.05] tracking-tight max-w-5xl mx-auto">
               Eleva tu arte{" "}
