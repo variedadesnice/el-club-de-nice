@@ -34,6 +34,7 @@ import avatarAuth1 from "../../assets/avatars/auth1.jpg";
 import avatarAuth2 from "../../assets/avatars/auth2.jpg";
 import avatarAuth3 from "../../assets/avatars/auth3.jpg";
 import avatarAuth4 from "../../assets/avatars/auth4.jpg";
+import nicePerfil from "../../assets/contenido/nice de perfil.png";
 import { apiFetch, API_BASE } from "../../lib/api";
 import type { Plan } from "../../types";
 
@@ -548,15 +549,11 @@ export default function Landing({ onViewChange }: LandingProps) {
       <div className="relative w-full min-h-screen flex flex-col items-center justify-start border-b border-slate-200">
         {/* Background Video */}
         <div className="absolute inset-0 w-full h-full overflow-hidden pointer-events-none">
-          <video
-            autoPlay
-            loop
-            muted
-            playsInline
-            className="absolute inset-0 w-full h-full object-cover"
-          >
-            <source src="https://cdn.coverr.co/videos/coverr-baking-a-cake-2-5244/1080p.mp4" type="video/mp4" />
-          </video>
+          <iframe
+            src="https://player.vimeo.com/video/1217664323?background=1&autoplay=1&loop=1&byline=0&title=0&muted=1"
+            className="absolute top-1/2 left-1/2 w-[100vw] h-[56.25vw] min-h-screen min-w-[177.77vh] -translate-x-1/2 -translate-y-1/2 pointer-events-none"
+            allow="autoplay; fullscreen"
+          ></iframe>
           {/* Overlay to lighten video and blend it at the bottom */}
           <div className="absolute inset-0 bg-white/60 backdrop-blur-[2px]" />
           <div className="absolute inset-x-0 bottom-0 h-48 bg-gradient-to-t from-slate-50 to-transparent" />
@@ -993,11 +990,10 @@ export default function Landing({ onViewChange }: LandingProps) {
         </div>
       </section>
 
-      {/* ── Instructor / Quién soy ─────────────────────────────────── */}
-      <section id="quien-es-nice" className="relative z-10 py-24">
+      {/* ── Sobre Mí / Historia ─────────────────────────────────────── */}
+      <section id="sobre-mi" className="relative z-10 py-24">
         <div className="max-w-7xl mx-auto px-6">
-          <div className="relative rounded-[3rem] overflow-hidden border border-slate-200 bg-white p-10 md:p-16 shadow-xl"
-          >
+          <div className="relative rounded-[3rem] overflow-hidden border border-slate-200 bg-white p-8 md:p-16 shadow-xl">
             {/* Glows */}
             <div className="absolute -top-24 -left-24 w-80 h-80 rounded-full blur-[120px] opacity-20"
               style={{ background: "#db2777" }} />
@@ -1005,99 +1001,81 @@ export default function Landing({ onViewChange }: LandingProps) {
               style={{ background: "#f472b6" }} />
 
             <div className="relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+              
+              {/* Imagen de perfil grande */}
               <motion.div
                 initial={{ opacity: 0, x: -30 }}
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true, margin: "-60px" }}
                 transition={{ duration: 0.7 }}
+                className="flex justify-center"
               >
-                <p className="text-pink-400 font-bold uppercase tracking-widest text-xs mb-4">
-                  Tu instructora
-                </p>
-                <h2 className="text-4xl md:text-5xl font-black text-slate-900 mb-6 leading-tight">
-                  Hola, soy{" "}
-                  <span className="text-pink-500">
-                    Nice
-                  </span>{" "}
-                  👋
-                </h2>
-                <p className="text-slate-600 font-medium leading-relaxed mb-6">
-                  Soy pastelera y emprendedora con más de 10 años transformando ingredientes simples
-                  en obras de arte comestibles. Fundé El Club de Nice porque quise crear el espacio
-                  que yo necesitaba cuando empecé: una comunidad donde aprender, crecer y construir
-                  un negocio real con mi pasión.
-                </p>
-                <p className="text-slate-600 font-medium leading-relaxed mb-10">
-                  Hoy más de 500 reposteras en toda Latinoamérica son parte de esta familia. Y tú
-                  puedes ser la próxima.
-                </p>
-                <div className="grid grid-cols-3 gap-4">
-                  {[
-                    { value: "10+", label: "Años de experiencia" },
-                    { value: "500+", label: "Alumnas formadas" },
-                    { value: "100+", label: "Lives impartidos" },
-                  ].map((stat, i) => (
-                    <div key={i} className="bg-slate-50 border border-slate-100 rounded-2xl p-4 text-center">
-                      <p className="text-2xl font-black text-pink-500">{stat.value}</p>
-                      <p className="text-xs font-bold text-slate-500 mt-1 leading-tight">{stat.label}</p>
+                <div className="relative">
+                  <img
+                    src={nicePerfil}
+                    alt="Nice de perfil"
+                    className="w-full max-w-md rounded-[2rem] object-cover shadow-2xl border-4 border-white"
+                  />
+                  <div className="absolute -bottom-6 -right-6 bg-white p-4 rounded-2xl shadow-lg border border-slate-100 flex items-center gap-4">
+                    <div className="bg-pink-100 p-3 rounded-xl">
+                      <Star className="text-pink-500 fill-pink-500" size={24} />
                     </div>
-                  ))}
+                    <div>
+                      <p className="text-slate-900 font-black text-lg">10+ Años</p>
+                      <p className="text-slate-500 text-xs font-bold uppercase tracking-wider">de experiencia</p>
+                    </div>
+                  </div>
                 </div>
               </motion.div>
 
+              {/* Texto / Historia */}
               <motion.div
                 initial={{ opacity: 0, x: 30 }}
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true, margin: "-60px" }}
                 transition={{ duration: 0.7 }}
-                className="flex flex-col gap-4"
               >
-                {/* Avatar + name card */}
-                <div className="bg-slate-50 border border-slate-100 rounded-3xl p-6 flex items-center gap-5">
-                  <div className="relative">
-                    <img
-                      src={avatarAuth4}
-                      alt="Nice González"
-                      className="w-20 h-20 rounded-2xl object-cover border-2 border-pink-200"
-                    />
-                    <div className="absolute -bottom-2 -right-2 w-7 h-7 bg-pink-500 rounded-lg flex items-center justify-center shadow-md">
-                      <BadgeCheck size={14} className="text-white" />
-                    </div>
-                  </div>
-                  <div>
-                    <p className="text-slate-900 font-black text-lg">Nice González</p>
-                    <p className="text-slate-500 text-sm font-medium">Fundadora · Chef Pastelera</p>
-                    <div className="flex items-center gap-1 mt-2">
-                      {[...Array(5)].map((_, i) => (
-                        <Star key={i} size={12} className="text-pink-500 fill-pink-500" />
-                      ))}
-                      <span className="text-slate-400 text-xs ml-1">5.0 · 500+ alumnas</span>
-                    </div>
-                  </div>
+                <p className="text-pink-400 font-bold uppercase tracking-widest text-xs mb-4">
+                  Sobre Mí
+                </p>
+                <h2 className="text-4xl md:text-5xl font-black text-slate-900 mb-6 leading-tight">
+                  Hola, soy{" "}
+                  <span className="text-pink-500">
+                    Nice
+                  </span>
+                </h2>
+                <div className="space-y-6 text-slate-600 font-medium leading-relaxed">
+                  <p>
+                    Mi historia en la repostería comenzó como un pequeño sueño en mi cocina, 
+                    horneando para familiares y amigos. Con el tiempo, esa pasión se transformó 
+                    en una vocación que me llevó a estudiar, perfeccionar mis técnicas y, 
+                    finalmente, convertir el azúcar y la harina en mi estilo de vida.
+                  </p>
+                  <p>
+                    A lo largo de los años, me di cuenta de que el verdadero arte no solo está en 
+                    hacer pasteles hermosos, sino en compartir ese conocimiento con otros. Así nació 
+                    la idea de crear este espacio: un lugar donde cualquiera, sin importar su nivel de 
+                    experiencia, pueda aprender los secretos de la pastelería.
+                  </p>
+                  <p>
+                    Hoy, mi mayor satisfacción es ver cómo mis alumnas logran texturas perfectas, 
+                    sabores inolvidables y, sobre todo, cómo muchas transforman este dulce pasatiempo 
+                    en un negocio exitoso y rentable. ¡Te invito a ser parte de esta historia!
+                  </p>
                 </div>
-
-                {/* Achievements */}
-                {[
-                  { icon: <Award size={18} className="text-yellow-500" />, text: "Premiada como mejor instructora de repostería online 2023" },
-                  { icon: <Users size={18} className="text-blue-500" />, text: "Comunidad de +50k seguidores en Instagram y TikTok" },
-                  { icon: <Video size={18} className="text-pink-500" />, text: "Más de 100 lives y clases magistrales impartidas" },
-                  { icon: <TrendingUp size={18} className="text-emerald-500" />, text: "El 78% de sus alumnas monetizaron su pasión en 6 meses" },
-                ].map((item, i) => (
-                  <motion.div
-                    key={i}
-                    initial={{ opacity: 0, x: 20 }}
-                    whileInView={{ opacity: 1, x: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ delay: i * 0.1, duration: 0.5 }}
-                    className="bg-white border border-slate-100 shadow-sm rounded-2xl p-4 flex items-start gap-3"
+                
+                <div className="mt-8 flex gap-4">
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => onViewChange("register")}
+                    className="px-6 py-3 font-bold text-white bg-pink-500 rounded-xl shadow-lg shadow-pink-200 hover:bg-pink-600 transition-colors"
                   >
-                    <div className="w-8 h-8 rounded-xl bg-slate-50 flex items-center justify-center flex-shrink-0">
-                      {item.icon}
-                    </div>
-                    <p className="text-slate-700 text-sm font-medium leading-snug">{item.text}</p>
-                  </motion.div>
-                ))}
+                    Aprende conmigo
+                  </motion.button>
+                </div>
               </motion.div>
+
             </div>
           </div>
         </div>
