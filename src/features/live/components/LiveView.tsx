@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useCallback } from "react";
-import { Plus, Radio, AlertCircle, Clock } from "lucide-react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
+import { Plus, Radio, AlertCircle, Clock, Trash2, Play, CalendarClock } from "lucide-react";
 import { useAuth } from "../../../context/AuthContext";
 import { useApiFetch } from "../../../lib/api";
 import { isAdmin } from "../../../lib/permissions";
@@ -45,13 +45,91 @@ function useCountdown(targetDate?: string | null) {
   return text;
 }
 
+function formatScheduled(iso?: string) {
+  if (!iso) return "Sin fecha programada";
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return "Fecha inválida";
+  return date.toLocaleString("es", {
+    day: "2-digit", month: "short", year: "numeric",
+    hour: "2-digit", minute: "2-digit",
+  });
+}
+
+/**
+ * Panel de admin con todas las transmisiones que no están al aire: programadas a
+ * futuro, vencidas y las que quedaron sin fecha. Es el único punto de la app
+ * desde el que se puede activar o eliminar un live ya creado.
+ */
+function ScheduledLivesPanel({
+  lives, busyId, onActivate, onDelete,
+}: {
+  lives: LiveSession[];
+  busyId: string | null;
+  onActivate: (live: LiveSession) => void;
+  onDelete: (live: LiveSession) => void;
+}) {
+  if (lives.length === 0) return null;
+
+  return (
+    <div className="w-full bg-white border border-slate-100 rounded-3xl shadow-sm p-5 text-left">
+      <h3 className="flex items-center gap-2 font-bold text-slate-900 mb-4">
+        <CalendarClock size={18} className="text-violet-500" />
+        Transmisiones programadas
+        <span className="ml-auto text-xs font-bold text-slate-400">{lives.length}</span>
+      </h3>
+
+      <ul className="space-y-2">
+        {lives.map((live) => {
+          const isPast = !!live.scheduledAt && new Date(live.scheduledAt) < new Date();
+          const isBusy = busyId === live.id;
+
+          return (
+            <li
+              key={live.id}
+              className="flex items-center gap-3 p-3 bg-slate-50 rounded-2xl border border-slate-100"
+            >
+              <div className="min-w-0 flex-1">
+                <p className="font-bold text-sm text-slate-900 truncate">{live.title}</p>
+                <p className={`text-xs font-medium mt-0.5 ${isPast ? "text-amber-600" : "text-slate-500"}`}>
+                  {formatScheduled(live.scheduledAt)}
+                  {isPast && " · vencida"}
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => onActivate(live)}
+                disabled={isBusy}
+                title="Poner en vivo ahora"
+                className="shrink-0 flex items-center gap-1.5 px-3 py-2 bg-red-100 text-red-600 rounded-xl font-bold text-xs hover:bg-red-200 transition-colors disabled:opacity-50"
+              >
+                <Play size={14} /> Activar
+              </button>
+
+              <button
+                type="button"
+                onClick={() => onDelete(live)}
+                disabled={isBusy}
+                title="Eliminar transmisión"
+                aria-label={`Eliminar ${live.title}`}
+                className="shrink-0 p-2 text-slate-400 rounded-xl hover:bg-red-50 hover:text-red-600 transition-colors disabled:opacity-50"
+              >
+                <Trash2 size={16} />
+              </button>
+            </li>
+          );
+        })}
+      </ul>
+    </div>
+  );
+}
+
 export default function LiveView() {
   const { user } = useAuth();
   const api = useApiFetch();
   const userIsAdmin = isAdmin(user?.role);
 
-  const [liveSession, setLiveSession] = useState<LiveSession | null>(null);
-  const [nextScheduled, setNextScheduled] = useState<LiveSession | null>(null);
+  const [lives, setLives] = useState<LiveSession[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   // Admin form
@@ -62,22 +140,39 @@ export default function LiveView() {
   const [newScheduledAt, setNewScheduledAt] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [busyId, setBusyId] = useState<string | null>(null);
+
+  const liveSession = useMemo(() => lives.find((l) => l.isActive) ?? null, [lives]);
+
+  // Programadas = todo lo que no está al aire. Las de fecha futura primero (la
+  // más próxima arriba), después las vencidas y las que no tienen fecha.
+  const scheduledLives = useMemo(() => {
+    const now = Date.now();
+    return lives
+      .filter((l) => !l.isActive)
+      .sort((a, b) => {
+        const ta = a.scheduledAt ? new Date(a.scheduledAt).getTime() : Infinity;
+        const tb = b.scheduledAt ? new Date(b.scheduledAt).getTime() : Infinity;
+        const aFuture = ta >= now;
+        const bFuture = tb >= now;
+        if (aFuture !== bFuture) return aFuture ? -1 : 1;
+        return aFuture ? ta - tb : tb - ta;
+      });
+  }, [lives]);
+
+  const nextScheduled = useMemo(() => {
+    if (liveSession) return null;
+    return scheduledLives.find(
+      (l) => l.scheduledAt && new Date(l.scheduledAt).getTime() >= Date.now()
+    ) ?? null;
+  }, [liveSession, scheduledLives]);
 
   const countdown = useCountdown(nextScheduled?.scheduledAt);
 
   const fetchCurrentLive = useCallback(async () => {
     try {
       const { data: all } = await api<LiveSession[]>("/api/lives/");
-      const active = all.find((l) => l.isActive) ?? null;
-      setLiveSession(active);
-      if (!active) {
-        const upcoming = all
-          .filter((l) => !l.isActive && l.scheduledAt && new Date(l.scheduledAt) > new Date())
-          .sort((a, b) => new Date(a.scheduledAt!).getTime() - new Date(b.scheduledAt!).getTime());
-        setNextScheduled(upcoming[0] ?? null);
-      } else {
-        setNextScheduled(null);
-      }
+      setLives(all);
     } catch (err) {
       console.error("[LiveView] Error fetching live:", err);
     } finally {
@@ -98,6 +193,11 @@ export default function LiveView() {
     setIsSubmitting(true);
     setError(null);
     try {
+      // datetime-local devuelve una fecha local sin zona; se manda en ISO con
+      // offset para que el backend no la interprete en otra zona horaria.
+      const scheduledDate = newScheduledAt ? new Date(newScheduledAt) : null;
+      const scheduleForLater = !!scheduledDate && scheduledDate.getTime() > Date.now();
+
       const { data: created } = await api<LiveSession>("/api/admin/lives/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -105,15 +205,20 @@ export default function LiveView() {
           title: newTitle.trim(),
           youtubeUrl: newUrl.trim() || undefined,
           description: newDescription.trim() || undefined,
-          scheduledAt: newScheduledAt || undefined,
+          scheduledAt: scheduledDate ? scheduledDate.toISOString() : undefined,
         }),
       });
-      const { data } = await api<LiveSession>(`/api/admin/lives/${created.id}/activate`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ isActive: true }),
-      });
-      setLiveSession(data);
+
+      // Solo se pone al aire si no quedó programada para más tarde.
+      if (!scheduleForLater) {
+        await api<LiveSession>(`/api/admin/lives/${created.id}/activate`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ isActive: true }),
+        });
+      }
+
+      await fetchCurrentLive();
       setShowForm(false);
       setNewTitle(""); setNewUrl(""); setNewDescription(""); setNewScheduledAt("");
     } catch (err) {
@@ -131,16 +236,59 @@ export default function LiveView() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ isActive: false }),
       });
-      setLiveSession(null);
+      await fetchCurrentLive();
     } catch (err) {
       console.error("[LiveView] Error ending live:", err);
-      alert("Error al terminar la transmisión");
+      alert(err instanceof Error ? err.message : "Error al terminar la transmisión");
+    }
+  };
+
+  const handleActivateLive = async (live: LiveSession) => {
+    if (!window.confirm(`¿Poner "${live.title}" en vivo ahora?`)) return;
+    setBusyId(live.id);
+    try {
+      await api(`/api/admin/lives/${live.id}/activate`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ isActive: true }),
+      });
+      await fetchCurrentLive();
+    } catch (err) {
+      console.error("[LiveView] Error activating live:", err);
+      alert(err instanceof Error ? err.message : "Error al activar la transmisión");
+    } finally {
+      setBusyId(null);
+    }
+  };
+
+  const handleDeleteLive = async (live: LiveSession) => {
+    if (!window.confirm(
+      `¿Eliminar "${live.title}"? Se borrarán también su chat, reacciones y PDFs. Esta acción no se puede deshacer.`
+    )) return;
+    setBusyId(live.id);
+    try {
+      await api(`/api/admin/lives/${live.id}`, { method: "DELETE" });
+      await fetchCurrentLive();
+    } catch (err) {
+      console.error("[LiveView] Error deleting live:", err);
+      alert(err instanceof Error ? err.message : "Error al eliminar la transmisión");
+    } finally {
+      setBusyId(null);
     }
   };
 
   if (isLoading) return <Spinner />;
 
   const inputClass = "w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-violet-400 transition-colors";
+
+  const adminPanel = userIsAdmin ? (
+    <ScheduledLivesPanel
+      lives={scheduledLives}
+      busyId={busyId}
+      onActivate={handleActivateLive}
+      onDelete={handleDeleteLive}
+    />
+  ) : null;
 
   return (
     <div className="max-w-7xl mx-auto flex flex-col lg:h-[calc(100vh-8rem)]">
@@ -186,6 +334,8 @@ export default function LiveView() {
             </div>
 
             <LivePdfs liveId={liveSession.id} isAdmin={userIsAdmin} />
+
+            {adminPanel}
           </div>
 
           {/* Columna derecha: chat */}
@@ -194,7 +344,7 @@ export default function LiveView() {
           </div>
         </div>
       ) : (
-        <div className="min-h-[60vh] lg:flex-1 lg:min-h-0 flex flex-col items-center justify-center border-2 border-dashed border-slate-200 rounded-3xl p-6 sm:p-8 text-center">
+        <div className="min-h-[60vh] lg:flex-1 lg:min-h-0 lg:overflow-y-auto flex flex-col items-center justify-center border-2 border-dashed border-slate-200 rounded-3xl p-6 sm:p-8 text-center">
           <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mb-4">
             <Radio className="text-slate-400" size={32} />
           </div>
@@ -219,7 +369,7 @@ export default function LiveView() {
           )}
 
           {userIsAdmin && (
-            <div className="mt-8 w-full max-w-md">
+            <div className="mt-8 w-full max-w-md space-y-4">
               {!showForm ? (
                 <button
                   onClick={() => setShowForm(true)}
@@ -260,6 +410,9 @@ export default function LiveView() {
                     <label className="block text-xs font-bold text-slate-500 mb-1">Hora programada <span className="font-normal text-slate-400">(opcional)</span></label>
                     <input type="datetime-local" value={newScheduledAt} onChange={(e) => setNewScheduledAt(e.target.value)}
                       className={inputClass} />
+                    <p className="text-[11px] text-slate-400 mt-1">
+                      Con una fecha futura la transmisión queda programada. Sin fecha, empieza en vivo de inmediato.
+                    </p>
                   </div>
 
                   <div className="flex gap-2 pt-1">
@@ -269,11 +422,13 @@ export default function LiveView() {
                     </button>
                     <button type="submit" disabled={isSubmitting}
                       className="flex-1 py-2.5 bg-red-500 text-white rounded-xl font-bold text-sm shadow-md hover:bg-red-600 transition-colors disabled:opacity-50">
-                      {isSubmitting ? "Iniciando..." : "Iniciar en vivo"}
+                      {isSubmitting ? "Guardando..." : "Guardar transmisión"}
                     </button>
                   </div>
                 </form>
               )}
+
+              {adminPanel}
             </div>
           )}
         </div>
