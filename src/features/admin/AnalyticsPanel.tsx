@@ -163,17 +163,17 @@ export default function AnalyticsPanel() {
   const stats = overview
     ? [
         {
-          label: "Miembros Totales",
+          label: "Miembros Activos",
           value: formatNumber(overview.members.total),
           change: `+${formatNumber(overview.members.new_this_month)} este mes`,
           positive: true,
           icon: <Users className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600" />,
         },
         {
-          label: "Miembros Activos",
-          value: formatNumber(overview.members.active),
-          change: `${overview.members.total > 0 ? Math.round((overview.members.active / overview.members.total) * 100) : 0}% del total`,
-          positive: true,
+          label: "Miembros Vencidos",
+          value: formatNumber(overview.members.expired),
+          change: `${formatNumber(overview.members.inactive)} inactivos`,
+          positive: overview.members.expired === 0,
           icon: <Activity className="w-4 h-4 sm:w-5 sm:h-5 text-purple-600" />,
         },
         {
@@ -352,7 +352,7 @@ export default function AnalyticsPanel() {
               <p className="text-base sm:text-xl font-black">{overview ? formatNumber(overview.members.new_this_month) : "—"}</p>
             </div>
             <div className="text-center">
-              <p className="text-[10px] sm:text-xs font-black text-slate-500 uppercase tracking-wide sm:tracking-widest">Total</p>
+              <p className="text-[10px] sm:text-xs font-black text-slate-500 uppercase tracking-wide sm:tracking-widest">Activos</p>
               <p className="text-base sm:text-xl font-black">{overview ? formatNumber(overview.members.total) : "—"}</p>
             </div>
           </div>
@@ -366,7 +366,7 @@ export default function AnalyticsPanel() {
             <h3 className="text-base sm:text-lg font-black text-slate-900 mb-1 flex items-center gap-2">
               <MapPin size={18} className="text-indigo-600" /> Miembros por Ciudad
             </h3>
-            <p className="text-slate-500 text-xs sm:text-sm font-medium mb-4 sm:mb-6">Distribución geográfica de la comunidad.</p>
+            <p className="text-slate-500 text-xs sm:text-sm font-medium mb-4 sm:mb-6">Distribución geográfica de los miembros activos.</p>
             {locationData.length === 0 ? (
               <div className="py-8 sm:py-12">
                 <EmptyChartState label="Sin datos disponibles." />
@@ -395,7 +395,7 @@ export default function AnalyticsPanel() {
             <h3 className="text-base sm:text-lg font-black text-slate-900 mb-1 flex items-center gap-2">
               <Cake size={18} className="text-indigo-600" /> Rangos de Edad
             </h3>
-            <p className="text-slate-500 text-xs sm:text-sm font-medium mb-4 sm:mb-6">Miembros por rango etario.</p>
+            <p className="text-slate-500 text-xs sm:text-sm font-medium mb-4 sm:mb-6">Miembros activos por rango etario.</p>
             <div className="h-[200px] sm:h-[240px] w-full">
               {ageData.length === 0 ? (
                 <EmptyChartState label="Sin datos disponibles." />
@@ -415,7 +415,7 @@ export default function AnalyticsPanel() {
 
           <div className="p-5 sm:p-6 lg:p-8 lg:bg-white lg:rounded-[2rem] lg:border lg:border-slate-200 lg:shadow-sm">
             <h3 className="text-base sm:text-lg font-black text-slate-900 mb-1">Género</h3>
-            <p className="text-slate-500 text-xs sm:text-sm font-medium mb-4 sm:mb-6">Distribución de miembros por género.</p>
+            <p className="text-slate-500 text-xs sm:text-sm font-medium mb-4 sm:mb-6">Distribución de los miembros activos por género.</p>
             <div className="h-[180px] sm:h-[220px] w-full">
               {genderData.length === 0 ? (
                 <EmptyChartState label="Sin datos disponibles." />
@@ -441,7 +441,7 @@ export default function AnalyticsPanel() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="bg-white p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] border border-slate-200 shadow-sm">
           <h3 className="text-lg font-black text-slate-900 mb-1">Estado de Miembros</h3>
-          <p className="text-slate-500 text-sm font-medium mb-6">Distribución de suscripciones.</p>
+          <p className="text-slate-500 text-sm font-medium mb-6">Todas las cuentas, incluidas inactivas y vencidas — el resto del panel cuenta solo la base activa.</p>
           <div className="h-[220px] w-full">
             {statusData.length === 0 ? (
               <EmptyChartState label="Sin datos disponibles." />

@@ -235,13 +235,46 @@ export interface Comment {
 }
 
 export interface AnalyticsMembersOverview {
+  /** Base activa: suscripción vigente + invitados, sin admins. */
   total: number;
+  /** Conteo crudo de perfiles, incluyendo inactivos, vencidos y admins. */
+  total_all: number;
   active: number;
   inactive: number;
   expired: number;
   invited: number;
   new_today: number;
   new_this_month: number;
+}
+
+/** Estado de acceso efectivo — la fecha de vencimiento manda sobre subscription_status. */
+export type MemberAccessState =
+  | "active"
+  | "expiring_soon"
+  | "expired"
+  | "inactive"
+  | "exempt";
+
+export interface AdminMember {
+  id: string;
+  name: string | null;
+  email: string | null;
+  avatar: string | null;
+  role: string | null;
+  city: string | null;
+  phone: string | null;
+  age: number | null;
+  subscription_status: string | null;
+  subscription_expires_at: string | null;
+  plan: string | null;
+  access_state: MemberAccessState;
+  days_remaining: number | null;
+  created_at: string | null;
+}
+
+export interface AdminMembersResponse {
+  members: AdminMember[];
+  summary: Record<MemberAccessState | "total", number>;
 }
 
 export interface AnalyticsRevenue {
