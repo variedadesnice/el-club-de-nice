@@ -188,11 +188,6 @@ Admin-configurable catalog of payment instructions (bank transfer, mobile paymen
 | GET | `/api/admin/analytics/history` | 👑 | Histórico de snapshots diarios |
 | POST | `/api/admin/analytics/snapshot` | 👑 | Fuerza snapshot del día |
 
-#### `/api/admin/members` — Roster de miembros
-| Method | Path | Auth | Description |
-|--------|------|------|-------------|
-| GET | `/api/admin/members/` | 👑 | `{members, summary}` — roster completo con `access_state` calculado (vencidos primero). Usado por `MembersPanel` |
-
 #### `/api/admin/levels` — Admin gamificación
 | Method | Path | Auth | Description |
 |--------|------|------|-------------|
@@ -247,7 +242,7 @@ src/
       data/profileMock.ts          — ranking/activity table data only; level/XP/achievements/streak/
                                      completed-courses/social-impact are now real API data (see below)
     admin/
-      AdminDashboard.tsx, AnalyticsPanel.tsx, MembersPanel.tsx, GamificationPanel.tsx, PaymentMethodsPanel.tsx
+      AdminDashboard.tsx, AnalyticsPanel.tsx, GamificationPanel.tsx, PaymentMethodsPanel.tsx
       (+ existing invitations/payments tabs)
   shared/layout/Layout.tsx       — nav shell (sidebar desktop + bottom nav mobile)
   types.ts                       — shared TypeScript interfaces
@@ -284,15 +279,7 @@ Roles that require an active subscription: `miembro`. Roles exempt from gating: 
 - Final submission to `POST /api/payments/register` sends `payment_method_id`, `currency_id`, `amount` (USD), `amount_local` (Bs), and `exchange_rate` (the frozen rate) — the backend stores all of these verbatim, it does not re-fetch or recompute rates.
 - Phone validation: 7–15 digits total, with a country-code dropdown (🇻🇪 +58, 🇺🇸 +1, 🇲🇽 +52, 🇨🇴 +57, 🇦🇷 +54, 🇵🇪 +51, 🇨🇱 +56, 🇪🇸 +34, 🇵🇦 +507, 🇩🇴 +1) prepended to the digits before submission.
 
-### Admin members roster (`MembersPanel.tsx`, pestaña "Miembros")
-
-- Lee `GET /api/admin/members/` y muestra el roster con un badge de estado por miembro. Las cinco tarjetas-resumen (Vencidos / Por vencer / Activos / Inactivos / Total) también funcionan como filtro al hacer click.
-- `access_state` lo calcula el **backend**, no el panel, y **no** es lo mismo que `subscription_status`: el trigger `sync_subscription_status` solo corre al tocar la tabla `payments`, así que una suscripción puede haber vencido por el paso del tiempo sin que la fila del perfil lo refleje. Por eso `expires_at` manda sobre el estado guardado. No derives el estado desde `subscription_status` en el cliente.
-- Orden por defecto: vencidos primero, luego por vencer (más urgente arriba), después el resto por nombre.
-
 ### Admin financial analytics (`AnalyticsPanel.tsx`)
-
-**Base activa**: desde 2026-08-24 los totales y la demografía (ciudad, edad, género) cuentan **solo la base activa** — `role IN ('miembro','invitado')` con acceso vigente, sin admins. `overview.members.total` es esa base activa; el conteo crudo de perfiles vive en `total_all`. La tarjeta "Estado de Miembros" es la excepción deliberada: sigue contando a todos, porque su propósito es mostrar cuántos están inactivos o vencidos frente a los activos.
 
 Fetches the same BCV rate API in parallel with `/api/admin/analytics/*` data. `formatAmount(amount, rate?)` divides Bs amounts by the rate to display a USD-equivalent figure on KPI cards, revenue history, and plan breakdown — falls back to a raw dollar format if the rate fetch fails.
 
