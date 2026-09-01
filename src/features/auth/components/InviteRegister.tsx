@@ -66,7 +66,7 @@ export default function InviteRegister({ onGoToLogin }: InviteRegisterProps) {
       const res = await fetch(`${API_BASE}/api/auth/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email: invitedEmail, password, role: "Invitado" }),
+        body: JSON.stringify({ name, email: invitedEmail, password, role: "invitado" }),
       });
       const data = await res.json();
       if (!res.ok) {
