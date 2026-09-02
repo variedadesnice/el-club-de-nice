@@ -41,6 +41,7 @@ interface Invitation {
   used_at: string | null;
   created_at: string;
   status: "pendiente" | "usada" | "expirada";
+  email_sent?: boolean;
 }
 
 type StatusFilter = "todos" | "pendiente" | "usada" | "expirada";
@@ -97,12 +98,18 @@ function InvitationsPanel() {
     setSubmitError(null);
     setSubmitSuccess(null);
     try {
-      await api("/api/invitations/", {
+      const { data: created } = await api<Invitation>("/api/invitations/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: emailInput.trim() }),
       });
-      setSubmitSuccess(`Invitación enviada a ${emailInput.trim()}`);
+      // El backend intenta enviar el correo, pero la invitación es válida
+      // igual si el envío falla — hay que decir cuál de las dos cosas pasó.
+      setSubmitSuccess(
+        created?.email_sent
+          ? `Invitación enviada a ${emailInput.trim()}`
+          : `Invitación creada para ${emailInput.trim()}, pero no se pudo enviar el correo. Copia el enlace y pásaselo tú.`
+      );
       setEmailInput("");
       await loadInvitations();
     } catch (e: unknown) {
