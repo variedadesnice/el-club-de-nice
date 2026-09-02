@@ -4,7 +4,8 @@ import avatar1 from "../../../assets/avatars/auth1.jpg";
 import avatar2 from "../../../assets/avatars/auth2.jpg";
 import avatar3 from "../../../assets/avatars/auth3.jpg";
 import avatar4 from "../../../assets/avatars/auth4.jpg";
-import { Lock, ArrowRight, ArrowLeft, CheckCircle2, ShieldAlert } from "lucide-react";
+import { ArrowRight, ArrowLeft, CheckCircle2, ShieldAlert } from "lucide-react";
+import PasswordInput from "../../../shared/ui/PasswordInput";
 import { motion, AnimatePresence } from "motion/react";
 import { apiFetch } from "../../../lib/api";
 
@@ -167,32 +168,22 @@ export default function ResetPassword({ onGoToLogin, onGoToForgotPassword }: Res
                 <form onSubmit={handleSubmit} className="space-y-6">
                   <div className="space-y-2">
                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1">Nueva contraseña</label>
-                    <div className="relative">
-                      <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-                      <input
-                        type="password"
-                        required
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        placeholder="••••••••"
-                        className="w-full bg-slate-50 border-2 border-transparent focus:border-indigo-100 focus:bg-white rounded-2xl py-4 pl-12 pr-4 text-sm font-medium transition-all outline-none"
-                      />
-                    </div>
+                    <PasswordInput
+                      required
+                      value={password}
+                      onChange={setPassword}
+                      autoComplete="new-password"
+                    />
                   </div>
 
                   <div className="space-y-2">
                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1">Confirmar contraseña</label>
-                    <div className="relative">
-                      <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-                      <input
-                        type="password"
-                        required
-                        value={confirmPassword}
-                        onChange={(e) => setConfirmPassword(e.target.value)}
-                        placeholder="••••••••"
-                        className="w-full bg-slate-50 border-2 border-transparent focus:border-indigo-100 focus:bg-white rounded-2xl py-4 pl-12 pr-4 text-sm font-medium transition-all outline-none"
-                      />
-                    </div>
+                    <PasswordInput
+                      required
+                      value={confirmPassword}
+                      onChange={setConfirmPassword}
+                      autoComplete="new-password"
+                    />
                   </div>
 
                   {error && (
