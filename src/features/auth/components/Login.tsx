@@ -4,7 +4,8 @@ import avatar1 from "../../../assets/avatars/auth1.jpg";
 import avatar2 from "../../../assets/avatars/auth2.jpg";
 import avatar3 from "../../../assets/avatars/auth3.jpg";
 import avatar4 from "../../../assets/avatars/auth4.jpg";
-import { Mail, Lock, ArrowRight } from "lucide-react";
+import { Mail, ArrowRight } from "lucide-react";
+import PasswordInput from "../../../shared/ui/PasswordInput";
 import { motion } from "motion/react";
 import { useAuth } from "../../../context/AuthContext";
 import { API_BASE } from "../../../lib/api";
@@ -114,17 +115,12 @@ export default function Login({ onGoToRegister, onForgotPassword }: LoginProps) 
                   ¿Olvidaste tu contraseña?
                 </button>
               </div>
-              <div className="relative">
-                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-                <input
-                  type="password"
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
-                  className="w-full bg-slate-50 border-2 border-transparent focus:border-indigo-100 focus:bg-white rounded-2xl py-4 pl-12 pr-4 text-sm font-medium transition-all outline-none"
-                />
-              </div>
+              <PasswordInput
+                required
+                value={password}
+                onChange={setPassword}
+                autoComplete="current-password"
+              />
             </div>
 
             {error && (

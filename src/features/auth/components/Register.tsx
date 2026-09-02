@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from "react";
 import {
-  Mail, Lock, User, Sparkles, Phone, Hash, CreditCard, Upload,
+  Mail, User, Sparkles, Phone, Hash, CreditCard, Upload,
   CheckCircle2, ChevronLeft, ChevronRight, Clock, FileText, X,
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { apiFetch } from "../../../lib/api";
 import type { PaymentMethod, PlanType, Plan, Currency } from "../../../types";
 import logo from "../../../assets/logo.png";
+import PasswordInput from "../../../shared/ui/PasswordInput";
 
 interface RegisterProps {
   onGoToLogin: () => void;
@@ -467,17 +468,13 @@ export default function Register({ onGoToLogin }: RegisterProps) {
 
               <div className="space-y-2">
                 <label className={labelClass}>Contraseña</label>
-                <div className="relative">
-                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-                  <input
-                    type="password"
-                    required
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Mínimo 6 caracteres, letras y números"
-                    className={inputClass}
-                  />
-                </div>
+                <PasswordInput
+                  required
+                  value={password}
+                  onChange={setPassword}
+                  placeholder="Mínimo 6 caracteres, letras y números"
+                  autoComplete="new-password"
+                />
                 {/* Password strength hints */}
                 {password.length > 0 && (
                   <div className="flex gap-3 mt-1 ml-1">

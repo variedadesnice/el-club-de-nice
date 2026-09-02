@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { Lock, User, Sparkles, ShieldCheck, XCircle, Mail } from "lucide-react";
+import { User, Sparkles, ShieldCheck, XCircle, Mail } from "lucide-react";
+import PasswordInput from "../../../shared/ui/PasswordInput";
 import { motion } from "motion/react";
 import { useAuth } from "../../../context/AuthContext";
 import { apiFetch, API_BASE } from "../../../lib/api";
@@ -216,17 +217,13 @@ export default function InviteRegister({ onGoToLogin }: InviteRegisterProps) {
 
             <div className="space-y-2">
               <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1">Contraseña</label>
-              <div className="relative">
-                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-                <input
-                  type="password"
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Mínimo 6 caracteres"
-                  className="w-full bg-slate-50 border-2 border-transparent focus:border-indigo-100 focus:bg-white rounded-2xl py-4 pl-12 pr-4 text-sm font-medium transition-all outline-none"
-                />
-              </div>
+              <PasswordInput
+                required
+                value={password}
+                onChange={setPassword}
+                placeholder="Mínimo 6 caracteres"
+                autoComplete="new-password"
+              />
             </div>
 
             {error && (
