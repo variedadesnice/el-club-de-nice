@@ -80,8 +80,9 @@ export interface AppRoute {
 }
 
 export const authRoutes: AppRoute[] = [
-  { path: "/", element: <Navigate to="/login" replace /> },
-  { path: "/landing", element: <LandingPage /> },
+  { path: "/", element: <LandingPage /> },
+  // Ruta histórica de la landing: ahora vive en "/", se redirige para no romper enlaces.
+  { path: "/landing", element: <Navigate to="/" replace /> },
   { path: "/login", element: <LoginPage /> },
   { path: "/register", element: <RegisterPage /> },
   { path: "/invite", element: <InviteRegisterPage /> },
