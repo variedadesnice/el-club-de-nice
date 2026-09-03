@@ -39,11 +39,12 @@ import type {
 
 const HISTORY_LIMIT = 30;
 
+// Los invitados no aparecen acá: no tienen suscripción, así que se muestran
+// aparte como un conteo suelto en vez de mezclarlos con los estados de pago.
 const STATUS_COLORS: Record<string, string> = {
   Activos: "#22c55e",
   Inactivos: "#94a3b8",
   Expirados: "#f97316",
-  Invitados: "#6366f1",
 };
 
 const GENDER_COLORS: Record<string, string> = {
@@ -198,7 +199,6 @@ export default function AnalyticsPanel() {
         { name: "Activos", value: members.active },
         { name: "Inactivos", value: members.inactive },
         { name: "Expirados", value: members.expired },
-        { name: "Invitados", value: members.invited },
       ].filter((d) => d.value > 0)
     : [];
 
@@ -227,7 +227,7 @@ export default function AnalyticsPanel() {
         <div>
           <h3 className="text-xl font-black text-slate-900">Estadísticas en tiempo real</h3>
           <p className="text-slate-500 font-medium text-sm mt-1">
-            Datos actualizados al momento desde la base de datos.
+            Solo miembros. Los admins no se cuentan y los invitados se reportan aparte.
           </p>
         </div>
         <div className="flex items-center gap-3">
@@ -366,7 +366,7 @@ export default function AnalyticsPanel() {
             <h3 className="text-base sm:text-lg font-black text-slate-900 mb-1 flex items-center gap-2">
               <MapPin size={18} className="text-indigo-600" /> Miembros por Ciudad
             </h3>
-            <p className="text-slate-500 text-xs sm:text-sm font-medium mb-4 sm:mb-6">Distribución geográfica de la comunidad.</p>
+            <p className="text-slate-500 text-xs sm:text-sm font-medium mb-4 sm:mb-6">Solo miembros con suscripción activa.</p>
             {locationData.length === 0 ? (
               <div className="py-8 sm:py-12">
                 <EmptyChartState label="Sin datos disponibles." />
@@ -395,7 +395,7 @@ export default function AnalyticsPanel() {
             <h3 className="text-base sm:text-lg font-black text-slate-900 mb-1 flex items-center gap-2">
               <Cake size={18} className="text-indigo-600" /> Rangos de Edad
             </h3>
-            <p className="text-slate-500 text-xs sm:text-sm font-medium mb-4 sm:mb-6">Miembros por rango etario.</p>
+            <p className="text-slate-500 text-xs sm:text-sm font-medium mb-4 sm:mb-6">Solo miembros con suscripción activa.</p>
             <div className="h-[200px] sm:h-[240px] w-full">
               {ageData.length === 0 ? (
                 <EmptyChartState label="Sin datos disponibles." />
@@ -415,7 +415,7 @@ export default function AnalyticsPanel() {
 
           <div className="p-5 sm:p-6 lg:p-8 lg:bg-white lg:rounded-[2rem] lg:border lg:border-slate-200 lg:shadow-sm">
             <h3 className="text-base sm:text-lg font-black text-slate-900 mb-1">Género</h3>
-            <p className="text-slate-500 text-xs sm:text-sm font-medium mb-4 sm:mb-6">Distribución de miembros por género.</p>
+            <p className="text-slate-500 text-xs sm:text-sm font-medium mb-4 sm:mb-6">Solo miembros con suscripción activa.</p>
             <div className="h-[180px] sm:h-[220px] w-full">
               {genderData.length === 0 ? (
                 <EmptyChartState label="Sin datos disponibles." />
@@ -458,6 +458,17 @@ export default function AnalyticsPanel() {
                 </PieChart>
               </ResponsiveContainer>
             )}
+          </div>
+          <div className="mt-6 bg-slate-50 rounded-2xl p-4 flex items-center justify-between gap-4">
+            <div className="min-w-0">
+              <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.15em]">Invitados</p>
+              <p className="text-xs font-medium text-slate-400 mt-0.5">
+                No entran en los totales ni en la demografía.
+              </p>
+            </div>
+            <p className="text-xl font-black text-slate-900 shrink-0">
+              {members ? formatNumber(members.invited) : "—"}
+            </p>
           </div>
         </div>
 

@@ -234,6 +234,10 @@ export interface Comment {
   replies?: Comment[];
 }
 
+/**
+ * Todos los contadores miran solo a role='miembro': los admins no se cuentan y
+ * de los invitados solo se reporta `invited`.
+ */
 export interface AnalyticsMembersOverview {
   total: number;
   active: number;
@@ -271,7 +275,8 @@ export interface AnalyticsAgeRange {
 }
 
 export interface AnalyticsMembersDetail extends AnalyticsMembersOverview {
-  admin: number;
+  /** Miembros activos: la unica poblacion que entra en los cortes demograficos. */
+  demographics_base: number;
   gender: { male: number; female: number; other: number };
   locations: AnalyticsLocation[];
   ages: AnalyticsAgeRange[];

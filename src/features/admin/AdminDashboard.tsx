@@ -1,10 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
 import {
-  Activity,
-  CreditCard,
-  Building2,
-  Briefcase,
-  Save,
   Mail,
   Send,
   Trash2,
@@ -603,13 +598,7 @@ function PaymentsPanel() {
 }
 
 export default function AdminDashboard() {
-  const [activeTab, setActiveTab] = useState<"stats" | "settings" | "invitaciones" | "pagos" | "metodos-pago" | "planes" | "gamification" | "sorteos" | "ruleta" | "banners">("stats");
-  const [bankInfo, setBankInfo] = useState({
-    accountHolder: "Sarah Jenkins",
-    bankName: "Global Bank",
-    accountNumber: "**** **** **** 4562",
-    routingNumber: "123456789",
-  });
+  const [activeTab, setActiveTab] = useState<"stats" | "invitaciones" | "pagos" | "metodos-pago" | "planes" | "gamification" | "sorteos" | "ruleta" | "banners">("stats");
 
   return (
     <div className="space-y-8">
@@ -636,7 +625,6 @@ export default function AdminDashboard() {
             <option value="sorteos">🎁 Sorteos</option>
             <option value="ruleta">🎡 Ruleta</option>
             <option value="banners">📣 Banners</option>
-            <option value="settings">⚙️ Configuración</option>
           </select>
           <div className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-slate-400">
             <ChevronDown size={18} />
@@ -654,7 +642,6 @@ export default function AdminDashboard() {
           <button onClick={() => setActiveTab("sorteos")} className={`px-6 py-2.5 rounded-xl font-bold text-sm transition-all whitespace-nowrap ${activeTab === 'sorteos' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>Sorteos</button>
           <button onClick={() => setActiveTab("ruleta")} className={`px-6 py-2.5 rounded-xl font-bold text-sm transition-all whitespace-nowrap ${activeTab === 'ruleta' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>Ruleta</button>
           <button onClick={() => setActiveTab("banners")} className={`px-6 py-2.5 rounded-xl font-bold text-sm transition-all whitespace-nowrap ${activeTab === 'banners' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>Banners</button>
-          <button onClick={() => setActiveTab("settings")} className={`px-6 py-2.5 rounded-xl font-bold text-sm transition-all whitespace-nowrap ${activeTab === 'settings' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>Configuración</button>
         </div>
       </div>
 
@@ -676,100 +663,6 @@ export default function AdminDashboard() {
 
       {activeTab === "banners" && <PromoBannersPanel />}
 
-      {activeTab === "settings" && (
-        <motion.div
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          className="grid grid-cols-1 md:grid-cols-12 gap-8"
-        >
-          {/* Bank Settings Cell */}
-          <div className="md:col-span-12 bg-white rounded-[2rem] md:rounded-[2.5rem] p-6 md:p-10 border border-slate-200 shadow-sm">
-            <h3 className="text-2xl font-black text-slate-900 mb-2 flex items-center gap-3">
-              <CreditCard className="text-indigo-600" /> Información Bancaria
-            </h3>
-            <p className="text-slate-500 font-medium mb-10">Gestiona dónde recibes tus pagos y revisa tu estado de cuenta.</p>
-
-            <form className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <div className="space-y-2">
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1">Titular de la Cuenta</label>
-                <div className="relative">
-                  <Building2 className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-                  <input
-                    type="text"
-                    value={bankInfo.accountHolder}
-                    onChange={(e) => setBankInfo({...bankInfo, accountHolder: e.target.value})}
-                    className="w-full bg-slate-50 border-2 border-transparent focus:border-indigo-100 focus:bg-white rounded-2xl py-4 pl-12 pr-4 text-sm font-bold transition-all outline-none"
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1">Nombre del Banco</label>
-                <div className="relative">
-                  <Building2 className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-                  <input
-                    type="text"
-                    value={bankInfo.bankName}
-                    onChange={(e) => setBankInfo({...bankInfo, bankName: e.target.value})}
-                    className="w-full bg-slate-50 border-2 border-transparent focus:border-indigo-100 focus:bg-white rounded-2xl py-4 pl-12 pr-4 text-sm font-bold transition-all outline-none"
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1">Número de Cuenta</label>
-                <div className="relative">
-                  <CreditCard className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-                  <input
-                    type="text"
-                    value={bankInfo.accountNumber}
-                    onChange={(e) => setBankInfo({...bankInfo, accountNumber: e.target.value})}
-                    className="w-full bg-slate-50 border-2 border-transparent focus:border-indigo-100 focus:bg-white rounded-2xl py-4 pl-12 pr-4 text-sm font-bold transition-all outline-none"
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1">Número de Ruta (SWIFT)</label>
-                <div className="relative">
-                  <Briefcase className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-                  <input
-                    type="text"
-                    value={bankInfo.routingNumber}
-                    onChange={(e) => setBankInfo({...bankInfo, routingNumber: e.target.value})}
-                    className="w-full bg-slate-50 border-2 border-transparent focus:border-indigo-100 focus:bg-white rounded-2xl py-4 pl-12 pr-4 text-sm font-bold transition-all outline-none"
-                  />
-                </div>
-              </div>
-
-              <div className="md:col-span-2 pt-6">
-                <button
-                  type="button"
-                  className="bg-indigo-600 text-white px-8 py-4 rounded-2xl font-black flex items-center gap-3 hover:bg-indigo-700 transition-all shadow-xl shadow-indigo-100"
-                >
-                  <Save size={20} /> Guardar Cambios
-                </button>
-              </div>
-            </form>
-          </div>
-
-          {/* Quick Info Cell */}
-          <div className="md:col-span-12 bg-slate-50 border-2 border-slate-200 border-dashed rounded-[2rem] md:rounded-[2.5rem] p-6 md:p-10 flex flex-col md:flex-row items-center justify-between gap-8 text-center md:text-left">
-            <div className="flex flex-col md:flex-row items-center gap-6">
-              <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center text-indigo-600 shadow-sm">
-                <Activity size={32} />
-              </div>
-              <div>
-                <h4 className="text-xl font-black text-slate-900">Estado de Cuenta Activo</h4>
-                <p className="text-slate-500 font-medium">Tus pagos se procesan automáticamente cada lunes.</p>
-              </div>
-            </div>
-            <button className="px-8 py-3 border-2 border-slate-200 rounded-2xl font-black text-slate-600 hover:bg-white transition-all">
-              Ver Historial de Pagos
-            </button>
-          </div>
-        </motion.div>
-      )}
     </div>
   );
 }
