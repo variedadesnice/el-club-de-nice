@@ -1,21 +1,24 @@
-import React, { lazy } from "react";
+import React from "react";
 import { Navigate, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { lazyWithReload } from "../lib/lazyWithReload";
 import { isAdmin } from "../lib/permissions";
 import Landing from "../features/landing/landing";
 import Login from "../features/auth/components/Login";
 
 // Cargados bajo demanda: reducen el bundle inicial que descarga cualquier
 // visitante no autenticado (login/landing) a solo lo que realmente se renderiza.
-const PostFeed = lazy(() => import("../features/muro/components/PostFeed"));
-const Classroom = lazy(() => import("../features/classroom/components/Classroom"));
-const Profile = lazy(() => import("../features/profile/components/Profile"));
-const LiveView = lazy(() => import("../features/live/components/LiveView"));
-const AdminDashboard = lazy(() => import("../features/admin/AdminDashboard"));
-const Register = lazy(() => import("../features/auth/components/Register"));
-const InviteRegister = lazy(() => import("../features/auth/components/InviteRegister"));
-const ForgotPassword = lazy(() => import("../features/auth/components/ForgotPassword"));
-const ResetPassword = lazy(() => import("../features/auth/components/ResetPassword"));
+// lazyWithReload en vez de lazy: si el chunk ya no existe porque se publicó una
+// versión nueva mientras la pestaña estaba abierta, recarga en vez de romper.
+const PostFeed = lazyWithReload(() => import("../features/muro/components/PostFeed"));
+const Classroom = lazyWithReload(() => import("../features/classroom/components/Classroom"));
+const Profile = lazyWithReload(() => import("../features/profile/components/Profile"));
+const LiveView = lazyWithReload(() => import("../features/live/components/LiveView"));
+const AdminDashboard = lazyWithReload(() => import("../features/admin/AdminDashboard"));
+const Register = lazyWithReload(() => import("../features/auth/components/Register"));
+const InviteRegister = lazyWithReload(() => import("../features/auth/components/InviteRegister"));
+const ForgotPassword = lazyWithReload(() => import("../features/auth/components/ForgotPassword"));
+const ResetPassword = lazyWithReload(() => import("../features/auth/components/ResetPassword"));
 
 function AdminRoute() {
   const { user } = useAuth();
