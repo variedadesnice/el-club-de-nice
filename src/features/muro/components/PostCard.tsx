@@ -1,4 +1,4 @@
-import { MessageSquare, MoreHorizontal, Lightbulb, Smile, Pin, Pencil, Trash2, Check, X, ImagePlus } from "lucide-react";
+import { MessageSquare, MoreHorizontal, Lightbulb, Smile, Pin, Pencil, Trash2, Check, X, ImagePlus, Link as LinkIcon } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { useRef, useState, useEffect } from "react";
 import { Post } from "../../../types";
@@ -27,6 +27,37 @@ function timeAgo(dateStr: string): string {
 }
 
 interface TagOption { id: string; name: string; }
+
+const urlRegex = /(https?:\/\/[^\s]+)/g;
+
+function renderContentWithLinks(content: string) {
+  if (!content) return null;
+  const parts = content.split(urlRegex);
+  return parts.map((part, i) => {
+    if (part.match(urlRegex)) {
+      return (
+        <a key={i} href={part} target="_blank" rel="noopener noreferrer" className="text-pink-500 font-bold hover:underline" onClick={(e) => e.stopPropagation()}>
+          {part}
+        </a>
+      );
+    }
+    return part;
+  });
+}
+
+function getFirstLink(content: string) {
+  if (!content) return null;
+  const match = content.match(urlRegex);
+  return match ? match[0] : null;
+}
+
+function getHostname(url: string) {
+  try {
+    return new URL(url).hostname;
+  } catch {
+    return url;
+  }
+}
 
 interface PostCardProps {
   post: Post;
@@ -310,7 +341,32 @@ export default function PostCard({ post, index, onReact, onDelete, onEdit, onPin
           </div>
         </div>
       ) : (
-        <p className="text-slate-600 leading-relaxed font-medium mb-6">{post.content}</p>
+        <>
+          <p className="text-slate-600 leading-relaxed font-medium mb-6 whitespace-pre-wrap break-words">
+            {renderContentWithLinks(post.content)}
+          </p>
+          {getFirstLink(post.content) && !post.image_url && (
+            <a 
+              href={getFirstLink(post.content)!} 
+              target="_blank" 
+              rel="noopener noreferrer"
+              onClick={(e) => e.stopPropagation()}
+              className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 p-4 mb-6 rounded-2xl border border-slate-200 bg-slate-50 hover:bg-slate-100 transition-colors group"
+            >
+              <div className="w-full sm:w-24 h-32 sm:h-24 bg-slate-200 rounded-xl flex items-center justify-center shrink-0 text-slate-400 group-hover:text-pink-500 transition-colors">
+                <LinkIcon size={32} />
+              </div>
+              <div className="flex-1 min-w-0 flex flex-col justify-center">
+                <p className="font-bold text-slate-800 line-clamp-1 mb-1">
+                  {getHostname(getFirstLink(post.content)!)}
+                </p>
+                <p className="text-sm text-slate-500 line-clamp-2">
+                  Haz clic para visitar este enlace externo.
+                </p>
+              </div>
+            </a>
+          )}
+        </>
       )}
 
       {post.image_url && !editing && (
