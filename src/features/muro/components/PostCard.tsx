@@ -53,6 +53,7 @@ export default function PostCard({ post, index, onReact, onDelete, onEdit, onPin
   const [selectedTagIds, setSelectedTagIds] = useState<string[]>([]);
   const [reactors, setReactors] = useState<{ name: string; avatar: string | null; reaction_type: string }[] | null>(null);
   const [showTooltip, setShowTooltip] = useState(false);
+  const [isImageModalOpen, setIsImageModalOpen] = useState(false);
   const pickerRef = useRef<HTMLDivElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   const tooltipRef = useRef<HTMLDivElement>(null);
@@ -313,9 +314,50 @@ export default function PostCard({ post, index, onReact, onDelete, onEdit, onPin
       )}
 
       {post.image_url && !editing && (
-        <div className="mb-6 rounded-2xl overflow-hidden border border-slate-100">
-          <img src={post.image_url} alt="imagen del post" className="w-full object-cover max-h-96" />
-        </div>
+        <>
+          <div 
+            className="mb-6 rounded-2xl overflow-hidden border border-slate-100 cursor-pointer group relative"
+            onClick={() => setIsImageModalOpen(true)}
+          >
+            <img src={post.image_url} alt="imagen del post" className="w-full object-cover max-h-96 group-hover:opacity-90 transition-opacity" />
+            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
+              <span className="bg-white/90 text-slate-800 text-xs font-bold px-3 py-1.5 rounded-full shadow-sm backdrop-blur-sm">Ver imagen completa</span>
+            </div>
+          </div>
+
+          <AnimatePresence>
+            {isImageModalOpen && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4"
+                onClick={() => setIsImageModalOpen(false)}
+              >
+                <motion.div
+                  initial={{ scale: 0.9, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  exit={{ scale: 0.9, opacity: 0 }}
+                  transition={{ type: "spring", damping: 25, stiffness: 300 }}
+                  className="relative max-w-5xl w-full max-h-full flex items-center justify-center"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <button
+                    onClick={() => setIsImageModalOpen(false)}
+                    className="absolute -top-12 right-0 sm:-right-12 w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors"
+                  >
+                    <X size={24} />
+                  </button>
+                  <img
+                    src={post.image_url}
+                    alt="imagen del post ampliada"
+                    className="max-w-full max-h-[85vh] object-contain rounded-lg shadow-2xl"
+                  />
+                </motion.div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </>
       )}
 
       {post.tip && (

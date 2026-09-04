@@ -31,6 +31,7 @@ function WinnerChip({ name, avatar, position }: { name: string; avatar?: string 
 export default function RaffleBanner() {
   const api = useApiFetch();
   const [raffle, setRaffle] = useState<Raffle | null>(null);
+  const [isExpanded, setIsExpanded] = useState(false);
 
   useEffect(() => {
     api<Raffle | null>("/api/raffles/active")
@@ -98,9 +99,19 @@ export default function RaffleBanner() {
               </>
             )}
             {raffle.description && (
-              <p className="text-xs sm:text-sm font-bold text-white/95 mt-1.5 leading-relaxed line-clamp-2">
-                {raffle.description}
-              </p>
+              <div className="mt-1.5">
+                <p className={`text-xs sm:text-sm font-bold text-white/95 leading-relaxed ${!isExpanded ? 'line-clamp-2' : ''}`}>
+                  {raffle.description}
+                </p>
+                {raffle.description.length > 100 && (
+                  <button 
+                    onClick={() => setIsExpanded(!isExpanded)}
+                    className="text-white hover:text-pink-200 text-[10px] font-black uppercase tracking-wider mt-1 transition-colors underline underline-offset-2"
+                  >
+                    {isExpanded ? "Ver menos" : "Ver más"}
+                  </button>
+                )}
+              </div>
             )}
 
             {raffle.is_active ? (
