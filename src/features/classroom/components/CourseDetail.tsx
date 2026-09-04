@@ -183,7 +183,9 @@ export default function CourseDetail({ course, onBack, onCourseUpdated, onEdit }
           </div>
         ) : chapters.length === 0 ? (
           <p className="text-sm font-medium text-slate-500">
-            Este curso aún no tiene capítulos. Añade el primero abajo.
+            {userIsAdmin
+              ? "Este curso aún no tiene capítulos. Añade el primero abajo."
+              : "Este curso todavía no tiene capítulos disponibles. ¡Vuelve pronto!"}
           </p>
         ) : (
           <div className="space-y-2">

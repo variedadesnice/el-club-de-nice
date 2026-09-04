@@ -75,9 +75,13 @@ export default function Classroom() {
 
         {courses.length === 0 ? (
           <div className="rounded-3xl border-2 border-violet-200 bg-sky-50/80 p-8 text-center">
-            <p className="font-bold text-slate-700">No hay cursos todavía</p>
+            <p className="font-bold text-slate-700">
+              {userIsAdmin ? "No hay cursos todavía" : "Todavía no hay cursos publicados"}
+            </p>
             <p className="text-sm text-slate-500 mt-1 mb-4">
-              Crea tu primer curso con nombre, descripción e imagen.
+              {userIsAdmin
+                ? "Crea tu primer curso con nombre, descripción e imagen."
+                : "Estamos preparando contenido nuevo. ¡Vuelve pronto!"}
             </p>
             {userIsAdmin && (
               <button
