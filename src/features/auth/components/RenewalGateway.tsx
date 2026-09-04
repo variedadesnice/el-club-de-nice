@@ -4,8 +4,14 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { useAuth, User } from "../../../context/AuthContext";
-import { useApiFetch } from "../../../lib/api";
+import { ApiError, useApiFetch } from "../../../lib/api";
 import type { PaymentMethod, PlanType, Plan, Currency, Payment } from "../../../types";
+
+interface RecheckResult {
+  verificado: boolean;
+  estado: string;
+  message: string;
+}
 
 const COUNTRY_CODE = "+58";
 
@@ -295,13 +301,30 @@ export default function RenewalGateway({ isModal = false, onClose }: { isModal?:
   async function handleRefreshStatus() {
     setIsRefreshing(true);
     setRefreshNotice(null);
+
+    // Igual que en AccountStatus: primero se le pide al backend que vuelva a
+    // preguntarle a la pasarela por el pago pendiente, y recién después se
+    // relee el estado propio. Si el pago ya entró, vuelve activo en el acto.
+    let recheckMessage: string | null = null;
+    try {
+      const { data } = await api<RecheckResult>("/api/payments/recheck", { method: "POST" });
+      recheckMessage = data.message ?? null;
+    } catch (err) {
+      // El 429 del límite trae su propio mensaje con los segundos que faltan.
+      if (err instanceof ApiError && err.status === 429) {
+        recheckMessage = err.message;
+      }
+    }
+
     try {
       const { data } = await api<{ user: User }>("/api/auth/me");
       updateUser(data.user);
       if (data.user.subscription_status === "active") {
-        setRefreshNotice("¡Tu suscripción ya está activa! Redirigiendo...");
+        setRefreshNotice("¡Pago verificado! Tu suscripción ya está activa. Redirigiendo...");
       } else {
-        setRefreshNotice("Tu estado sigue igual. Si acabas de enviar el comprobante, espera a que el admin lo apruebe.");
+        setRefreshNotice(
+          recheckMessage ?? "Tu estado sigue igual. Si acabas de enviar el comprobante, espera a que el admin lo apruebe."
+        );
       }
     } catch (err) {
       setRefreshNotice("No se pudo actualizar el estado.");
@@ -370,7 +393,7 @@ export default function RenewalGateway({ isModal = false, onClose }: { isModal?:
               className="flex-1 flex items-center justify-center gap-2 bg-indigo-600 text-white py-4 rounded-2xl font-bold text-sm hover:bg-indigo-700 transition-all shadow-xl shadow-indigo-100 active:scale-[0.98] disabled:opacity-60"
             >
               <RefreshCw size={18} className={isRefreshing ? "animate-spin" : ""} />
-              Actualizar estado
+              Verificar estado
             </button>
             {(!isModal || !onClose) && (
               <button

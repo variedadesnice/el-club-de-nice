@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import { Clock, XCircle, AlertTriangle, ShieldOff, RefreshCw, LogOut, Hash, CreditCard, Calendar } from "lucide-react";
 import { motion } from "motion/react";
 import { useAuth, User } from "../../../context/AuthContext";
-import { useApiFetch } from "../../../lib/api";
+import { ApiError, useApiFetch } from "../../../lib/api";
 import type { Payment } from "../../../types";
 
 const PLAN_LABELS: Record<string, string> = {
@@ -20,6 +20,13 @@ function formatDate(iso: string | null) {
   } catch {
     return iso;
   }
+}
+
+interface RecheckResult {
+  verificado: boolean;
+  /** "aprobado" | "esperando" | "sin_pendiente" | "no_automatico" | "requiere_revision" */
+  estado: string;
+  message: string;
 }
 
 interface StatusView {
@@ -55,7 +62,7 @@ function resolveStatusView(subscriptionStatus: string | null | undefined, latest
       badgeLabel: "Pago en revisión",
       title: "Tu comprobante está en revisión",
       description:
-        "Recibimos tu pago y un administrador lo revisará pronto. Te avisaremos por email en cuanto se active tu cuenta — también puedes volver a esta pantalla y pulsar \"Actualizar estado\".",
+        "Estamos comprobando tu pago automáticamente. Suele tardar unos minutos; si ya pagaste, pulsa \"Verificar estado\" para que volvamos a consultarlo ahora mismo. Si no lo encontramos, un administrador lo revisará y te avisaremos por email.",
     };
   }
 
@@ -110,19 +117,45 @@ export default function AccountStatus() {
     loadPayments();
   }, [loadPayments]);
 
+  const latestPayment = payments.length > 0
+    ? [...payments].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())[0]
+    : null;
+
   async function handleRefreshStatus() {
     if (!user) return;
     setIsRefreshing(true);
     setError(null);
     setRefreshNotice(null);
+
+    // Si hay un pago esperando, primero le pedimos al backend que vuelva a
+    // preguntarle a la pasarela si el pago ya entró. Antes esto sólo releía
+    // nuestra propia base, así que el botón no podía adelantar nada: mostraba
+    // el mismo "sigue igual" hasta que cayera el reintento automático.
+    let recheckMessage: string | null = null;
+    if (latestPayment?.status === "pending") {
+      try {
+        const { data } = await api<RecheckResult>("/api/payments/recheck", { method: "POST" });
+        recheckMessage = data.message ?? null;
+      } catch (err) {
+        // Un 429 (demasiadas consultas seguidas) no es un fallo: es el límite
+        // haciendo su trabajo, y su mensaje ya dice cuánto esperar. Se muestra
+        // como aviso y se sigue con la relectura normal del estado.
+        if (err instanceof ApiError && err.status === 429) {
+          recheckMessage = err.message;
+        } else {
+          setError(err instanceof Error ? err.message : "No se pudo consultar tu pago.");
+        }
+      }
+    }
+
     try {
       const { data } = await api<{ user: User }>("/api/auth/me");
       updateUser(data.user);
       await loadPayments();
       if (data.user.subscription_status === "active") {
-        setRefreshNotice("¡Tu suscripción ya está activa! Redirigiendo...");
+        setRefreshNotice("¡Pago verificado! Tu cuenta ya está activa. Redirigiendo...");
       } else {
-        setRefreshNotice("Tu estado sigue igual. Vuelve a intentarlo más tarde.");
+        setRefreshNotice(recheckMessage ?? "Tu estado sigue igual. Vuelve a intentarlo más tarde.");
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "No se pudo actualizar tu estado.");
@@ -130,10 +163,6 @@ export default function AccountStatus() {
       setIsRefreshing(false);
     }
   }
-
-  const latestPayment = payments.length > 0
-    ? [...payments].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())[0]
-    : null;
 
   const view = resolveStatusView(user?.subscription_status, latestPayment);
 
@@ -202,7 +231,7 @@ export default function AccountStatus() {
             className="flex-1 flex items-center justify-center gap-2 bg-indigo-600 text-white py-4 rounded-2xl font-bold text-sm hover:bg-indigo-700 transition-all shadow-xl shadow-indigo-100 active:scale-[0.98] disabled:opacity-60"
           >
             <RefreshCw size={18} className={isRefreshing ? "animate-spin" : ""} />
-            Actualizar estado
+            {latestPayment?.status === "pending" ? "Verificar estado" : "Actualizar estado"}
           </button>
           <button
             onClick={logout}
