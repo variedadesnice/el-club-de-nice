@@ -697,7 +697,7 @@ export default function Landing({ onViewChange }: LandingProps) {
               una comunidad apasionada y transforma tu hobby en un negocio exitoso.
             </p>
 
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-8">
               <motion.button
                 whileHover={{ scale: 1.05, y: -2 }}
                 whileTap={{ scale: 0.95 }}
@@ -774,12 +774,12 @@ export default function Landing({ onViewChange }: LandingProps) {
       <section
         id="beneficios"
         ref={featuresRef}
-        className="relative z-10 max-w-7xl mx-auto px-6 py-24"
+        className="relative z-10 max-w-7xl mx-auto px-6 py-12"
       >
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={featuresInView ? { opacity: 1, y: 0 } : {}}
-          className="text-center mb-16"
+          className="text-center mb-8"
         >
           <p className="text-pink-500 font-bold uppercase tracking-widest text-xs mb-4">
             ¿Por qué El Club de Nice?
@@ -847,73 +847,10 @@ export default function Landing({ onViewChange }: LandingProps) {
       </section>
 
       {/* ── Product Preview ───────────────────────────────────────────── */}
-      <section id="preview" className="relative z-10 py-24">
-        <div
-          style={{ background: "linear-gradient(180deg, transparent, rgba(219,39,119,0.06) 50%, transparent)" }}
-          className="absolute inset-0 pointer-events-none"
-        />
-        <div className="relative max-w-7xl mx-auto px-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-            <motion.div
-              initial={{ opacity: 0, x: -30 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true, margin: "-80px" }}
-              transition={{ duration: 0.7 }}
-            >
-              <p className="text-pink-400 font-bold uppercase tracking-widest text-xs mb-4">
-                La plataforma
-              </p>
-              <h2 className="text-4xl md:text-5xl font-black text-slate-900 mb-6 leading-tight">
-                Diseñada para{" "}
-                <span className="text-pink-500">
-                  inspirarte
-                </span>{" "}
-                cada día
-              </h2>
-              <p className="text-slate-600 font-medium leading-relaxed mb-10">
-                Una experiencia pensada para reposteras. Navega entre el muro de la comunidad,
-                tus cursos favoritos y el calendario de lives — todo desde un solo lugar, en cualquier dispositivo.
-              </p>
-              <div className="flex flex-col gap-4">
-                {[
-                  { icon: <Palette size={18} className="text-pink-500" />, title: "Interfaz intuitiva y bella", desc: "Diseño premium hecho para inspirar tu creatividad." },
-                  { icon: <RefreshCw size={18} className="text-blue-500" />, title: "Siempre actualizado", desc: "Nuevo contenido cada semana: cursos, lives y tips." },
-                  { icon: <Calendar size={18} className="text-emerald-500" />, title: "Calendario de lives en vivo", desc: "Nunca te pierdas una clase — recibe recordatorios." },
-                ].map((item, i) => (
-                  <motion.div
-                    key={i}
-                    initial={{ opacity: 0, x: -16 }}
-                    whileInView={{ opacity: 1, x: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ delay: i * 0.12, duration: 0.5 }}
-                    className="flex items-start gap-4 bg-white border border-slate-100 rounded-2xl p-4 shadow-sm"
-                  >
-                    <div className="w-9 h-9 rounded-xl bg-slate-50 flex items-center justify-center flex-shrink-0">
-                      {item.icon}
-                    </div>
-                    <div>
-                      <p className="text-slate-900 font-bold text-sm">{item.title}</p>
-                      <p className="text-slate-500 text-sm font-medium mt-0.5">{item.desc}</p>
-                    </div>
-                  </motion.div>
-                ))}
-              </div>
-            </motion.div>
 
-            <motion.div
-              initial={{ opacity: 0, x: 30 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true, margin: "-80px" }}
-              transition={{ duration: 0.7 }}
-            >
-              <ProductPreview />
-            </motion.div>
-          </div>
-        </div>
-      </section>
 
       {/* ── For Whom ─────────────────────────────────────────────────── */}
-      <section id="para-quien" className="relative z-10 py-24">
+      <section id="para-quien" className="relative z-10 py-12">
         <div
           style={{
             background: "linear-gradient(180deg, transparent, rgba(219,39,119,0.05) 50%, transparent)",
@@ -921,7 +858,7 @@ export default function Landing({ onViewChange }: LandingProps) {
           className="absolute inset-0 pointer-events-none"
         />
         <div className="relative max-w-7xl mx-auto px-6">
-          <div className="text-center mb-16">
+          <div className="text-center mb-8">
             <p className="text-pink-400 font-bold uppercase tracking-widest text-xs mb-4">
               ¿Esto es para ti?
             </p>
@@ -991,7 +928,7 @@ export default function Landing({ onViewChange }: LandingProps) {
       </section>
 
       {/* ── Sobre Mí / Historia ─────────────────────────────────────── */}
-      <section id="sobre-mi" className="relative z-10 py-24">
+      <section id="sobre-mi" className="relative z-10 py-12">
         <div className="max-w-7xl mx-auto px-6">
           <div className="relative rounded-[3rem] overflow-hidden border border-slate-200 bg-white p-8 md:p-16 shadow-xl">
             {/* Glows */}
@@ -1047,20 +984,13 @@ export default function Landing({ onViewChange }: LandingProps) {
                 <div className="space-y-6 text-slate-600 font-medium leading-relaxed">
                   <p>
                     Mi historia en la repostería comenzó como un pequeño sueño en mi cocina, 
-                    horneando para familiares y amigos. Con el tiempo, esa pasión se transformó 
-                    en una vocación que me llevó a estudiar, perfeccionar mis técnicas y, 
-                    finalmente, convertir el azúcar y la harina en mi estilo de vida.
-                  </p>
-                  <p>
-                    A lo largo de los años, me di cuenta de que el verdadero arte no solo está en 
-                    hacer pasteles hermosos, sino en compartir ese conocimiento con otros. Así nació 
-                    la idea de crear este espacio: un lugar donde cualquiera, sin importar su nivel de 
-                    experiencia, pueda aprender los secretos de la pastelería.
+                    horneando para familiares y amigos. Con el tiempo, esta pasión se transformó 
+                    en una vocación que me llevó a convertir el azúcar y la harina en mi estilo de vida.
                   </p>
                   <p>
                     Hoy, mi mayor satisfacción es ver cómo mis alumnas logran texturas perfectas, 
-                    sabores inolvidables y, sobre todo, cómo muchas transforman este dulce pasatiempo 
-                    en un negocio exitoso y rentable. ¡Te invito a ser parte de esta historia!
+                    sabores inolvidables y transforman este dulce pasatiempo en un negocio 
+                    exitoso y rentable. ¡Te invito a ser parte de esta historia!
                   </p>
                 </div>
                 
@@ -1139,8 +1069,8 @@ export default function Landing({ onViewChange }: LandingProps) {
       </section>
 
       {/* ── Testimonials ─────────────────────────────────────────────── */}
-      <section id="testimonios" className="relative z-10 max-w-7xl mx-auto px-6 py-24">
-        <div className="text-center mb-16">
+      <section id="testimonios" className="relative z-10 max-w-7xl mx-auto px-6 py-12">
+        <div className="text-center mb-8">
           <p className="text-pink-400 font-bold uppercase tracking-widest text-xs mb-4">
             Lo que dice nuestra comunidad
           </p>
@@ -1174,38 +1104,18 @@ export default function Landing({ onViewChange }: LandingProps) {
             text="El sistema de niveles me tiene enganchada. Cada día me desafío a crear algo nuevo, compartirlo en el muro y recibir feedback real. La comunidad es súper amorosa y motivadora."
             delay={0.2}
           />
-          <TestimonialCard
-            avatar={avatarAuth2}
-            name="Daniela Flores"
-            role="Estudiante de gastronomía · Argentina"
-            text="Pensé que era cara la membresía pero es lo mejor que he invertido en mi formación. Los cursos en video los puedo ver a mi ritmo y los lives me conectan con profesionales de verdad."
-            delay={0.3}
-          />
-          <TestimonialCard
-            avatar={avatarFeat3}
-            name="Valentina Torres"
-            role="Emprendedora · Perú"
-            text="Lo que más me sorprendió fue el módulo de negocio. Aprendí a poner precios correctamente y en el primer mes recuperé 3 veces lo que pagué por la membresía. Totalmente recomendado."
-            delay={0.4}
-          />
-          <TestimonialCard
-            avatar={avatarAuth3}
-            name="Sofía Martínez"
-            role="Pastelera · Chile"
-            text="La comunidad del muro es lo que me hace volver cada día. Nunca me sentí sola en mi proceso de aprendizaje. Hay alguien siempre dispuesto a ayudarte y celebrar tus logros."
-            delay={0.5}
-          />
+
         </div>
       </section>
 
       {/* ── Pricing ───────────────────────────────────────────────────── */}
-      <section id="planes" className="relative z-10 py-24">
+      <section id="planes" className="relative z-10 py-12">
         <div
           style={{ background: "linear-gradient(180deg, transparent, rgba(219,39,119,0.07) 50%, transparent)" }}
           className="absolute inset-0 pointer-events-none"
         />
         <div className="relative max-w-7xl mx-auto px-6">
-          <div className="text-center mb-16">
+          <div className="text-center mb-8">
             <p className="text-pink-400 font-bold uppercase tracking-widest text-xs mb-4">
               Elige tu plan
             </p>
@@ -1230,9 +1140,9 @@ export default function Landing({ onViewChange }: LandingProps) {
             // Fallback static plans if API fails
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {[
-                { name: "Mensual", price: 25, duration: "1 mes", highlighted: false },
-                { name: "Trimestral", price: 60, duration: "3 meses", highlighted: true },
-                { name: "Semestral", price: 100, duration: "6 meses", highlighted: false },
+                { name: "Mensual", price: 10, duration: "1 mes", highlighted: false },
+                { name: "Semestral", price: 40, duration: "6 meses", highlighted: true },
+                { name: "Anual", price: 60, duration: "1 año", highlighted: false },
               ].map((p, i) => (
                 <motion.div
                   key={i}
@@ -1304,30 +1214,12 @@ export default function Landing({ onViewChange }: LandingProps) {
             </div>
           )}
 
-          {/* Guarantee */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-            className="mt-12 flex flex-col sm:flex-row items-center justify-center gap-4 bg-white border border-slate-200 shadow-sm rounded-3xl px-8 py-6 max-w-2xl mx-auto"
-          >
-            <div className="w-14 h-14 rounded-2xl bg-green-50 border border-green-100 flex items-center justify-center flex-shrink-0">
-              <ShieldCheck size={24} className="text-green-500" />
-            </div>
-            <div className="text-center sm:text-left">
-              <p className="text-slate-900 font-black text-base mb-1">Garantía de satisfacción</p>
-              <p className="text-slate-600 text-sm font-medium leading-relaxed">
-                Si en los primeros 7 días sientes que el Club de Nice no es para ti, te devolvemos tu dinero.
-                Sin preguntas, sin complicaciones.
-              </p>
-            </div>
-          </motion.div>
+
         </div>
       </section>
 
       {/* ── FAQ ───────────────────────────────────────────────────────── */}
-      <section id="faq" className="relative z-10 max-w-4xl mx-auto px-6 py-24">
+      <section id="faq" className="relative z-10 max-w-4xl mx-auto px-6 py-12">
         <div className="text-center mb-14">
           <p className="text-pink-400 font-bold uppercase tracking-widest text-xs mb-4">
             Preguntas frecuentes
@@ -1346,98 +1238,10 @@ export default function Landing({ onViewChange }: LandingProps) {
           ))}
         </div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="mt-10 text-center bg-white border border-slate-200 shadow-sm rounded-3xl p-8"
-        >
-          <p className="text-slate-600 font-medium mb-4">¿Tienes más dudas? Escríbenos directamente.</p>
-          <a
-            href="https://instagram.com"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl border border-pink-200 bg-pink-50 text-pink-600 font-bold text-sm hover:bg-pink-100 transition-colors"
-          >
-            <Instagram size={16} /> Contáctanos en Instagram
-          </a>
-        </motion.div>
+
       </section>
 
-      {/* ── Final CTA ────────────────────────────────────────────────── */}
-      <section className="relative z-10 max-w-7xl mx-auto px-6 pb-24">
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="relative bg-white border border-pink-100 shadow-xl rounded-[3rem] overflow-hidden p-16 text-center"
-        >
-          {/* Glows */}
-          <div
-            className="absolute -top-32 left-1/2 -translate-x-1/2 w-96 h-96 rounded-full blur-[100px] opacity-20"
-            style={{ background: "#fbcfe8" }}
-          />
-          <div
-            className="absolute -bottom-32 right-0 w-64 h-64 rounded-full blur-[80px] opacity-20"
-            style={{ background: "#fdf2f8" }}
-          />
 
-          <div className="relative z-10">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-pink-200 bg-pink-50 mb-8">
-              <Zap size={14} className="text-pink-500" />
-              <span className="text-xs font-bold text-pink-600 uppercase tracking-widest">
-                Únete hoy y empieza a crear
-              </span>
-            </div>
-
-            <h2 className="text-4xl md:text-6xl font-black text-slate-900 mb-6 leading-tight">
-              Tu próxima obra maestra{" "}
-              <br />
-              <span className="text-pink-500">
-                empieza aquí
-              </span>
-            </h2>
-
-            <p className="text-slate-600 font-medium mb-10 max-w-xl mx-auto text-lg">
-              Únete a cientos de reposteras y pasteleros que ya están transformando
-              su pasión en su profesión.
-            </p>
-
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <motion.button
-                whileHover={{ scale: 1.05, y: -2 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => onViewChange("register")}
-                style={{ background: "linear-gradient(135deg, #db2777, #f472b6)" }}
-                className="w-full sm:w-auto flex items-center justify-center gap-3 px-10 py-5 font-black text-white text-lg rounded-2xl shadow-xl shadow-pink-200"
-              >
-                Quiero ser miembro ahora <ArrowRight size={22} />
-              </motion.button>
-              <button
-                onClick={() => onViewChange("login")}
-                className="w-full sm:w-auto px-10 py-5 font-bold text-slate-700 text-base rounded-2xl border border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50 transition-all shadow-sm"
-              >
-                Ya tengo cuenta
-              </button>
-            </div>
-
-            <div className="flex flex-wrap items-center justify-center gap-8 mt-10 text-slate-400">
-              <div className="flex items-center gap-2 text-sm font-semibold">
-                <ShieldCheck size={15} className="text-green-500" />
-                <span>Garantía 7 días</span>
-              </div>
-              <div className="flex items-center gap-2 text-sm font-semibold">
-                <Clock size={15} className="text-blue-500" />
-                <span>Activación en menos de 24h</span>
-              </div>
-              <div className="flex items-center gap-2 text-sm font-semibold">
-                <Star size={15} className="text-pink-500 fill-pink-500" />
-                <span>Contenido premium</span>
-              </div>
-            </div>
-          </div>
-        </motion.div>
-      </section>
 
       {/* ── Footer ───────────────────────────────────────────────────── */}
       <footer className="relative z-10 border-t border-slate-200 py-14">
