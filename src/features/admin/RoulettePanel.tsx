@@ -1,7 +1,8 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence, useMotionValue, animate } from "motion/react";
-import { Gift, Plus, RotateCw, Trash2, Trophy, X, History, Power, Eye } from "lucide-react";
+import { Gift, Plus, RotateCw, Trash2, Trophy, X, History, Power, Eye, ChevronRight } from "lucide-react";
 import { useApiFetch } from "../../lib/api";
+import { useProfileDrawer } from "../../context/ProfileDrawerContext";
 import RouletteWheel from "../../shared/ui/RouletteWheel";
 import RouletteModal from "../roulette/RouletteModal";
 import { RoulettePrize, RouletteSpinHistoryItem } from "../../types";
@@ -34,6 +35,9 @@ export default function RoulettePanel() {
   const [winner, setWinner] = useState<RoulettePrize | null>(null);
 
   const [history, setHistory] = useState<RouletteSpinHistoryItem[]>([]);
+  // Mismo panel de perfil que se abre desde el muro, para que el admin
+  // reconozca a quién le tocó el premio sin salir de la ruleta.
+  const { openProfile } = useProfileDrawer();
   const [historyLoading, setHistoryLoading] = useState(true);
   const [showUserPreview, setShowUserPreview] = useState(false);
 
@@ -330,6 +334,9 @@ export default function RoulettePanel() {
         <h4 className="text-base sm:text-lg font-black text-slate-900 mb-5 flex items-center gap-2">
           <History size={18} className="text-indigo-600" /> Historial de Giros
         </h4>
+        <p className="text-xs font-medium text-slate-400 -mt-3 mb-5">
+          Toca a un ganador para ver su perfil.
+        </p>
         {historyLoading ? (
           <div className="flex justify-center items-center py-8 text-slate-400">
             <RotateCw size={18} className="animate-spin mr-2" />
@@ -340,13 +347,22 @@ export default function RoulettePanel() {
         ) : (
           <div className="space-y-2">
             {history.map(h => (
-              <div key={h.id} className="flex items-center justify-between gap-3 bg-slate-50 rounded-xl px-4 py-2.5 border border-slate-100">
+              <button
+                key={h.id}
+                type="button"
+                onClick={() => openProfile(h.user_id)}
+                title={`Ver el perfil de ${h.user_name}`}
+                className="w-full flex items-center justify-between gap-3 bg-slate-50 hover:bg-indigo-50 rounded-xl px-4 py-2.5 border border-slate-100 hover:border-indigo-200 text-left transition-colors group"
+              >
                 <div className="min-w-0">
-                  <p className="font-bold text-sm text-slate-800 truncate">{h.user_name}</p>
+                  <p className="font-bold text-sm text-slate-800 group-hover:text-indigo-700 truncate">{h.user_name}</p>
                   <p className="text-xs font-medium text-slate-400">{formatDateTime(h.spun_at)}</p>
                 </div>
-                <span className="text-xs font-black text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-full shrink-0">{h.prize_label}</span>
-              </div>
+                <div className="flex items-center gap-1.5 shrink-0">
+                  <span className="text-xs font-black text-indigo-600 bg-indigo-50 group-hover:bg-white px-2.5 py-1 rounded-full transition-colors">{h.prize_label}</span>
+                  <ChevronRight size={16} className="text-slate-300 group-hover:text-indigo-500 transition-colors" />
+                </div>
+              </button>
             ))}
           </div>
         )}
