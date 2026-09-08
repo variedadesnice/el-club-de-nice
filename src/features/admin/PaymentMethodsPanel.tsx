@@ -30,11 +30,38 @@ interface MethodDraft {
   name: string;
   description: string;
   is_active: boolean;
+  auto_verify: boolean;
   sort_order: number;
   fields: FieldDraft[];
 }
 
-const EMPTY_METHOD_DRAFT: MethodDraft = { name: "", description: "", is_active: true, sort_order: 0, fields: [] };
+const EMPTY_METHOD_DRAFT: MethodDraft = { name: "", description: "", is_active: true, auto_verify: false, sort_order: 0, fields: [] };
+
+/**
+ * La verificación automática sólo funciona si el método tiene un campo
+ * etiquetado "Banco" cuyo valor sea uno de los bancos que la pasarela sabe
+ * leer. El backend resuelve el banco receptor exactamente así, de modo que si
+ * el valor no encaja, activar la casilla no hace nada y todos los pagos de ese
+ * método siguen cayendo en revisión manual — sin ningún error visible. Por eso
+ * el panel avisa antes en vez de dejar el problema latente.
+ */
+const BANCOS_SOPORTADOS = ["bdv", "de venezuela", "bnc", "nacional de cr", "bfc", "fondo com", "binance"];
+
+function bancoConfigurado(fields: { field_label: string; value: string | null }[]): string | null {
+  const campo = fields.find((f) => f.field_label.trim().toLowerCase() === "banco");
+  return campo ? (campo.value ?? "") : null;
+}
+
+function avisoVerificacion(fields: { field_label: string; value: string | null }[]): string | null {
+  const banco = bancoConfigurado(fields);
+  if (banco === null) return "Falta un campo con la etiqueta exacta \"Banco\". Sin él no se puede saber a qué cuenta tuya entró el dinero.";
+  if (!banco.trim()) return "El campo \"Banco\" está vacío. Rellénalo con el banco que recibe los pagos.";
+  const v = banco.toLowerCase();
+  if (!BANCOS_SOPORTADOS.some((b) => v.includes(b))) {
+    return `"${banco}" no es un banco que la pasarela sepa leer todavía. Soportados: BDV, BNC, BFC y Binance.`;
+  }
+  return null;
+}
 
 type Api = ReturnType<typeof useApiFetch>;
 
@@ -214,6 +241,18 @@ function PaymentMethodCard({
               <span className={`text-[10px] font-black px-2 py-0.5 rounded-full flex-shrink-0 ${method.is_active ? "bg-green-50 text-green-700 border border-green-200" : "bg-slate-100 text-slate-400 border border-slate-200"}`}>
                 {method.is_active ? "Activo" : "Inactivo"}
               </span>
+              {method.auto_verify && (
+                <span
+                  className={`text-[10px] font-black px-2 py-0.5 rounded-full flex-shrink-0 border ${
+                    avisoVerificacion(method.fields)
+                      ? "bg-amber-50 text-amber-700 border-amber-200"
+                      : "bg-indigo-50 text-indigo-600 border-indigo-200"
+                  }`}
+                  title={avisoVerificacion(method.fields) ?? "Los pagos por este método se verifican solos."}
+                >
+                  {avisoVerificacion(method.fields) ? "Auto ⚠️" : "Auto"}
+                </span>
+              )}
             </div>
             {method.description && <p className="text-xs font-medium text-slate-400 truncate mt-0.5">{method.description}</p>}
           </div>
@@ -406,6 +445,11 @@ export default function PaymentMethodsPanel() {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [draft, setDraft] = useState<MethodDraft>(EMPTY_METHOD_DRAFT);
+  // Los campos y sus valores viven en la tarjeta, no en el draft, así que el
+  // aviso se calcula contra el método real que se está editando.
+  const editingMethodWarning = draft.id
+    ? avisoVerificacion(methods.find((m) => m.id === draft.id)?.fields ?? [])
+    : null;
   const [isSaving, setIsSaving] = useState(false);
   const [newFieldDraft, setNewFieldDraft] = useState<FieldDraft>(EMPTY_FIELD_DRAFT);
 
@@ -436,6 +480,7 @@ export default function PaymentMethodsPanel() {
       name: m.name,
       description: m.description ?? "",
       is_active: m.is_active,
+      auto_verify: m.auto_verify,
       sort_order: m.sort_order,
       fields: [],
     });
@@ -467,6 +512,7 @@ export default function PaymentMethodsPanel() {
             name: draft.name.trim(),
             description: draft.description.trim() || null,
             is_active: draft.is_active,
+            auto_verify: draft.auto_verify,
             sort_order: draft.sort_order,
           }),
         });
@@ -479,6 +525,7 @@ export default function PaymentMethodsPanel() {
             name: draft.name.trim(),
             description: draft.description.trim() || null,
             is_active: draft.is_active,
+            auto_verify: draft.auto_verify,
             sort_order: draft.sort_order,
             fields: draft.fields.map((f) => ({
               field_key: f.field_key.trim(),
@@ -600,6 +647,33 @@ export default function PaymentMethodsPanel() {
                       Activo
                     </label>
                   </div>
+                </div>
+
+                <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 space-y-2">
+                  <label className="flex items-center gap-2 text-sm font-bold text-slate-700">
+                    <input
+                      type="checkbox"
+                      checked={draft.auto_verify}
+                      onChange={(e) => setDraft({ ...draft, auto_verify: e.target.checked })}
+                    />
+                    Verificación automática
+                  </label>
+                  <p className="text-xs font-medium text-slate-500 leading-relaxed">
+                    Los pagos por este método se comprueban solos y activan la cuenta sin que tengas que
+                    revisarlos. Necesita un campo con la etiqueta <strong>Banco</strong> cuyo valor sea
+                    BDV, BNC, BFC o Binance.
+                  </p>
+                  {draft.auto_verify && draft.id && editingMethodWarning && (
+                    <p className="text-xs font-bold text-amber-600 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2">
+                      ⚠️ {editingMethodWarning}
+                    </p>
+                  )}
+                  {draft.auto_verify && !draft.id && (
+                    <p className="text-xs font-bold text-amber-600 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2">
+                      ⚠️ Recuerda añadir abajo un campo con la etiqueta exacta <strong>Banco</strong> y
+                      rellenar su valor después de crear el método.
+                    </p>
+                  )}
                 </div>
 
                 {/* Campos iniciales — solo al crear */}
