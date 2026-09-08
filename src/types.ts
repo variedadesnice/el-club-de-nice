@@ -156,6 +156,32 @@ export interface PromoBanner {
   created_at: string;
 }
 
+/**
+ * Lo que devuelve /api/users/{id}/admin-profile: el perfil público más los
+ * datos privados. Sólo un admin puede pedirlo.
+ */
+export interface AdminUserProfile extends PublicUserProfile {
+  email: string | null;
+  phone: string | null;
+  gender: string | null;
+  birthdate: string | null;
+  subscription_status: string | null;
+  subscription_expires_at: string | null;
+  joined_at: string | null;
+  last_payment: {
+    id: string;
+    status: string;
+    plan: string;
+    amount: number | null;
+    amount_local: number | null;
+    reference_number: string | null;
+    payment_method: string | null;
+    created_at: string;
+    paid_at: string | null;
+    expires_at: string | null;
+  } | null;
+}
+
 export interface PublicUserProfile {
   id: string;
   name: string | null;

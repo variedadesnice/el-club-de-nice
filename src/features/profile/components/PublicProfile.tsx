@@ -2,9 +2,12 @@ import React, { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { X, MapPin, Flame, BookOpen, Users, Trophy, Award } from "lucide-react";
 import { useApiFetch } from "../../../lib/api";
+import { useAuth } from "../../../context/AuthContext";
+import { isAdmin } from "../../../lib/permissions";
 import type { PublicUserProfile } from "../../../types";
 import ProfileLevelCard from "./ProfileLevelCard";
 import ProfileAchievements, { UserAchievement, groupAchievements } from "./ProfileAchievements";
+import AdminProfileDetails from "./AdminProfileDetails";
 
 interface Props {
   userId: string;
@@ -41,6 +44,12 @@ function StatBox({
 
 export default function PublicProfile({ userId, onClose }: Props) {
   const api = useApiFetch();
+  const { user } = useAuth();
+  // Los datos privados los pide un componente aparte contra un endpoint que
+  // sólo responde a administradores. Esta comprobación evita la llamada
+  // inútil (y el 403) cuando quien mira es un miembro; la protección real
+  // está en el backend.
+  const viewerIsAdmin = isAdmin(user?.role);
   const [profile, setProfile] = useState<PublicUserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -212,6 +221,9 @@ export default function PublicProfile({ userId, onClose }: Props) {
                 {achievements.length > 0 && (
                   <ProfileAchievements achievements={achievements} loading={false} />
                 )}
+
+                {/* Datos de contacto — sólo para administradores */}
+                {viewerIsAdmin && <AdminProfileDetails userId={userId} />}
               </div>
             </>
           )}
