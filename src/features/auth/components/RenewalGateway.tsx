@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from "react";
 import {
-  Mail, Clock, ShieldOff, CreditCard, Upload, FileText, CheckCircle2, ChevronLeft, ChevronRight, Hash, Phone, LogOut, RefreshCw, AlertTriangle, X
+  Mail, Clock, ShieldOff, CreditCard, Upload, FileText, CheckCircle2, ChevronLeft, ChevronRight, Hash, Phone, LogOut, RefreshCw, AlertTriangle, X, UserRound
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { useAuth, User } from "../../../context/AuthContext";
 import { ApiError, useApiFetch } from "../../../lib/api";
+import { isBinanceMethod } from "../../../lib/paymentMethods";
 import type { PaymentMethod, PlanType, Plan, Currency, Payment } from "../../../types";
 
 interface RecheckResult {
@@ -76,6 +77,7 @@ export default function RenewalGateway({ isModal = false, onClose }: { isModal?:
   const [plan, setPlan] = useState<PlanType>("");
   const [amount, setAmount] = useState("");
   const [referenceNumber, setReferenceNumber] = useState("");
+  const [payerName, setPayerName] = useState("");
   const [phone, setPhone] = useState("");
 
   const [isAutoApproved, setIsAutoApproved] = useState(false);
@@ -105,6 +107,7 @@ export default function RenewalGateway({ isModal = false, onClose }: { isModal?:
   const [refreshNotice, setRefreshNotice] = useState<string | null>(null);
 
   const selectedMethod = paymentMethods.find((m) => m.id === selectedMethodId) ?? null;
+  const isBinance = isBinanceMethod(selectedMethod);
   const selectedPlan = plans.find((p) => p.code === plan) ?? null;
 
   // Tasas BCV
@@ -191,7 +194,16 @@ export default function RenewalGateway({ isModal = false, onClose }: { isModal?:
 
   function handleNextStep2() {
     if (!referenceNumber.trim() || !phone.trim()) {
-      setStepError("Completa la referencia y el teléfono de contacto.");
+      setStepError(
+        isBinance
+          ? "Completa el número de orden y el teléfono de contacto."
+          : "Completa la referencia y el teléfono de contacto."
+      );
+      return;
+    }
+    // En Binance el nombre es el único dato que identifica el pago.
+    if (isBinance && !payerName.trim()) {
+      setStepError("Escribe el nombre con el que aparece tu pago en Binance.");
       return;
     }
     const digitsOnly = phone.replace(/\D/g, "");
@@ -276,6 +288,7 @@ export default function RenewalGateway({ isModal = false, onClose }: { isModal?:
           amount: selectedPlan?.price_usd ?? 0,
           payment_method_id: selectedMethodId,
           reference_number: referenceNumber.trim(),
+          payer_name: payerName.trim() || null,
           phone: `${COUNTRY_CODE}${phone.trim()}`,
           receipt_path: receiptPath,
           currency_id: selectedCurrencyId,
@@ -617,15 +630,47 @@ export default function RenewalGateway({ isModal = false, onClose }: { isModal?:
               {/* Ref & Phone */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <label className={labelClass}>Número de Referencia Completa</label>
+                  <label className={labelClass}>
+                    {isBinance ? "Número de orden de Binance" : "Número de Referencia Completa"}
+                  </label>
                   <div className="relative">
                     <Hash className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-                    <input type="text" required value={referenceNumber} onChange={(e) => setReferenceNumber(e.target.value)} placeholder="Ej. 0001234567" className={inputClass} />
+                    <input
+                      type="text"
+                      required
+                      value={referenceNumber}
+                      onChange={(e) => setReferenceNumber(e.target.value)}
+                      placeholder={isBinance ? "Ej. 22581234567890123456" : "Ej. 0001234567"}
+                      className={inputClass}
+                    />
                   </div>
                   <p className="text-[11px] text-indigo-600 font-bold ml-1">
-                    ⚠️ Ingresa la referencia completa, tal como aparece en tu comprobante — no la abrevies ni la trunques.
+                    {isBinance
+                      ? "Lo encuentras en el detalle de la orden P2P, como \"Número de orden\"."
+                      : "⚠️ Ingresa la referencia completa, tal como aparece en tu comprobante — no la abrevies ni la trunques."}
                   </p>
                 </div>
+
+                {isBinance && (
+                  <div className="space-y-2">
+                    <label className={labelClass}>Nombre en Binance</label>
+                    <div className="relative">
+                      <UserRound className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                      <input
+                        type="text"
+                        required
+                        value={payerName}
+                        onChange={(e) => setPayerName(e.target.value)}
+                        placeholder="Ej. Angelica Rodriguez"
+                        className={inputClass}
+                      />
+                    </div>
+                    <p className="text-[11px] text-indigo-600 font-bold ml-1">
+                      ⚠️ Escríbelo igual que aparece en tu orden de Binance. Es lo único que nos permite
+                      reconocer tu pago automáticamente.
+                    </p>
+                  </div>
+                )}
 
                 <div className="space-y-2">
                   <label className={labelClass}>Teléfono de Contacto</label>
@@ -711,7 +756,8 @@ export default function RenewalGateway({ isModal = false, onClose }: { isModal?:
                 <div className="flex justify-between text-sm"><span className="text-slate-400">Plan</span><span className="font-bold text-slate-700">{selectedPlan?.name}</span></div>
                 <div className="flex justify-between text-sm"><span className="text-slate-400">Monto total</span><span className="font-bold text-slate-700">Bs. {parseFloat(amount || "0").toLocaleString("es-VE", { minimumFractionDigits: 2 })}</span></div>
                 <div className="flex justify-between text-sm"><span className="text-slate-400">Método de pago</span><span className="font-bold text-slate-700">{selectedMethod?.name}</span></div>
-                <div className="flex justify-between text-sm"><span className="text-slate-400">Referencia</span><span className="font-bold text-slate-700">{referenceNumber}</span></div>
+                <div className="flex justify-between text-sm"><span className="text-slate-400">{isBinance ? "Nº de orden" : "Referencia"}</span><span className="font-bold text-slate-700">{referenceNumber}</span></div>
+                {isBinance && <div className="flex justify-between text-sm"><span className="text-slate-400">Nombre en Binance</span><span className="font-bold text-slate-700">{payerName}</span></div>}
                 <div className="flex justify-between text-sm"><span className="text-slate-400">Teléfono de contacto</span><span className="font-bold text-slate-700">{phone}</span></div>
               </div>
             </motion.div>

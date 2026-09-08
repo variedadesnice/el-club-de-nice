@@ -5,6 +5,7 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { apiFetch } from "../../../lib/api";
+import { isBinanceMethod } from "../../../lib/paymentMethods";
 import type { PaymentMethod, PlanType, Plan, Currency } from "../../../types";
 import logo from "../../../assets/logo.png";
 import PasswordInput from "../../../shared/ui/PasswordInput";
@@ -156,6 +157,7 @@ export default function Register({ onGoToLogin }: RegisterProps) {
   const [plan, setPlan] = useState<PlanType>("");
   const [amount, setAmount] = useState("");
   const [referenceNumber, setReferenceNumber] = useState("");
+  const [payerName, setPayerName] = useState("");
   const [phone, setPhone] = useState("");
 
   const [isAutoApproved, setIsAutoApproved] = useState(false);
@@ -186,6 +188,7 @@ export default function Register({ onGoToLogin }: RegisterProps) {
   const [submitted, setSubmitted] = useState(false);
 
   const selectedMethod = paymentMethods.find((m) => m.id === selectedMethodId) ?? null;
+  const isBinance = isBinanceMethod(selectedMethod);
   const selectedPlan = plans.find((p) => p.code === plan) ?? null;
 
   useEffect(() => {
@@ -309,7 +312,17 @@ export default function Register({ onGoToLogin }: RegisterProps) {
 
   function handleNextFromStep3() {
     if (!referenceNumber.trim() || !phone.trim()) {
-      setStepError("Completa la referencia y el teléfono de contacto.");
+      setStepError(
+        isBinance
+          ? "Completa el número de orden y el teléfono de contacto."
+          : "Completa la referencia y el teléfono de contacto."
+      );
+      return;
+    }
+    // En Binance el nombre no es un extra: es el único dato con el que se
+    // puede reconocer el pago, así que sin él no tiene sentido continuar.
+    if (isBinance && !payerName.trim()) {
+      setStepError("Escribe el nombre con el que aparece tu pago en Binance.");
       return;
     }
     const digitsOnly = phone.replace(/\D/g, "");
@@ -397,6 +410,7 @@ export default function Register({ onGoToLogin }: RegisterProps) {
           amount: selectedPlan?.price_usd ?? 0,               // USD
           payment_method_id: selectedMethodId,
           reference_number: referenceNumber.trim(),
+          payer_name: payerName.trim() || null,
           phone: `${COUNTRY_CODE}${phone.trim()}`,
           receipt_path: receiptPath,
           currency_id: selectedCurrencyId,
@@ -646,15 +660,47 @@ export default function Register({ onGoToLogin }: RegisterProps) {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                 <div className="space-y-2">
-                  <label className={labelClass}>Número de Referencia Completa</label>
+                  <label className={labelClass}>
+                    {isBinance ? "Número de orden de Binance" : "Número de Referencia Completa"}
+                  </label>
                   <div className="relative">
                     <Hash className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-                    <input type="text" required value={referenceNumber} onChange={(e) => setReferenceNumber(e.target.value)} placeholder="Ej. 0001234567" className={inputClass} />
+                    <input
+                      type="text"
+                      required
+                      value={referenceNumber}
+                      onChange={(e) => setReferenceNumber(e.target.value)}
+                      placeholder={isBinance ? "Ej. 22581234567890123456" : "Ej. 0001234567"}
+                      className={inputClass}
+                    />
                   </div>
                   <p className="text-[11px] text-indigo-600 font-bold ml-1">
-                    ⚠️ Ingresa la referencia completa, tal como aparece en tu comprobante — no la abrevies ni la trunques.
+                    {isBinance
+                      ? "Lo encuentras en el detalle de la orden P2P, como \"Número de orden\"."
+                      : "⚠️ Ingresa la referencia completa, tal como aparece en tu comprobante — no la abrevies ni la trunques."}
                   </p>
                 </div>
+
+                {isBinance && (
+                  <div className="space-y-2">
+                    <label className={labelClass}>Nombre en Binance</label>
+                    <div className="relative">
+                      <User className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                      <input
+                        type="text"
+                        required
+                        value={payerName}
+                        onChange={(e) => setPayerName(e.target.value)}
+                        placeholder="Ej. Angelica Rodriguez"
+                        className={inputClass}
+                      />
+                    </div>
+                    <p className="text-[11px] text-indigo-600 font-bold ml-1">
+                      ⚠️ Escríbelo igual que aparece en tu orden de Binance. Es lo único que nos permite
+                      reconocer tu pago automáticamente.
+                    </p>
+                  </div>
+                )}
 
                 <div className="space-y-2">
                   <label className={labelClass}>Teléfono de Contacto</label>
@@ -680,7 +726,9 @@ export default function Register({ onGoToLogin }: RegisterProps) {
               </div>
 
               <p className="text-xs font-medium text-slate-400 bg-slate-50 px-4 py-3 rounded-xl">
-                Usaremos tu número de referencia para verificar tu pago automáticamente o de forma manual si es necesario.
+                {isBinance
+                  ? "Usaremos tu nombre en Binance para verificar el pago automáticamente, o lo revisará un administrador si hace falta."
+                  : "Usaremos tu número de referencia para verificar tu pago automáticamente o de forma manual si es necesario."}
               </p>
             </motion.div>
           )}
@@ -746,7 +794,8 @@ export default function Register({ onGoToLogin }: RegisterProps) {
                   ["Plan", selectedPlan?.name ?? plan],
                   ["Monto", amount],
                   ["Método de pago", selectedMethod?.name ?? ""],
-                  ["Referencia", referenceNumber],
+                  [isBinance ? "Nº de orden" : "Referencia", referenceNumber],
+                  ...(isBinance ? [["Nombre en Binance", payerName] as [string, string]] : []),
                   ["Teléfono de contacto", phone],
                 ].map(([k, v]) => (
                   <div key={k} className="flex items-center justify-between text-sm">

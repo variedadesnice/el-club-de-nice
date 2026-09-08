@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { Plus, Edit2, Trash2, Camera, X, RefreshCw, Trophy, Star } from "lucide-react";
-import { useApiFetch } from "../../lib/api";
+import { ApiError, useApiFetch } from "../../lib/api";
 import type { Level, Badge } from "../../types";
 
 type TabType = "levels" | "badges";
@@ -153,6 +153,25 @@ export default function GamificationPanel() {
     if (!confirm("¿Estás seguro de eliminar esta insignia?")) return;
     try {
       await api(`/api/admin/achievements/${id}`, { method: "DELETE" });
+      setBadges(prev => prev.filter(b => b.id !== id));
+      return;
+    } catch (e: any) {
+      // 409 significa que alguien ya la tiene en su perfil. El backend no la
+      // borra solo en ese caso: quitarle una insignia ganada a un miembro es
+      // irreversible, así que se pregunta antes en vez de hacerlo callado.
+      if (!(e instanceof ApiError && e.status === 409)) {
+        alert("Error al eliminar insignia: " + e.message);
+        return;
+      }
+      if (!confirm(`${e.message}
+
+Pulsa Aceptar para eliminarla igualmente y quitársela a quien la tenga. El XP que ya ganaron NO se les quita.`)) {
+        return;
+      }
+    }
+
+    try {
+      await api(`/api/admin/achievements/${id}?force=true`, { method: "DELETE" });
       setBadges(prev => prev.filter(b => b.id !== id));
     } catch (e: any) {
       alert("Error al eliminar insignia: " + e.message);
