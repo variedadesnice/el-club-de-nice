@@ -5,6 +5,7 @@ import { lazyWithReload } from "../lib/lazyWithReload";
 import { isAdmin } from "../lib/permissions";
 import Landing from "../features/landing/landing";
 import Login from "../features/auth/components/Login";
+import Landing3 from "../features/landing/Landing3";
 
 // Cargados bajo demanda: reducen el bundle inicial que descarga cualquier
 // visitante no autenticado (login/landing) a solo lo que realmente se renderiza.
@@ -85,6 +86,7 @@ export interface AppRoute {
 export const authRoutes: AppRoute[] = [
   { path: "/", element: <LandingPage /> },
   { path: "/landing", element: <Navigate to="/" replace /> },
+  { path: "/landing3", element: <Landing3 /> },
   { path: "/login", element: <LoginPage /> },
   { path: "/register", element: <RegisterPage /> },
   { path: "/invite", element: <InviteRegisterPage /> },
