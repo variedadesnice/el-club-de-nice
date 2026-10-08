@@ -138,13 +138,13 @@ export default function PostFeed() {
         )}
 
         {/* Accesos rápidos a categorías de contenido */}
-        <div className="grid grid-cols-2 gap-3">
+        <div className="flex gap-3 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {CONTENT_CATEGORIES.map((cat) => (
             <button
               key={cat.key}
               type="button"
               onClick={() => navigate(`/classroom?category=${encodeURIComponent(cat.key)}`)}
-              className="relative overflow-hidden flex flex-col items-start justify-end rounded-2xl bg-pink-500 hover:bg-pink-600 active:scale-[0.97] transition-all p-4 min-h-[90px] text-left shadow-md shadow-pink-500/20 group"
+              className="relative overflow-hidden flex flex-col items-start justify-end rounded-2xl bg-pink-500 hover:bg-pink-600 active:scale-[0.97] transition-all p-4 min-h-[100px] w-[160px] shrink-0 text-left shadow-md shadow-pink-500/20"
             >
               {cat.icon}
               <div className="relative z-10">
