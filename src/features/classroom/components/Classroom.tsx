@@ -16,6 +16,7 @@ export default function Classroom() {
   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
   const [showCreate, setShowCreate] = useState(false);
   const [editingCourse, setEditingCourse] = useState<Course | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<string>("Todos");
 
   React.useEffect(() => {
     if (selectedCourse) {
@@ -73,14 +74,33 @@ export default function Classroom() {
           </div>
         )}
 
+        {courses.length > 0 && (
+          <div className="flex items-center gap-2 overflow-x-auto pb-2 snap-x">
+            {["Todos", "Cursos", "Probando marcas", "Guías digitales", "Laboratorios"].map((cat) => (
+              <button
+                key={cat}
+                type="button"
+                onClick={() => setSelectedCategory(cat)}
+                className={`px-4 py-2 rounded-full text-sm font-bold whitespace-nowrap transition-colors snap-start shrink-0 ${
+                  selectedCategory === cat
+                    ? "bg-pink-500 text-white shadow-md shadow-pink-500/20"
+                    : "bg-pink-50 text-pink-600 hover:bg-pink-100"
+                }`}
+              >
+                {cat}
+              </button>
+            ))}
+          </div>
+        )}
+
         {courses.length === 0 ? (
           <div className="rounded-3xl border-2 border-violet-200 bg-sky-50/80 p-8 text-center">
             <p className="font-bold text-slate-700">
-              {userIsAdmin ? "No hay cursos todavía" : "Todavía no hay cursos publicados"}
+              {userIsAdmin ? "No hay contenidos todavía" : "Todavía no hay contenidos publicados"}
             </p>
             <p className="text-sm text-slate-500 mt-1 mb-4">
               {userIsAdmin
-                ? "Crea tu primer curso con nombre, descripción e imagen."
+                ? "Sube tu primer contenido."
                 : "Estamos preparando contenido nuevo. ¡Vuelve pronto!"}
             </p>
             {userIsAdmin && (
@@ -89,28 +109,35 @@ export default function Classroom() {
                 onClick={() => { if (requireAdmin(user?.role, "subir cursos")) setShowCreate(true); }}
                 className="inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-brand-primary text-white text-sm font-bold"
               >
-                <Plus size={18} /> Subir curso
+                <Plus size={18} /> Subir contenido
               </button>
             )}
           </div>
         ) : (
           <div className="space-y-3">
-            {courses.map((course, idx) => (
-              <CourseCard
-                key={course.id}
-                course={course}
-                index={idx}
-                onClick={() => setSelectedCourse(course)}
-                onEdit={
-                  userIsAdmin
-                    ? () => {
-                        setEditingCourse(course);
-                        setShowCreate(true);
-                      }
-                    : undefined
-                }
-              />
+            {courses
+              .filter((course) => selectedCategory === "Todos" || course.category === selectedCategory)
+              .map((course, idx) => (
+                <CourseCard
+                  key={course.id}
+                  course={course}
+                  index={idx}
+                  onClick={() => setSelectedCourse(course)}
+                  onEdit={
+                    userIsAdmin
+                      ? () => {
+                          setEditingCourse(course);
+                          setShowCreate(true);
+                        }
+                      : undefined
+                  }
+                />
             ))}
+            {courses.filter((course) => selectedCategory === "Todos" || course.category === selectedCategory).length === 0 && (
+              <div className="text-center py-10">
+                <p className="text-slate-500 font-medium">No hay contenidos en esta categoría.</p>
+              </div>
+            )}
           </div>
         )}
       </div>

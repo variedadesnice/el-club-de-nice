@@ -15,7 +15,7 @@ export default function CreateCourseSheet({ open, onClose, onCreated, course }: 
   const api = useApiFetch();
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [category, setCategory] = useState("General");
+  const [category, setCategory] = useState("Cursos");
   const [thumbnailPreview, setThumbnailPreview] = useState("");
   const [thumbnailUrl, setThumbnailUrl] = useState("");
   const [isUploading, setIsUploading] = useState(false);
@@ -27,7 +27,7 @@ export default function CreateCourseSheet({ open, onClose, onCreated, course }: 
     if (open && course) {
       setTitle(course.title);
       setDescription(course.description);
-      setCategory(course.category ?? "General");
+      setCategory(course.category || "Cursos");
       setThumbnailPreview(course.thumbnail);
       setThumbnailUrl(course.thumbnail);
     } else if (open && !course) {
@@ -39,7 +39,7 @@ export default function CreateCourseSheet({ open, onClose, onCreated, course }: 
   const reset = () => {
     setTitle("");
     setDescription("");
-    setCategory("General");
+    setCategory("Cursos");
     setThumbnailPreview("");
     setThumbnailUrl("");
     setError(null);
@@ -104,7 +104,7 @@ export default function CreateCourseSheet({ open, onClose, onCreated, course }: 
             title: title.trim(),
             description: description.trim(),
             thumbnail: thumbnailUrl,
-            category: category.trim() || "General",
+            category: category,
           }),
         });
       } else {
@@ -115,7 +115,7 @@ export default function CreateCourseSheet({ open, onClose, onCreated, course }: 
             title: title.trim(),
             description: description.trim(),
             thumbnail: thumbnailUrl,
-            category: category.trim() || "General",
+            category: category,
           }),
         });
       }
@@ -185,13 +185,16 @@ export default function CreateCourseSheet({ open, onClose, onCreated, course }: 
         <label className="text-[10px] font-black text-slate-400 uppercase tracking-wider ml-1">
           Categoría
         </label>
-        <input
-          type="text"
+        <select
           value={category}
           onChange={(e) => setCategory(e.target.value)}
-          placeholder="Ej. Marketing, Finanzas, General..."
-          className="w-full mt-1 bg-slate-50 border-2 border-transparent focus:border-violet-200 focus:bg-white rounded-xl py-3 px-4 text-sm font-medium outline-none"
-        />
+          className="w-full mt-1 bg-slate-50 border-2 border-transparent focus:border-violet-200 focus:bg-white rounded-xl py-3 px-4 text-sm font-medium outline-none appearance-none"
+        >
+          <option value="Cursos">Cursos</option>
+          <option value="Probando marcas">Probando marcas</option>
+          <option value="Guías digitales">Guías digitales</option>
+          <option value="Laboratorios">Laboratorios</option>
+        </select>
       </div>
 
       <div>
