@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Plus } from "lucide-react";
+import { useSearchParams } from "react-router-dom";
 import { useCourses } from "../hooks/useCourses";
 import { useAuth } from "../../../context/AuthContext";
 import { requireAdmin, isAdmin } from "../../../lib/permissions";
@@ -13,10 +14,13 @@ export default function Classroom() {
   const { user } = useAuth();
   const userIsAdmin = isAdmin(user?.role);
   const { courses, isLoading, error, refetch } = useCourses();
+  const [searchParams] = useSearchParams();
   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
   const [showCreate, setShowCreate] = useState(false);
   const [editingCourse, setEditingCourse] = useState<Course | null>(null);
-  const [selectedCategory, setSelectedCategory] = useState<string>("Todos");
+  const [selectedCategory, setSelectedCategory] = useState<string>(
+    searchParams.get("category") ?? "Todos"
+  );
 
   React.useEffect(() => {
     if (selectedCourse) {

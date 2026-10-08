@@ -1,4 +1,5 @@
 import { useRef, useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { usePosts } from "../hooks/usePosts";
 import CreatePost from "./CreatePost";
 import PostCard from "./PostCard";
@@ -9,9 +10,60 @@ import RenewalBanner from "./RenewalBanner";
 import RaffleBanner from "./RaffleBanner";
 import PromoBanner from "./PromoBanner";
 
+const CONTENT_CATEGORIES = [
+  {
+    key: "Cursos",
+    label: "Cursos",
+    desc: "Aprende a tu ritmo con nuestras clases",
+    icon: (
+      <svg viewBox="0 0 48 48" fill="none" className="w-14 h-14 opacity-20 absolute right-2 bottom-0" xmlns="http://www.w3.org/2000/svg">
+        <path d="M8 38V14a2 2 0 0 1 2-2h28a2 2 0 0 1 2 2v24" stroke="white" strokeWidth="3" strokeLinecap="round"/>
+        <path d="M4 38h40" stroke="white" strokeWidth="3" strokeLinecap="round"/>
+        <path d="M20 18l8 6-8 6V18Z" fill="white"/>
+      </svg>
+    ),
+  },
+  {
+    key: "Probando marcas",
+    label: "Probando\nmarcas",
+    desc: "Ponemos a prueba tus ingredientes favoritos",
+    icon: (
+      <svg viewBox="0 0 48 48" fill="none" className="w-14 h-14 opacity-20 absolute right-2 bottom-0" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="24" cy="24" r="16" stroke="white" strokeWidth="3"/>
+        <path d="M16 24l5 5 11-11" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
+      </svg>
+    ),
+  },
+  {
+    key: "Guías digitales",
+    label: "Guías\ndigitales",
+    desc: "Recetas y guías paso a paso",
+    icon: (
+      <svg viewBox="0 0 48 48" fill="none" className="w-14 h-14 opacity-20 absolute right-2 bottom-0" xmlns="http://www.w3.org/2000/svg">
+        <rect x="10" y="6" width="28" height="36" rx="3" stroke="white" strokeWidth="3"/>
+        <path d="M16 16h16M16 22h16M16 28h10" stroke="white" strokeWidth="2.5" strokeLinecap="round"/>
+      </svg>
+    ),
+  },
+  {
+    key: "Laboratorios",
+    label: "Laboratorios",
+    desc: "Probando nuevos trucos en la cocina",
+    icon: (
+      <svg viewBox="0 0 48 48" fill="none" className="w-14 h-14 opacity-20 absolute right-2 bottom-0" xmlns="http://www.w3.org/2000/svg">
+        <path d="M18 6v16L10 36a4 4 0 0 0 3.6 5.7h20.8A4 4 0 0 0 38 36L30 22V6" stroke="white" strokeWidth="3" strokeLinecap="round"/>
+        <path d="M15 6h18" stroke="white" strokeWidth="3" strokeLinecap="round"/>
+        <circle cx="20" cy="34" r="2" fill="white"/>
+        <circle cx="27" cy="38" r="1.5" fill="white"/>
+      </svg>
+    ),
+  },
+];
+
 interface TagOption { id: string; name: string; }
 
 export default function PostFeed() {
+  const navigate = useNavigate();
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [allTags, setAllTags] = useState<TagOption[]>([]);
 
@@ -84,6 +136,28 @@ export default function PostFeed() {
             )}
           </div>
         )}
+
+        {/* Accesos rápidos a categorías de contenido */}
+        <div className="grid grid-cols-2 gap-3">
+          {CONTENT_CATEGORIES.map((cat) => (
+            <button
+              key={cat.key}
+              type="button"
+              onClick={() => navigate(`/classroom?category=${encodeURIComponent(cat.key)}`)}
+              className="relative overflow-hidden flex flex-col items-start justify-end rounded-2xl bg-pink-500 hover:bg-pink-600 active:scale-[0.97] transition-all p-4 min-h-[90px] text-left shadow-md shadow-pink-500/20 group"
+            >
+              {cat.icon}
+              <div className="relative z-10">
+                <p className="text-white font-black text-sm leading-tight uppercase tracking-wide whitespace-pre-line">
+                  ❯ {cat.label}
+                </p>
+                <p className="text-pink-100 text-[11px] font-medium mt-0.5 leading-snug">
+                  {cat.desc}
+                </p>
+              </div>
+            </button>
+          ))}
+        </div>
 
         <CreatePost onSubmit={createPost} />
 
