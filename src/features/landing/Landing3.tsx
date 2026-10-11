@@ -8,7 +8,92 @@ import fondo5 from "../../assets/landing oscar/FONDO 5.png";
 import logo from "../../assets/logo.png";
 import cuadroReproductor from "../../assets/landing oscar/CUADRO REPRODUCTOR.png";
 import grupo2 from "../../assets/landing oscar/Grupo 2.png";
-import { Paintbrush, RefreshCw, Calendar } from "lucide-react";
+import { Paintbrush, RefreshCw, Calendar, Star, Instagram, Youtube } from "lucide-react";
+import nicePerfil from "../../assets/contenido/nice de perfil.png";
+import avatarFeat1 from "../../assets/avatars/feat1.jpg";
+import avatarFeat2 from "../../assets/avatars/feat2.jpg";
+import avatarFeat3 from "../../assets/avatars/feat3.jpg";
+
+interface Testimonial {
+  name: string;
+  role: string;
+  country: string;
+  image: string;
+  quote: string;
+  rating: number;
+}
+
+const testimonials: Testimonial[] = [
+  {
+    name: "María González",
+    role: "Pastelera freelance",
+    country: "Venezuela",
+    image: avatarFeat1,
+    quote: "Gracias al Club de Nice pude aprender técnicas que nunca encontré en YouTube. En 3 meses ya tenía mis primeros 5 clientes y hoy vivo de la repostería. No lo hubiera logrado sin esta comunidad.",
+    rating: 5,
+  },
+  {
+    name: "Carolina Ramírez",
+    role: "Dueña de pastelería",
+    country: "Colombia",
+    image: avatarFeat3,
+    quote: "Los lives semanales son increíbles. Cada semana aprendo algo nuevo que puedo aplicar inmediatamente en mi negocio. La calidad del contenido es muy superior a lo que esperaba.",
+    rating: 5,
+  },
+  {
+    name: "Laura Méndez",
+    role: "Repostera artesanal",
+    country: "México",
+    image: avatarFeat2,
+    quote: "El sistema de niveles me tiene enganchada. Cada día me desafío a crear algo nuevo, compartirlo en el muro y recibir feedback real. La comunidad es súper amorosa y motivadora.",
+    rating: 5,
+  },
+];
+
+function TestimonialCard({ testimonial, index }: { testimonial: Testimonial; index: number }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 25 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.5, delay: index * 0.12, ease: "easeOut" }}
+      className="flex flex-col justify-between bg-white border border-[#E8E8EE] rounded-[18px] p-6 sm:p-7 h-full shadow-[0_4px_16px_rgba(0,0,0,0.02)] hover:-translate-y-1 hover:border-[#ff008c]/40 hover:shadow-[0_14px_35px_rgba(255,0,140,0.07)] transition-all duration-300"
+    >
+      <div>
+        {/* Estrellas */}
+        <div className="flex items-center gap-1 text-[#ff008c] mb-4">
+          {Array.from({ length: testimonial.rating }).map((_, i) => (
+            <span key={i} className="text-[15px] sm:text-[16px] leading-none select-none">
+              ★
+            </span>
+          ))}
+        </div>
+
+        {/* Cita */}
+        <p className="text-[#617089] text-[14.5px] sm:text-[15px] leading-[1.65] font-[450] mb-6">
+          “{testimonial.quote}”
+        </p>
+      </div>
+
+      {/* Perfil */}
+      <div className="flex items-center gap-3.5 pt-4 border-t border-[#f4f4f7]">
+        <img
+          src={testimonial.image}
+          alt={testimonial.name}
+          className="w-[42px] h-[42px] rounded-full object-cover border border-[#f0e4ec] shrink-0"
+        />
+        <div className="flex flex-col">
+          <h4 className="text-[#071631] font-[750] text-[14.5px] leading-tight">
+            {testimonial.name}
+          </h4>
+          <span className="text-[#617089] text-[11.5px] sm:text-[12px] font-[500] mt-0.5 leading-tight">
+            {testimonial.role} · {testimonial.country}
+          </span>
+        </div>
+      </div>
+    </motion.div>
+  );
+}
 
 function AnimatedCounter({ target, duration = 1500 }: { target: number, duration?: number }) {
   const [count, setCount] = useState(0);
@@ -58,6 +143,25 @@ function AnimatedCounter({ target, duration = 1500 }: { target: number, duration
 
 export default function Landing3() {
   const navigate = useNavigate();
+  const [activeTestimonial, setActiveTestimonial] = useState(0);
+  const testimonialCarouselRef = useRef<HTMLDivElement>(null);
+
+  const handleCarouselScroll = () => {
+    if (!testimonialCarouselRef.current) return;
+    const { scrollLeft, offsetWidth } = testimonialCarouselRef.current;
+    const newIndex = Math.round(scrollLeft / (offsetWidth * 0.85));
+    setActiveTestimonial(Math.min(Math.max(newIndex, 0), testimonials.length - 1));
+  };
+
+  const scrollToSlide = (idx: number) => {
+    if (!testimonialCarouselRef.current) return;
+    const cardWidth = testimonialCarouselRef.current.offsetWidth * 0.85;
+    testimonialCarouselRef.current.scrollTo({
+      left: idx * cardWidth,
+      behavior: "smooth",
+    });
+    setActiveTestimonial(idx);
+  };
 
   return (
     <div className="w-full flex flex-col font-sans">
@@ -207,6 +311,7 @@ export default function Landing3() {
 
       {/* Sección 3: Pricing (Fondo Eliminado) */}
       <section
+        id="planes"
         className="w-full relative flex flex-col items-center justify-center py-24 md:py-[120px] px-4 sm:px-6 bg-[#071426]"
       >
         <motion.div
@@ -329,7 +434,7 @@ export default function Landing3() {
       </section>
 
       {/* Sección: Hecho para quienes aman hornear */}
-      <section className="w-full relative bg-white py-24 md:py-[110px] px-4 sm:px-6">
+      <section id="beneficios" className="w-full relative bg-white py-24 md:py-[110px] px-4 sm:px-6">
         <div className="max-w-[1240px] mx-auto">
           {/* Encabezado */}
           <motion.div
@@ -428,6 +533,7 @@ export default function Landing3() {
 
       {/* Sección Diseñada para inspirarte cada día */}
       <section
+        id="plataforma"
         className="w-full relative flex flex-col justify-center overflow-hidden py-20 md:py-[100px] bg-[#610d29]"
       >
         <div className="relative z-10 w-full max-w-[1240px] mx-auto px-4 sm:px-6 grid grid-cols-1 md:grid-cols-[0.9fr_1.1fr] items-center gap-0 md:gap-8">
@@ -571,6 +677,302 @@ export default function Landing3() {
 
         </div>
       </section>
+
+      {/* ── SECCIÓN 1 — SOBRE MÍ / HOLA, SOY NICE ── */}
+      <section id="sobre-mi" className="w-full relative bg-white pt-24 md:pt-[110px] pb-14 md:pb-20 px-4 sm:px-6">
+        <div className="max-w-[1220px] mx-auto">
+          <div className="relative rounded-[32px] sm:rounded-[40px] bg-white border border-[#E7EAF0] p-6 sm:p-10 md:p-14 lg:p-16 shadow-[0_20px_60px_rgba(12,24,48,0.05)] overflow-hidden">
+            
+            {/* Forma decorativa orgánica en esquina superior derecha */}
+            <div
+              className="absolute -top-16 -right-16 w-56 h-56 sm:w-72 sm:h-72 rounded-full pointer-events-none opacity-40 blur-[36px]"
+              style={{
+                background: "radial-gradient(circle, #ff008c 0%, #ff80bf 45%, transparent 75%)",
+              }}
+            />
+            <div
+              className="absolute -top-10 -right-8 w-44 h-44 rounded-full pointer-events-none opacity-20"
+              style={{
+                background: "linear-gradient(135deg, #ff008c, #ff3399)",
+                filter: "blur(24px)",
+              }}
+            />
+
+            {/* Contenedor: 2 columnas en desktop, orden narrativo específico en mobile */}
+            <div className="relative z-10 flex flex-col md:grid md:grid-cols-[0.48fr_0.52fr] gap-8 sm:gap-10 md:gap-12 lg:gap-16 items-center">
+              
+              {/* HEADER MOBILE (Oculto en Desktop): 1. Eyebrow, 2. Título */}
+              <div className="md:hidden w-full text-left">
+                <span className="text-[#ff008c] font-[750] text-[12px] uppercase tracking-[0.14em] mb-2 block">
+                  SOBRE MÍ
+                </span>
+                <h2 className="text-[34px] sm:text-[40px] font-[800] leading-[1.08] tracking-[-0.03em] text-[#071631]">
+                  Hola, soy <span className="text-[#ff008c]">Nice</span>
+                </h2>
+              </div>
+
+              {/* COLUMNA IZQUIERDA: 3. Fotografía con panel vertical y 4. Badge */}
+              <motion.div
+                initial={{ opacity: 0, x: -25 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.7, ease: "easeOut" }}
+                className="relative w-full max-w-[420px] mx-auto md:max-w-none flex justify-center"
+              >
+                {/* Panel vertical para la fotografía */}
+                <div
+                  className="relative w-full rounded-[28px] sm:rounded-[32px] overflow-visible flex items-end justify-center px-4 sm:px-6 pt-6 sm:pt-8 pb-0"
+                  style={{
+                    background: "linear-gradient(180deg, #ffffff 0%, #fff7fb 55%, #ffeef7 100%)",
+                    border: "1px solid rgba(255, 255, 255, 0.95)",
+                    boxShadow: "0 10px 30px rgba(255, 0, 140, 0.05)",
+                  }}
+                >
+                  {/* Halo sutil detrás de la fotografía */}
+                  <div
+                    className="absolute inset-x-6 bottom-6 h-3/4 rounded-full blur-[45px] opacity-25 pointer-events-none"
+                    style={{ background: "radial-gradient(circle, #ff008c 0%, transparent 70%)" }}
+                  />
+
+                  <img
+                    src={nicePerfil}
+                    alt="Nicelis Garrido"
+                    className="relative z-10 w-full max-h-[440px] sm:max-h-[500px] md:max-h-[560px] object-contain drop-shadow-[0_15px_30px_rgba(0,0,0,0.08)]"
+                  />
+
+                  {/* Badge flotante en esquina inferior derecha */}
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    whileInView={{ opacity: 1, scale: 1 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.5, delay: 0.35, ease: "easeOut" }}
+                    className="absolute -bottom-4 -right-2 sm:-bottom-5 sm:-right-4 z-20 bg-white rounded-[16px] py-3 px-4 sm:py-3.5 sm:px-5 shadow-[0_12px_30px_rgba(12,24,48,0.1)] border border-[#fce7f3] flex items-center gap-3.5 select-none"
+                  >
+                    <div className="w-[42px] h-[42px] rounded-[12px] bg-[#ffeef7] flex items-center justify-center shrink-0">
+                      <Star className="w-[20px] h-[20px] text-[#ff008c] fill-[#ff008c]" />
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-[#071631] font-[850] text-[17px] sm:text-[18px] leading-tight">
+                        10+ Años
+                      </span>
+                      <span className="text-[#617089] text-[10px] sm:text-[11px] font-[750] uppercase tracking-[0.1em] mt-0.5 leading-tight">
+                        DE EXPERIENCIA
+                      </span>
+                    </div>
+                  </motion.div>
+                </div>
+              </motion.div>
+
+              {/* COLUMNA DERECHA: Contenido y Biografía */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.7, delay: 0.15, ease: "easeOut" }}
+                className="flex flex-col w-full"
+              >
+                {/* HEADER DESKTOP (Oculto en Mobile) */}
+                <div className="hidden md:block">
+                  <span className="text-[#ff008c] font-[750] text-[12px] md:text-[13px] uppercase tracking-[0.14em] mb-3 block">
+                    SOBRE MÍ
+                  </span>
+                  <h2 className="text-[clamp(42px,4vw,58px)] font-[800] leading-[1.08] tracking-[-0.03em] text-[#071631] mb-6">
+                    Hola, soy <span className="text-[#ff008c]">Nice</span>
+                  </h2>
+                </div>
+
+                {/* 5. Textos con separación vertical */}
+                <div className="space-y-4 max-w-[580px] text-[#617089] text-[15px] md:text-[16.5px] font-[450] leading-[1.7] mb-8">
+                  <p>
+                    Mi historia en la repostería comenzó como un pequeño sueño en mi cocina, horneando para familiares y amigos. Con el tiempo, esa pasión se transformó en una vocación que me llevó a estudiar, perfeccionar mis técnicas y, finalmente, convertir el azúcar y la harina en mi estilo de vida.
+                  </p>
+                  <p>
+                    A lo largo de los años, me di cuenta de que el verdadero arte no solo está en hacer pasteles hermosos, sino en compartir ese conocimiento con otros. Así nació la idea de crear este espacio: un lugar donde cualquiera, sin importar su nivel de experiencia, pueda aprender los secretos de la pastelería.
+                  </p>
+                  <p>
+                    Hoy, mi mayor satisfacción es ver cómo mis alumnos logran texturas perfectas, sabores inolvidables y, sobre todo, cómo muchos transforman este dulce pasatiempo en un negocio exitoso y rentable. ¡Te invito a ser parte de esta historia!
+                  </p>
+                </div>
+
+                {/* 6. Botón CTA */}
+                <div>
+                  <motion.button
+                    whileHover={{ y: -2 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={() => navigate("/register")}
+                    className="inline-flex items-center justify-center px-[28px] py-[14px] rounded-[11px] text-white font-[700] text-[15px] md:text-[16px] transition-all duration-300"
+                    style={{
+                      backgroundColor: "#ff008c",
+                      boxShadow: "0 8px 25px rgba(255,0,140,0.22)",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor = "#e6007e";
+                      e.currentTarget.style.boxShadow = "0 12px 30px rgba(255,0,140,0.35)";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = "#ff008c";
+                      e.currentTarget.style.boxShadow = "0 8px 25px rgba(255,0,140,0.22)";
+                    }}
+                  >
+                    Aprende conmigo &nbsp;&rarr;
+                  </motion.button>
+                </div>
+              </motion.div>
+
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── SECCIÓN 2 — TESTIMONIOS ── */}
+      <section id="testimonios" className="w-full relative bg-white pt-16 md:pt-24 pb-24 md:pb-32 px-4 sm:px-6">
+        <div className="max-w-[1220px] mx-auto">
+          
+          {/* Encabezado */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, ease: "easeOut" }}
+            className="flex flex-col items-center text-center mb-14 md:mb-16"
+          >
+            <span className="text-[#ff008c] font-[750] text-[11px] md:text-[13px] uppercase tracking-[0.14em] mb-3">
+              LO QUE DICE NUESTRA COMUNIDAD
+            </span>
+            <h2 className="text-[34px] sm:text-[42px] md:text-[clamp(38px,4vw,52px)] font-[800] text-[#071631] tracking-[-0.03em] leading-[1.1]">
+              Historias reales, <span className="text-[#ff008c]">resultados reales</span>
+            </h2>
+          </motion.div>
+
+          {/* Grid Desktop: 3 columnas, gap 20px, max-w 1140px */}
+          <div className="hidden md:grid md:grid-cols-3 gap-5 lg:gap-6 max-w-[1140px] mx-auto items-stretch">
+            {testimonials.map((t, idx) => (
+              <TestimonialCard key={idx} testimonial={t} index={idx} />
+            ))}
+          </div>
+
+          {/* Carrusel Mobile: Scroll-snap táctil suave */}
+          <div className="md:hidden w-full">
+            <div
+              ref={testimonialCarouselRef}
+              onScroll={handleCarouselScroll}
+              className="flex overflow-x-auto snap-x snap-mandatory gap-4 px-2 pb-4 no-scrollbar"
+              style={{ scrollbarWidth: "none" }}
+            >
+              {testimonials.map((t, idx) => (
+                <div key={idx} className="min-w-[85%] sm:min-w-[75%] snap-center shrink-0">
+                  <TestimonialCard testimonial={t} index={idx} />
+                </div>
+              ))}
+            </div>
+
+            {/* Indicadores inferiores discretos */}
+            <div className="flex justify-center items-center gap-2 mt-4">
+              {testimonials.map((_, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => scrollToSlide(idx)}
+                  aria-label={`Ir a testimonio ${idx + 1}`}
+                  className={`h-2 rounded-full transition-all duration-300 ${
+                    activeTestimonial === idx ? "w-6 bg-[#ff008c]" : "w-2 bg-[#e2e8f0]"
+                  }`}
+                />
+              ))}
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      {/* ── FOOTER ── */}
+      <footer className="w-full relative bg-white pb-14 px-4 sm:px-6">
+        <div className="max-w-[1220px] mx-auto">
+          {/* Gran contenedor horizontal morado oscuro / vinotinto profundo */}
+          <div
+            className="rounded-[28px] sm:rounded-[36px] md:rounded-[40px] p-6 sm:p-8 md:p-10 lg:px-12 lg:py-9 flex flex-col md:flex-row items-center justify-between gap-6 md:gap-8 shadow-2xl"
+            style={{
+              background: "linear-gradient(135deg, #2a0515 0%, #3e0720 50%, #200310 100%)",
+              border: "1px solid rgba(255, 0, 140, 0.15)",
+            }}
+          >
+            {/* Izquierda: Logo El Club de Nice */}
+            <div className="flex items-center gap-3.5">
+              <img src={logo} alt="El Club de Nice" className="w-9 h-9 sm:w-10 sm:h-10 object-contain drop-shadow" />
+              <span className="font-[800] text-[18px] sm:text-[20px] text-white tracking-tight">
+                El Club de Nice
+              </span>
+            </div>
+
+            {/* Centro: Navegación horizontal */}
+            <nav className="flex flex-wrap items-center justify-center gap-5 sm:gap-7 md:gap-8">
+              {[
+                { label: "Beneficios", href: "#beneficios" },
+                { label: "La plataforma", href: "#plataforma" },
+                { label: "Planes", href: "#planes" },
+                { label: "Testimonios", href: "#testimonios" },
+                { label: "FAQ", href: "#faq" },
+              ].map((item, i) => (
+                <a
+                  key={i}
+                  href={item.href}
+                  className="text-[13.5px] sm:text-[14px] font-[600] text-white/80 hover:text-white transition-colors"
+                >
+                  {item.label}
+                </a>
+              ))}
+            </nav>
+
+            {/* Derecha: Botones cuadrados blancos con Instagram, YouTube, TikTok */}
+            <div className="flex items-center gap-3">
+              <a
+                href="https://instagram.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-10 h-10 rounded-[12px] bg-white flex items-center justify-center text-[#2a0515] hover:bg-[#ffeef7] hover:text-[#ff008c] hover:-translate-y-0.5 shadow-sm transition-all"
+                aria-label="Instagram"
+              >
+                <Instagram size={18} strokeWidth={2.2} />
+              </a>
+              <a
+                href="https://youtube.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-10 h-10 rounded-[12px] bg-white flex items-center justify-center text-[#2a0515] hover:bg-[#ffeef7] hover:text-[#ff008c] hover:-translate-y-0.5 shadow-sm transition-all"
+                aria-label="YouTube"
+              >
+                <Youtube size={18} strokeWidth={2.2} />
+              </a>
+              <a
+                href="https://tiktok.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-10 h-10 rounded-[12px] bg-white flex items-center justify-center text-[#2a0515] hover:bg-[#ffeef7] hover:text-[#ff008c] hover:-translate-y-0.5 shadow-sm transition-all"
+                aria-label="TikTok"
+              >
+                <svg viewBox="0 0 24 24" fill="currentColor" className="w-[17px] h-[17px]">
+                  <path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.69a8.18 8.18 0 004.78 1.52V6.76a4.85 4.85 0 01-1.01-.07z" />
+                </svg>
+              </a>
+            </div>
+          </div>
+
+          {/* Debajo del contenedor principal */}
+          <div className="mt-8 flex flex-col md:flex-row items-center justify-between gap-4 text-center md:text-left px-2">
+            <p className="text-[#617089] text-[13px] sm:text-[13.5px] font-[500]">
+              © 2026 El Club de Nice · Comunidad de Repostería y Pastelería
+            </p>
+            <div className="flex items-center gap-6 text-[12.5px] sm:text-[13px] font-[500] text-[#617089]">
+              <a href="#" className="hover:text-[#ff008c] transition-colors">
+                Términos y condiciones
+              </a>
+              <a href="#" className="hover:text-[#ff008c] transition-colors">
+                Política de privacidad
+              </a>
+            </div>
+          </div>
+        </div>
+      </footer>
+
     </div>
   );
 }
