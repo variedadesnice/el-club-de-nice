@@ -328,6 +328,103 @@ export default function Landing3() {
         </motion.div>
       </section>
 
+      {/* Sección: Hecho para quienes aman hornear */}
+      <section className="w-full relative bg-white py-24 md:py-[110px] px-4 sm:px-6">
+        <div className="max-w-[1240px] mx-auto">
+          {/* Encabezado */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, ease: "easeOut" }}
+            className="flex flex-col items-center text-center mb-14 md:mb-16"
+          >
+            <span className="text-[#ff008c] font-[750] text-[12px] md:text-[13px] uppercase tracking-[0.14em] mb-3">
+              ¿ESTO ES PARA TI?
+            </span>
+            <h2 className="text-[36px] sm:text-[44px] md:text-[52px] font-[850] text-[#0c1830] tracking-[-0.03em] leading-[1.1]">
+              Hecho para quienes aman <span className="text-[#ff008c]">hornear</span>
+            </h2>
+          </motion.div>
+
+          {/* Tarjetas */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
+            {[
+              {
+                emoji: "🎂",
+                title: "Principiantes con pasión",
+                description:
+                  "Nunca has hecho un macaron perfecto? No importa. Aquí empezamos desde cero con paciencia y metodología probada. Tu primer pastel de bodas está más cerca de lo que crees.",
+                items: [
+                  "Bases sólidas de repostería",
+                  "Cursos introductorios",
+                  "Comunidad que te apoya",
+                ],
+              },
+              {
+                emoji: "🍰",
+                title: "Reposteros intermedios",
+                description:
+                  "Ya dominas lo básico pero quieres elevar tu técnica. Los lives y cursos avanzados te darán ese salto de calidad que tus clientes van a notar inmediatamente.",
+                items: [
+                  "Técnicas avanzadas en video",
+                  "Feedback de expertos",
+                  "Logros que miden tu progreso",
+                ],
+              },
+              {
+                emoji: "🏪",
+                title: "Profesionales y emprendedores",
+                description:
+                  "Tienes talento y quieres monetizarlo. Aprende fijación de precios, marketing digital para pastelerías y cómo construir una marca dulce que perdure.",
+                items: [
+                  "Estrategias de negocio",
+                  "Red de contactos",
+                  "Visibilidad en la comunidad",
+                ],
+              },
+            ].map((card, idx) => (
+              <motion.div
+                key={idx}
+                initial={{ opacity: 0, y: 25 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6, delay: idx * 0.12, ease: "easeOut" }}
+                whileHover={{ y: -6 }}
+                className="flex flex-col justify-between rounded-[32px] md:rounded-[36px] p-8 md:p-10 border border-[#fce7f3]/70 shadow-[0_12px_40px_rgba(12,24,48,0.04)] hover:shadow-[0_18px_45px_rgba(255,0,140,0.08)] transition-all duration-300"
+                style={{
+                  background:
+                    "linear-gradient(180deg, #ffffff 0%, #ffffff 52%, #fff5fa 82%, #ffeaf5 100%)",
+                }}
+              >
+                <div>
+                  <div className="text-[38px] md:text-[42px] mb-5 select-none leading-none">
+                    {card.emoji}
+                  </div>
+                  <h3 className="text-[#0c1830] font-[800] text-[20px] md:text-[22px] leading-snug mb-3.5">
+                    {card.title}
+                  </h3>
+                  <p className="text-[#5a6f87] font-[450] text-[14px] md:text-[14.5px] leading-[1.65] mb-8">
+                    {card.description}
+                  </p>
+                </div>
+
+                <ul className="space-y-3 pt-2">
+                  {card.items.map((item, itemIdx) => (
+                    <li
+                      key={itemIdx}
+                      className="flex items-center text-[#3b4b5e] font-[600] text-[13.5px] md:text-[14px]"
+                    >
+                      <span className="w-[6px] h-[6px] rounded-full bg-[#ff008c] mr-3 shrink-0" />
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
 
       {/* Sección Diseñada para inspirarte cada día */}
       <section
