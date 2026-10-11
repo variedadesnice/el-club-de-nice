@@ -13,6 +13,7 @@ import nicePerfil from "../../assets/contenido/nice de perfil.png";
 import avatarFeat1 from "../../assets/avatars/feat1.jpg";
 import avatarFeat2 from "../../assets/avatars/feat2.jpg";
 import avatarFeat3 from "../../assets/avatars/feat3.jpg";
+import { PricingBackground } from "./PricingBackground";
 
 interface Testimonial {
   name: string;
@@ -308,17 +309,20 @@ export default function Landing3() {
         </div>
       </section>
 
-      {/* Sección 3: Pricing (Fondo Eliminado) */}
+      {/* Sección 3: Pricing (Invierte en tu pasión) */}
       <section
         id="planes"
-        className="w-full relative flex flex-col items-center justify-center py-16 sm:py-20 md:py-[120px] px-4 sm:px-6 bg-[#071426]"
+        className="w-full relative flex flex-col items-center justify-center py-16 sm:py-20 md:py-[120px] px-4 sm:px-6 overflow-hidden"
       >
+        {/* Fondo oscuro y premium con glow, manchas fucsia neón, viñeteado y partículas */}
+        <PricingBackground />
+
         <motion.div
           initial={{ opacity: 0, y: 25 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.7, ease: "easeOut" }}
-          className="z-10 flex flex-col items-center w-full max-w-[860px]"
+          className="relative z-10 flex flex-col items-center w-full max-w-[860px]"
         >
           {/* Encabezado */}
           <span className="text-[#ff008c] font-[700] text-[12px] sm:text-[13px] md:text-[14px] uppercase tracking-[0.12em] mb-3 sm:mb-[18px]">
