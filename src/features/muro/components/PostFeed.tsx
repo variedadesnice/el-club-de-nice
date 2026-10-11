@@ -138,25 +138,27 @@ export default function PostFeed() {
         )}
 
         {/* Accesos rápidos a categorías de contenido */}
-        <div className="flex gap-3 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-          {CONTENT_CATEGORIES.map((cat) => (
-            <button
-              key={cat.key}
-              type="button"
-              onClick={() => navigate(`/classroom?category=${encodeURIComponent(cat.key)}`)}
-              className="relative overflow-hidden flex flex-col items-start justify-end rounded-2xl bg-pink-500 hover:bg-pink-600 active:scale-[0.97] transition-all p-4 min-h-[100px] w-[160px] shrink-0 text-left shadow-md shadow-pink-500/20"
-            >
-              {cat.icon}
-              <div className="relative z-10">
-                <p className="text-white font-black text-sm leading-tight uppercase tracking-wide whitespace-pre-line">
-                  ❯ {cat.label}
-                </p>
-                <p className="text-pink-100 text-[11px] font-medium mt-0.5 leading-snug">
-                  {cat.desc}
-                </p>
-              </div>
-            </button>
-          ))}
+        <div className="-mx-2 md:mx-0 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          <div className="flex gap-3 px-2 md:px-0 pb-1">
+            {CONTENT_CATEGORIES.map((cat) => (
+              <button
+                key={cat.key}
+                type="button"
+                onClick={() => navigate(`/classroom?category=${encodeURIComponent(cat.key)}`)}
+                className="relative overflow-hidden flex flex-col items-start justify-end rounded-2xl bg-pink-500 hover:bg-pink-600 active:scale-[0.97] transition-all p-4 min-h-[100px] w-[148px] shrink-0 text-left shadow-md shadow-pink-500/20"
+              >
+                {cat.icon}
+                <div className="relative z-10">
+                  <p className="text-white font-black text-sm leading-tight uppercase tracking-wide whitespace-pre-line">
+                    ❯ {cat.label}
+                  </p>
+                  <p className="text-pink-100 text-[11px] font-medium mt-0.5 leading-snug">
+                    {cat.desc}
+                  </p>
+                </div>
+              </button>
+            ))}
+          </div>
         </div>
 
         <CreatePost onSubmit={createPost} />
