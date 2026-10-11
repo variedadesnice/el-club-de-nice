@@ -538,7 +538,7 @@ export default function Landing3() {
       {/* Sección Diseñada para inspirarte cada día */}
       <section
         id="plataforma"
-        className="w-full relative flex flex-col justify-center overflow-hidden pt-16 sm:pt-24 md:pt-32 pb-20 md:pb-[100px]"
+        className="w-full relative flex flex-col justify-center overflow-hidden pt-24 sm:pt-28 md:pt-36 pb-20 md:pb-[100px]"
       >
         {/* Fondo oscuro y premium idéntico al de Invierte en tu pasión */}
         <PricingBackground />
