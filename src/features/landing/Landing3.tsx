@@ -14,6 +14,7 @@ import avatarFeat1 from "../../assets/avatars/feat1.jpg";
 import avatarFeat2 from "../../assets/avatars/feat2.jpg";
 import avatarFeat3 from "../../assets/avatars/feat3.jpg";
 import { PricingBackground } from "./PricingBackground";
+import lineaNice from "../../assets/landing oscar/linea nice.png";
 
 interface Testimonial {
   name: string;
@@ -537,10 +538,28 @@ export default function Landing3() {
       {/* Sección Diseñada para inspirarte cada día */}
       <section
         id="plataforma"
-        className="w-full relative flex flex-col justify-center overflow-hidden py-20 md:py-[100px]"
+        className="w-full relative flex flex-col justify-center overflow-hidden pt-16 sm:pt-24 md:pt-32 pb-20 md:pb-[100px]"
       >
         {/* Fondo oscuro y premium idéntico al de Invierte en tu pasión */}
         <PricingBackground />
+
+        {/* Línea divisora superior: linea nice ajustada a los lados fixeada en el borde */}
+        <div className="absolute top-0 left-0 right-0 w-full z-20 pointer-events-none select-none">
+          {/* Relleno blanco superior para conectar perfectamente con la sección de arriba */}
+          <svg
+            className="absolute inset-0 w-full h-full pointer-events-none"
+            viewBox="0 0 2996 433"
+            preserveAspectRatio="none"
+          >
+            <polygon points="0,0 2996,0 2996,28 0,210" fill="#ffffff" />
+          </svg>
+
+          <img
+            src={lineaNice}
+            alt="Línea divisora El Club de Nice"
+            className="relative z-10 w-full h-auto min-w-full object-cover block drop-shadow-[0_6px_20px_rgba(0,0,0,0.18)]"
+          />
+        </div>
 
         <div className="relative z-10 w-full max-w-[1240px] mx-auto px-4 sm:px-6 grid grid-cols-1 md:grid-cols-[0.9fr_1.1fr] items-center gap-0 md:gap-8">
           
