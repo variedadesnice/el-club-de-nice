@@ -8,7 +8,7 @@ import fondo5 from "../../assets/landing oscar/FONDO 5.png";
 import logo from "../../assets/logo.png";
 import cuadroReproductor from "../../assets/landing oscar/CUADRO REPRODUCTOR.png";
 import grupo2 from "../../assets/landing oscar/Grupo 2.png";
-import { Paintbrush, RefreshCw, Calendar, Star, Instagram, Youtube } from "lucide-react";
+import { Paintbrush, RefreshCw, Calendar, Star, Instagram, Youtube, ChevronLeft, ChevronRight } from "lucide-react";
 import nicePerfil from "../../assets/contenido/nice de perfil.png";
 import avatarFeat1 from "../../assets/avatars/feat1.jpg";
 import avatarFeat2 from "../../assets/avatars/feat2.jpg";
@@ -57,11 +57,11 @@ function TestimonialCard({ testimonial, index }: { testimonial: Testimonial; ind
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={{ duration: 0.5, delay: index * 0.12, ease: "easeOut" }}
-      className="flex flex-col justify-between bg-white border border-[#E8E8EE] rounded-[18px] p-6 sm:p-7 h-full shadow-[0_4px_16px_rgba(0,0,0,0.02)] hover:-translate-y-1 hover:border-[#ff008c]/40 hover:shadow-[0_14px_35px_rgba(255,0,140,0.07)] transition-all duration-300"
+      className="flex flex-col justify-between bg-white border border-[#E8E8EE] rounded-[18px] p-5 sm:p-7 h-full w-full max-w-full shadow-[0_4px_16px_rgba(0,0,0,0.02)] hover:-translate-y-1 hover:border-[#ff008c]/40 hover:shadow-[0_14px_35px_rgba(255,0,140,0.07)] transition-all duration-300"
     >
-      <div>
+      <div className="w-full">
         {/* Estrellas */}
-        <div className="flex items-center gap-1 text-[#ff008c] mb-4">
+        <div className="flex items-center gap-1 text-[#ff008c] mb-3 sm:mb-4">
           {Array.from({ length: testimonial.rating }).map((_, i) => (
             <span key={i} className="text-[15px] sm:text-[16px] leading-none select-none">
               ★
@@ -70,7 +70,7 @@ function TestimonialCard({ testimonial, index }: { testimonial: Testimonial; ind
         </div>
 
         {/* Cita */}
-        <p className="text-[#617089] text-[14.5px] sm:text-[15px] leading-[1.65] font-[450] mb-6">
+        <p className="text-[#617089] text-[14px] sm:text-[15px] leading-[1.65] font-[450] mb-5 sm:mb-6 break-words whitespace-normal text-left">
           “{testimonial.quote}”
         </p>
       </div>
@@ -149,28 +149,29 @@ export default function Landing3() {
   const handleCarouselScroll = () => {
     if (!testimonialCarouselRef.current) return;
     const { scrollLeft, offsetWidth } = testimonialCarouselRef.current;
-    const newIndex = Math.round(scrollLeft / (offsetWidth * 0.85));
+    if (offsetWidth === 0) return;
+    const newIndex = Math.round(scrollLeft / offsetWidth);
     setActiveTestimonial(Math.min(Math.max(newIndex, 0), testimonials.length - 1));
   };
 
   const scrollToSlide = (idx: number) => {
     if (!testimonialCarouselRef.current) return;
-    const cardWidth = testimonialCarouselRef.current.offsetWidth * 0.85;
+    const containerWidth = testimonialCarouselRef.current.offsetWidth;
     testimonialCarouselRef.current.scrollTo({
-      left: idx * cardWidth,
+      left: idx * containerWidth,
       behavior: "smooth",
     });
     setActiveTestimonial(idx);
   };
 
   return (
-    <div className="w-full flex flex-col font-sans">
+    <div className="w-full flex flex-col font-sans overflow-x-hidden">
       {/* Navbar / Header */}
-      <header className="w-full bg-white sticky top-0 z-50 flex items-center justify-between px-6 md:px-12 py-4 shadow-sm">
+      <header className="w-full bg-white sticky top-0 z-50 flex items-center justify-between px-4 sm:px-6 md:px-12 py-3.5 sm:py-4 shadow-sm">
         {/* Logo and Title */}
-        <div className="flex items-center space-x-3 cursor-pointer" onClick={() => window.scrollTo(0, 0)}>
-          <img src={logo} alt="El Club de Nice Logo" className="h-8 w-auto object-contain" />
-          <span className="font-[800] text-[#071426] text-xl tracking-tight hidden sm:block">
+        <div className="flex items-center space-x-2.5 sm:space-x-3 cursor-pointer" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}>
+          <img src={logo} alt="El Club de Nice Logo" className="h-7 sm:h-8 w-auto object-contain" />
+          <span className="font-[800] text-[#071426] text-lg sm:text-xl tracking-tight">
             El Club de Nice
           </span>
         </div>
@@ -192,7 +193,7 @@ export default function Landing3() {
         </nav>
 
         {/* Actions */}
-        <div className="flex items-center space-x-6">
+        <div className="flex items-center space-x-3 sm:space-x-6">
           <button
             onClick={() => navigate("/login")}
             className="hidden md:block text-[14px] font-[700] text-[#46566c] hover:text-[#ff2f92] transition-colors"
@@ -201,7 +202,7 @@ export default function Landing3() {
           </button>
           <button
             onClick={() => navigate("/register")}
-            className="bg-[#ff2f92] text-white px-6 py-2.5 rounded-full text-[14px] font-[700] shadow-[0_4px_14px_0_rgba(255,47,146,0.39)] hover:shadow-[0_6px_20px_rgba(255,47,146,0.23)] hover:bg-[#e0267d] hover:-translate-y-[1px] transition-all"
+            className="bg-[#ff2f92] text-white px-4 sm:px-6 py-2 sm:py-2.5 rounded-full text-[13px] sm:text-[14px] font-[700] shadow-[0_4px_14px_0_rgba(255,47,146,0.39)] hover:shadow-[0_6px_20px_rgba(255,47,146,0.23)] hover:bg-[#e0267d] hover:-translate-y-[1px] transition-all"
           >
             Únete Ahora
           </button>
@@ -210,18 +211,18 @@ export default function Landing3() {
 
       {/* Sección 1: Hero */}
       <section
-        className="min-h-[calc(100vh-76px)] w-full bg-cover bg-center bg-no-repeat relative flex flex-col items-center justify-center"
+        className="min-h-[460px] sm:min-h-[560px] md:min-h-[calc(100vh-76px)] w-full bg-cover bg-center bg-no-repeat relative flex flex-col items-center justify-center"
         style={{ backgroundImage: `url(${fondo1})` }}
       >
         <div className="z-10 flex flex-col items-center justify-center px-4">
-          <h1 className="text-5xl md:text-7xl text-white font-bold drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)] text-center">
+          <h1 className="text-3xl sm:text-5xl md:text-7xl text-white font-bold drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] text-center">
             Hero Section
           </h1>
         </div>
       </section>
 
       {/* Sección Estadísticas */}
-      <section className="w-full bg-[#fdfdfd] py-[70px] md:py-[90px] px-6">
+      <section className="w-full bg-[#fdfdfd] py-10 sm:py-16 md:py-[90px] px-4 sm:px-6">
         <motion.div 
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -229,44 +230,44 @@ export default function Landing3() {
           transition={{ duration: 0.8, ease: "easeOut" }}
           className="max-w-[1250px] mx-auto"
         >
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-10 md:gap-12">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8 md:gap-12">
             
             {/* Stat 1 */}
             <div className="flex flex-col items-center justify-center text-center">
-              <div className="text-[64px] md:text-[72px] font-[800] text-[#ff2f92] leading-none mb-3 font-sans tracking-tight">
+              <div className="text-[38px] sm:text-[54px] md:text-[72px] font-[800] text-[#ff2f92] leading-none mb-2 sm:mb-3 font-sans tracking-tight">
                 <AnimatedCounter target={500} />+
               </div>
-              <div className="text-[14px] md:text-[16px] font-[600] text-[#8ca0b3] uppercase tracking-[0.1em] font-sans">
+              <div className="text-[11px] sm:text-[14px] md:text-[16px] font-[600] text-[#8ca0b3] uppercase tracking-[0.08em] sm:tracking-[0.1em] font-sans">
                 Miembros Activos
               </div>
             </div>
 
             {/* Stat 2 */}
             <div className="flex flex-col items-center justify-center text-center">
-              <div className="text-[64px] md:text-[72px] font-[800] text-[#ff2f92] leading-none mb-3 font-sans tracking-tight">
+              <div className="text-[38px] sm:text-[54px] md:text-[72px] font-[800] text-[#ff2f92] leading-none mb-2 sm:mb-3 font-sans tracking-tight">
                 <AnimatedCounter target={30} />+
               </div>
-              <div className="text-[14px] md:text-[16px] font-[600] text-[#8ca0b3] uppercase tracking-[0.1em] font-sans">
+              <div className="text-[11px] sm:text-[14px] md:text-[16px] font-[600] text-[#8ca0b3] uppercase tracking-[0.08em] sm:tracking-[0.1em] font-sans">
                 Cursos de Repostería
               </div>
             </div>
 
             {/* Stat 3 */}
             <div className="flex flex-col items-center justify-center text-center">
-              <div className="text-[64px] md:text-[72px] font-[800] text-[#ff2f92] leading-none mb-3 font-sans tracking-tight">
+              <div className="text-[38px] sm:text-[54px] md:text-[72px] font-[800] text-[#ff2f92] leading-none mb-2 sm:mb-3 font-sans tracking-tight">
                 <AnimatedCounter target={100} />+
               </div>
-              <div className="text-[14px] md:text-[16px] font-[600] text-[#8ca0b3] uppercase tracking-[0.1em] font-sans">
+              <div className="text-[11px] sm:text-[14px] md:text-[16px] font-[600] text-[#8ca0b3] uppercase tracking-[0.08em] sm:tracking-[0.1em] font-sans">
                 Lives Realizados
               </div>
             </div>
 
             {/* Stat 4 */}
             <div className="flex flex-col items-center justify-center text-center">
-              <div className="text-[64px] md:text-[72px] font-[800] text-[#ff2f92] leading-none mb-3 font-sans tracking-tight">
+              <div className="text-[38px] sm:text-[54px] md:text-[72px] font-[800] text-[#ff2f92] leading-none mb-2 sm:mb-3 font-sans tracking-tight">
                 <AnimatedCounter target={95} />%
               </div>
-              <div className="text-[14px] md:text-[16px] font-[600] text-[#8ca0b3] uppercase tracking-[0.1em] font-sans">
+              <div className="text-[11px] sm:text-[14px] md:text-[16px] font-[600] text-[#8ca0b3] uppercase tracking-[0.08em] sm:tracking-[0.1em] font-sans">
                 Satisfacción
               </div>
             </div>
@@ -277,10 +278,10 @@ export default function Landing3() {
 
       {/* Sección 2: Reproductor (Fondo Eliminado) */}
       <section
-        className="min-h-screen w-full relative flex flex-col items-center justify-center py-20 px-4 bg-white"
+        className="w-full relative flex flex-col items-center justify-center py-14 sm:py-20 md:py-28 px-4 sm:px-6 bg-white"
       >
-        <div className="z-20 text-center mb-12 lg:mb-16">
-          <h2 className="text-4xl md:text-5xl lg:text-[56px] font-[800] text-[#071426] tracking-tight font-sans">
+        <div className="z-20 text-center mb-8 sm:mb-12 lg:mb-16">
+          <h2 className="text-[26px] sm:text-4xl md:text-5xl lg:text-[56px] font-[800] text-[#071426] tracking-tight font-sans leading-[1.15]">
             Todo lo que necesitas para <span className="text-[#ff2f92]">crecer</span>
           </h2>
         </div>
@@ -293,9 +294,7 @@ export default function Landing3() {
             className="w-full h-auto relative z-20 pointer-events-none drop-shadow-2xl" 
           />
           
-          {/* Contenedor del video centrado. 
-              Los porcentajes (top, left, w, h) se ajustan para encajar 
-              dentro de la parte transparente/pantalla del cuadro. */}
+          {/* Contenedor del video centrado. */}
           <div className="absolute z-10 top-[5%] left-[5%] w-[90%] h-[90%] bg-black flex items-center justify-center overflow-hidden rounded-md shadow-inner">
             <video 
               className="w-full h-full object-cover" 
@@ -312,7 +311,7 @@ export default function Landing3() {
       {/* Sección 3: Pricing (Fondo Eliminado) */}
       <section
         id="planes"
-        className="w-full relative flex flex-col items-center justify-center py-24 md:py-[120px] px-4 sm:px-6 bg-[#071426]"
+        className="w-full relative flex flex-col items-center justify-center py-16 sm:py-20 md:py-[120px] px-4 sm:px-6 bg-[#071426]"
       >
         <motion.div
           initial={{ opacity: 0, y: 25 }}
@@ -322,13 +321,13 @@ export default function Landing3() {
           className="z-10 flex flex-col items-center w-full max-w-[860px]"
         >
           {/* Encabezado */}
-          <span className="text-[#ff008c] font-[700] text-[13px] md:text-[14px] uppercase tracking-[0.12em] mb-[18px]">
+          <span className="text-[#ff008c] font-[700] text-[12px] sm:text-[13px] md:text-[14px] uppercase tracking-[0.12em] mb-3 sm:mb-[18px]">
             Elige tu plan
           </span>
-          <h2 className="text-[40px] md:text-[48px] lg:text-[56px] font-[800] text-white text-center leading-[1.05] tracking-tight mb-5">
+          <h2 className="text-[30px] sm:text-[40px] md:text-[48px] lg:text-[56px] font-[800] text-white text-center leading-[1.1] tracking-tight mb-4 sm:mb-5">
             Invierte en tu <span className="text-[#ff008c]">pasión</span>
           </h2>
-          <p className="text-white/90 text-[16px] md:text-[18px] font-[600] text-center max-w-[620px] leading-[1.45] mb-[65px] md:mb-[80px]">
+          <p className="text-white/90 text-[14px] sm:text-[16px] md:text-[18px] font-[550] text-center max-w-[620px] leading-[1.5] mb-8 sm:mb-12 md:mb-[80px] px-2">
             Sin renovaciones automáticas. Sin sorpresas. Elige el plan que mejor se adapte a tu ritmo.
           </p>
 
@@ -341,20 +340,20 @@ export default function Landing3() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6, delay: 0.1, ease: "easeOut" }}
-              className="flex flex-col bg-white rounded-[22px] md:rounded-[26px] p-[28px] md:p-[34px] shadow-[0_18px_50px_rgba(0,0,0,0.08)] hover:-translate-y-[5px] transition-transform duration-300 ease-in-out order-2 md:order-1"
+              className="flex flex-col bg-white rounded-[22px] md:rounded-[26px] p-6 sm:p-7 md:p-[34px] shadow-[0_18px_50px_rgba(0,0,0,0.08)] hover:-translate-y-[5px] transition-transform duration-300 ease-in-out order-2 md:order-1"
             >
-              <div className="mb-6">
-                <span className="text-[#ff008c] font-[700] text-[13px] uppercase tracking-wide">1 Mes</span>
-                <h3 className="text-[#071426] font-[750] text-[28px] mt-1 leading-none">Mensual</h3>
-                <p className="text-[#8ca0b3] font-[600] text-[15px] mt-[5px]">Acceso mensual</p>
+              <div className="mb-5 sm:mb-6">
+                <span className="text-[#ff008c] font-[700] text-[12px] sm:text-[13px] uppercase tracking-wide">1 Mes</span>
+                <h3 className="text-[#071426] font-[750] text-[24px] sm:text-[28px] mt-1 leading-none">Mensual</h3>
+                <p className="text-[#8ca0b3] font-[600] text-[14px] sm:text-[15px] mt-[4px]">Acceso mensual</p>
               </div>
               
-              <div className="flex items-baseline mb-[24px]">
-                <span className="text-[#071426] font-[800] text-[48px] md:text-[58px] tracking-[-0.02em] leading-none">$0.0016</span>
-                <span className="text-[#8ca0b3] font-[600] text-[14px] ml-2">USD</span>
+              <div className="flex items-baseline mb-5 sm:mb-[24px]">
+                <span className="text-[#071426] font-[800] text-[40px] sm:text-[48px] md:text-[58px] tracking-[-0.02em] leading-none">$0.0016</span>
+                <span className="text-[#8ca0b3] font-[600] text-[13px] sm:text-[14px] ml-2">USD</span>
               </div>
 
-              <ul className="flex-1 space-y-[15px] flex flex-col justify-start">
+              <ul className="flex-1 space-y-3 sm:space-y-[15px] flex flex-col justify-start">
                 {[
                   "Acceso completo a todos los cursos",
                   "Lives semanales con expertos",
@@ -363,13 +362,13 @@ export default function Landing3() {
                   "Módulo de negocio y emprendimiento"
                 ].map((item, i) => (
                   <li key={i} className="flex items-start">
-                    <span className="text-[#ff008c] font-bold mr-3 mt-[2px] text-[14px]">✓</span>
-                    <span className="text-[#17324a] font-[600] text-[15px] leading-tight">{item}</span>
+                    <span className="text-[#ff008c] font-bold mr-2.5 sm:mr-3 mt-[1px] text-[14px]">✓</span>
+                    <span className="text-[#17324a] font-[600] text-[14px] sm:text-[15px] leading-tight">{item}</span>
                   </li>
                 ))}
               </ul>
 
-              <button className="mt-[28px] w-full h-[56px] rounded-[16px] bg-[#fff0f7] border border-[#ff008c]/25 text-[#ff008c] font-[700] text-[15px] hover:bg-[#ffe5f1] hover:-translate-y-[2px] transition-all duration-300">
+              <button className="mt-6 sm:mt-[28px] w-full h-[52px] sm:h-[56px] rounded-[16px] bg-[#fff0f7] border border-[#ff008c]/25 text-[#ff008c] font-[700] text-[14.5px] sm:text-[15px] hover:bg-[#ffe5f1] hover:-translate-y-[2px] transition-all duration-300">
                 Empezar con este plan
               </button>
             </motion.div>
@@ -380,7 +379,7 @@ export default function Landing3() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6, delay: 0.2, ease: "easeOut" }}
-              className="relative flex flex-col rounded-[22px] md:rounded-[26px] p-[28px] md:p-[34px] shadow-xl hover:shadow-2xl hover:-translate-y-[5px] transition-all duration-300 ease-in-out order-1 md:order-2 overflow-hidden"
+              className="relative flex flex-col rounded-[22px] md:rounded-[26px] p-6 sm:p-7 md:p-[34px] shadow-xl hover:shadow-2xl hover:-translate-y-[5px] transition-all duration-300 ease-in-out order-1 md:order-2 overflow-hidden"
               style={{
                 background: "linear-gradient(145deg, #ff00a0 0%, #ff0088 45%, #ff006e 100%)",
               }}
@@ -388,28 +387,28 @@ export default function Landing3() {
               {/* Radial gradient sutil */}
               <div className="absolute inset-0 pointer-events-none" style={{ background: "radial-gradient(circle at 85% 5%, rgba(255,255,255,0.12), transparent 35%)" }}></div>
 
-              <div className="relative z-10 flex justify-between items-start mb-6">
+              <div className="relative z-10 flex justify-between items-start mb-5 sm:mb-6">
                 <div>
-                  <span className="text-white font-[700] text-[13px] uppercase tracking-wide">1 Año</span>
-                  <h3 className="text-white font-[750] text-[28px] mt-1 leading-none">Anual</h3>
-                  <p className="text-white/90 font-[600] text-[15px] mt-[5px]">Plan anual</p>
+                  <span className="text-white font-[700] text-[12px] sm:text-[13px] uppercase tracking-wide">1 Año</span>
+                  <h3 className="text-white font-[750] text-[24px] sm:text-[28px] mt-1 leading-none">Anual</h3>
+                  <p className="text-white/90 font-[600] text-[14px] sm:text-[15px] mt-[4px]">Plan anual</p>
                 </div>
-                <div className="bg-white/20 backdrop-blur-[8px] text-white text-[12px] font-[750] tracking-[0.03em] px-[14px] py-[8px] rounded-full whitespace-nowrap self-start mt-1">
+                <div className="bg-white/20 backdrop-blur-[8px] text-white text-[11px] sm:text-[12px] font-[750] tracking-[0.03em] px-3 sm:px-[14px] py-1.5 sm:py-[8px] rounded-full whitespace-nowrap self-start mt-1">
                   ✣ MÁS POPULAR
                 </div>
               </div>
 
-              <div className="relative z-10 mb-[22px]">
+              <div className="relative z-10 mb-5 sm:mb-[22px]">
                 <div className="flex items-baseline">
-                  <span className="text-white font-[800] text-[48px] md:text-[58px] tracking-[-0.02em] leading-none">$197</span>
-                  <span className="text-white/90 font-[650] text-[14px] ml-2">USD</span>
+                  <span className="text-white font-[800] text-[40px] sm:text-[48px] md:text-[58px] tracking-[-0.02em] leading-none">$197</span>
+                  <span className="text-white/90 font-[650] text-[13px] sm:text-[14px] ml-2">USD</span>
                 </div>
-                <div className="text-white/90 font-[650] text-[13px] md:text-[14px] mt-1">
+                <div className="text-white/90 font-[650] text-[13px] sm:text-[14px] mt-1">
                   ≈ $16 USD / mes
                 </div>
               </div>
 
-              <ul className="relative z-10 flex-1 space-y-[15px] flex flex-col justify-start">
+              <ul className="relative z-10 flex-1 space-y-3 sm:space-y-[15px] flex flex-col justify-start">
                 {[
                   "Acceso completo a todos los cursos",
                   "Lives semanales con expertos",
@@ -418,13 +417,13 @@ export default function Landing3() {
                   "Módulo de negocio y emprendimiento"
                 ].map((item, i) => (
                   <li key={i} className="flex items-start">
-                    <span className="text-white font-bold mr-3 mt-[2px] text-[14px]">✓</span>
-                    <span className="text-white font-[600] text-[15px] leading-tight">{item}</span>
+                    <span className="text-white font-bold mr-2.5 sm:mr-3 mt-[1px] text-[14px]">✓</span>
+                    <span className="text-white font-[600] text-[14px] sm:text-[15px] leading-tight">{item}</span>
                   </li>
                 ))}
               </ul>
 
-              <button className="relative z-10 mt-[28px] w-full h-[56px] rounded-[16px] bg-white text-[#ff008c] font-[750] text-[15px] hover:shadow-[0_8px_25px_rgba(0,0,0,0.15)] hover:-translate-y-[2px] transition-all duration-300">
+              <button className="relative z-10 mt-6 sm:mt-[28px] w-full h-[52px] sm:h-[56px] rounded-[16px] bg-white text-[#ff008c] font-[750] text-[14.5px] sm:text-[15px] hover:shadow-[0_8px_25px_rgba(0,0,0,0.15)] hover:-translate-y-[2px] transition-all duration-300">
                 Empezar con este plan
               </button>
             </motion.div>
@@ -434,7 +433,7 @@ export default function Landing3() {
       </section>
 
       {/* Sección: Hecho para quienes aman hornear */}
-      <section id="beneficios" className="w-full relative bg-white py-24 md:py-[110px] px-4 sm:px-6">
+      <section id="beneficios" className="w-full relative bg-white py-14 sm:py-20 md:py-[110px] px-4 sm:px-6">
         <div className="max-w-[1240px] mx-auto">
           {/* Encabezado */}
           <motion.div
@@ -442,12 +441,12 @@ export default function Landing3() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6, ease: "easeOut" }}
-            className="flex flex-col items-center text-center mb-14 md:mb-16"
+            className="flex flex-col items-center text-center mb-10 sm:mb-14 md:mb-16"
           >
-            <span className="text-[#ff008c] font-[750] text-[12px] md:text-[13px] uppercase tracking-[0.14em] mb-3">
+            <span className="text-[#ff008c] font-[750] text-[11px] sm:text-[12px] md:text-[13px] uppercase tracking-[0.14em] mb-2 sm:mb-3">
               ¿ESTO ES PARA TI?
             </span>
-            <h2 className="text-[36px] sm:text-[44px] md:text-[52px] font-[850] text-[#0c1830] tracking-[-0.03em] leading-[1.1]">
+            <h2 className="text-[28px] sm:text-[38px] md:text-[52px] font-[850] text-[#0c1830] tracking-[-0.03em] leading-[1.15]">
               Hecho para quienes aman <span className="text-[#ff008c]">hornear</span>
             </h2>
           </motion.div>
@@ -568,31 +567,31 @@ export default function Landing3() {
               whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true }}
               transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-              className="md:hidden relative z-10 w-full my-6 pointer-events-none"
+              className="md:hidden relative z-10 w-full my-6 flex justify-center pointer-events-none overflow-hidden"
             >
               <img 
                 src={grupo2} 
                 alt="Vista de la plataforma en móvil" 
-                className="w-[120%] max-w-none ml-[50%] -translate-x-[50%] object-contain"
+                className="w-full max-w-[360px] object-contain drop-shadow-xl"
               />
             </motion.div>
 
             {/* Tarjetas de Beneficios */}
-            <div className="flex flex-col gap-[14px] w-full max-w-full md:max-w-[480px]">
+            <div className="flex flex-col gap-[12px] sm:gap-[14px] w-full max-w-full md:max-w-[480px]">
               
               <motion.div
                 initial={{ opacity: 0, x: -15 }}
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: 0.1, ease: "easeOut" }}
-                className="bg-white rounded-[24px] min-h-[72px] md:h-[76px] flex items-center p-[12px] pr-[16px] gap-[18px] shadow-[0_8px_24px_rgba(0,0,0,0.07)] hover:translate-x-[4px] transition-transform duration-300"
+                className="bg-white rounded-[20px] sm:rounded-[24px] min-h-[64px] md:h-[76px] flex items-center p-[10px] sm:p-[12px] pr-[14px] sm:pr-[16px] gap-[14px] sm:gap-[18px] shadow-[0_8px_24px_rgba(0,0,0,0.07)] hover:translate-x-[4px] transition-transform duration-300"
               >
-                <div className="w-[46px] h-[46px] rounded-full bg-[#ffecf5] flex items-center justify-center shrink-0 ml-[4px]">
-                  <Paintbrush className="w-[20px] h-[20px] text-[#ff008c]" strokeWidth={2} />
+                <div className="w-[42px] h-[42px] sm:w-[46px] sm:h-[46px] rounded-full bg-[#ffecf5] flex items-center justify-center shrink-0 ml-[4px]">
+                  <Paintbrush className="w-[18px] h-[18px] sm:w-[20px] sm:h-[20px] text-[#ff008c]" strokeWidth={2} />
                 </div>
                 <div className="flex flex-col justify-center">
-                  <h4 className="text-[#0c1830] font-[750] text-[14px] md:text-[15px] leading-[1.2]">Interfaz intuitiva y bella</h4>
-                  <p className="text-[#6c88a0] font-[500] text-[13px] md:text-[14px] mt-[3px] leading-[1.2]">Diseño premium hecho para inspirar tu creatividad.</p>
+                  <h4 className="text-[#0c1830] font-[750] text-[13.5px] sm:text-[14px] md:text-[15px] leading-[1.2]">Interfaz intuitiva y bella</h4>
+                  <p className="text-[#6c88a0] font-[500] text-[12.5px] sm:text-[13px] md:text-[14px] mt-[3px] leading-[1.2]">Diseño premium hecho para inspirar tu creatividad.</p>
                 </div>
               </motion.div>
 
@@ -601,14 +600,14 @@ export default function Landing3() {
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: 0.18, ease: "easeOut" }}
-                className="bg-white rounded-[24px] min-h-[72px] md:h-[76px] flex items-center p-[12px] pr-[16px] gap-[18px] shadow-[0_8px_24px_rgba(0,0,0,0.07)] hover:translate-x-[4px] transition-transform duration-300"
+                className="bg-white rounded-[20px] sm:rounded-[24px] min-h-[64px] md:h-[76px] flex items-center p-[10px] sm:p-[12px] pr-[14px] sm:pr-[16px] gap-[14px] sm:gap-[18px] shadow-[0_8px_24px_rgba(0,0,0,0.07)] hover:translate-x-[4px] transition-transform duration-300"
               >
-                <div className="w-[46px] h-[46px] rounded-full bg-[#e6f4ff] flex items-center justify-center shrink-0 ml-[4px]">
-                  <RefreshCw className="w-[20px] h-[20px] text-[#008cff]" strokeWidth={2} />
+                <div className="w-[42px] h-[42px] sm:w-[46px] sm:h-[46px] rounded-full bg-[#e6f4ff] flex items-center justify-center shrink-0 ml-[4px]">
+                  <RefreshCw className="w-[18px] h-[18px] sm:w-[20px] sm:h-[20px] text-[#008cff]" strokeWidth={2} />
                 </div>
                 <div className="flex flex-col justify-center">
-                  <h4 className="text-[#0c1830] font-[750] text-[14px] md:text-[15px] leading-[1.2]">Siempre actualizado</h4>
-                  <p className="text-[#6c88a0] font-[500] text-[13px] md:text-[14px] mt-[3px] leading-[1.2]">Nuevo contenido cada semana: cursos, lives y tips.</p>
+                  <h4 className="text-[#0c1830] font-[750] text-[13.5px] sm:text-[14px] md:text-[15px] leading-[1.2]">Siempre actualizado</h4>
+                  <p className="text-[#6c88a0] font-[500] text-[12.5px] sm:text-[13px] md:text-[14px] mt-[3px] leading-[1.2]">Nuevo contenido cada semana: cursos, lives y tips.</p>
                 </div>
               </motion.div>
 
@@ -617,14 +616,14 @@ export default function Landing3() {
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: 0.26, ease: "easeOut" }}
-                className="bg-white rounded-[24px] min-h-[72px] md:h-[76px] flex items-center p-[12px] pr-[16px] gap-[18px] shadow-[0_8px_24px_rgba(0,0,0,0.07)] hover:translate-x-[4px] transition-transform duration-300"
+                className="bg-white rounded-[20px] sm:rounded-[24px] min-h-[64px] md:h-[76px] flex items-center p-[10px] sm:p-[12px] pr-[14px] sm:pr-[16px] gap-[14px] sm:gap-[18px] shadow-[0_8px_24px_rgba(0,0,0,0.07)] hover:translate-x-[4px] transition-transform duration-300"
               >
-                <div className="w-[46px] h-[46px] rounded-full bg-[#e5fcf2] flex items-center justify-center shrink-0 ml-[4px]">
-                  <Calendar className="w-[20px] h-[20px] text-[#00b87a]" strokeWidth={2} />
+                <div className="w-[42px] h-[42px] sm:w-[46px] sm:h-[46px] rounded-full bg-[#e5fcf2] flex items-center justify-center shrink-0 ml-[4px]">
+                  <Calendar className="w-[18px] h-[18px] sm:w-[20px] sm:h-[20px] text-[#00b87a]" strokeWidth={2} />
                 </div>
                 <div className="flex flex-col justify-center">
-                  <h4 className="text-[#0c1830] font-[750] text-[14px] md:text-[15px] leading-[1.2]">Calendario de lives en vivo</h4>
-                  <p className="text-[#6c88a0] font-[500] text-[13px] md:text-[14px] mt-[3px] leading-[1.2]">Nunca te pierdas una clase — recibe recordatorios.</p>
+                  <h4 className="text-[#0c1830] font-[750] text-[13.5px] sm:text-[14px] md:text-[15px] leading-[1.2]">Calendario de lives en vivo</h4>
+                  <p className="text-[#6c88a0] font-[500] text-[12.5px] sm:text-[13px] md:text-[14px] mt-[3px] leading-[1.2]">Nunca te pierdas una clase — recibe recordatorios.</p>
                 </div>
               </motion.div>
               
@@ -636,11 +635,11 @@ export default function Landing3() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: 0.35, ease: "easeOut" }}
-              className="mt-[32px] md:mt-[42px] flex flex-col sm:flex-row gap-[16px]"
+              className="mt-7 sm:mt-[32px] md:mt-[42px] flex flex-col sm:flex-row gap-3 sm:gap-[16px]"
             >
               <button 
                 onClick={() => navigate("/register")}
-                className="w-full sm:w-auto h-[54px] md:h-[58px] px-[32px] rounded-[20px] text-white font-[700] text-[15px] md:text-[16px] flex justify-center items-center hover:-translate-y-[2px] transition-all duration-300"
+                className="w-full sm:w-auto h-[50px] sm:h-[54px] md:h-[58px] px-6 sm:px-[32px] rounded-[18px] sm:rounded-[20px] text-white font-[700] text-[14.5px] sm:text-[15px] md:text-[16px] flex justify-center items-center hover:-translate-y-[2px] transition-all duration-300"
                 style={{
                   backgroundColor: "#ff008c",
                   boxShadow: "0 4px 15px rgba(255,0,140,0.15)"
@@ -652,7 +651,7 @@ export default function Landing3() {
               </button>
               <button 
                 onClick={() => navigate("/login")}
-                className="w-full sm:w-auto h-[54px] md:h-[58px] px-[32px] rounded-[20px] bg-[#fcf1e8] text-[#0c1830] font-[650] text-[15px] md:text-[16px] flex justify-center items-center hover:bg-[#faebd9] hover:-translate-y-[2px] transition-all duration-300"
+                className="w-full sm:w-auto h-[50px] sm:h-[54px] md:h-[58px] px-6 sm:px-[32px] rounded-[18px] sm:rounded-[20px] bg-[#fcf1e8] text-[#0c1830] font-[650] text-[14.5px] sm:text-[15px] md:text-[16px] flex justify-center items-center hover:bg-[#faebd9] hover:-translate-y-[2px] transition-all duration-300"
               >
                 Ya tengo cuenta &nbsp;&rsaquo;
               </button>
@@ -679,9 +678,9 @@ export default function Landing3() {
       </section>
 
       {/* ── SECCIÓN 1 — SOBRE MÍ / HOLA, SOY NICE ── */}
-      <section id="sobre-mi" className="w-full relative bg-white pt-24 md:pt-[110px] pb-14 md:pb-20 px-4 sm:px-6">
+      <section id="sobre-mi" className="w-full relative bg-white pt-16 sm:pt-24 md:pt-[110px] pb-12 sm:pb-14 md:pb-20 px-4 sm:px-6">
         <div className="max-w-[1220px] mx-auto">
-          <div className="relative rounded-[32px] sm:rounded-[40px] bg-white border border-[#E7EAF0] p-6 sm:p-10 md:p-14 lg:p-16 shadow-[0_20px_60px_rgba(12,24,48,0.05)] overflow-hidden">
+          <div className="relative rounded-[28px] sm:rounded-[36px] md:rounded-[40px] bg-white border border-[#E7EAF0] p-5 sm:p-10 md:p-14 lg:p-16 shadow-[0_20px_60px_rgba(12,24,48,0.05)] overflow-hidden">
             
             {/* Forma decorativa orgánica en esquina superior derecha */}
             <div
@@ -699,14 +698,14 @@ export default function Landing3() {
             />
 
             {/* Contenedor: 2 columnas en desktop, orden narrativo específico en mobile */}
-            <div className="relative z-10 flex flex-col md:grid md:grid-cols-[0.48fr_0.52fr] gap-8 sm:gap-10 md:gap-12 lg:gap-16 items-center">
+            <div className="relative z-10 flex flex-col md:grid md:grid-cols-[0.48fr_0.52fr] gap-6 sm:gap-10 md:gap-12 lg:gap-16 items-center">
               
               {/* HEADER MOBILE (Oculto en Desktop): 1. Eyebrow, 2. Título */}
               <div className="md:hidden w-full text-left">
-                <span className="text-[#ff008c] font-[750] text-[12px] uppercase tracking-[0.14em] mb-2 block">
+                <span className="text-[#ff008c] font-[750] text-[11px] sm:text-[12px] uppercase tracking-[0.14em] mb-1.5 block">
                   SOBRE MÍ
                 </span>
-                <h2 className="text-[34px] sm:text-[40px] font-[800] leading-[1.08] tracking-[-0.03em] text-[#071631]">
+                <h2 className="text-[28px] sm:text-[36px] font-[800] leading-[1.1] tracking-[-0.03em] text-[#071631]">
                   Hola, soy <span className="text-[#ff008c]">Nice</span>
                 </h2>
               </div>
@@ -721,7 +720,7 @@ export default function Landing3() {
               >
                 {/* Panel vertical para la fotografía */}
                 <div
-                  className="relative w-full rounded-[28px] sm:rounded-[32px] overflow-visible flex items-end justify-center px-4 sm:px-6 pt-6 sm:pt-8 pb-0"
+                  className="relative w-full rounded-[24px] sm:rounded-[32px] overflow-visible flex items-end justify-center px-3 sm:px-6 pt-5 sm:pt-8 pb-0"
                   style={{
                     background: "linear-gradient(180deg, #ffffff 0%, #fff7fb 55%, #ffeef7 100%)",
                     border: "1px solid rgba(255, 255, 255, 0.95)",
@@ -737,7 +736,7 @@ export default function Landing3() {
                   <img
                     src={nicePerfil}
                     alt="Nicelis Garrido"
-                    className="relative z-10 w-full max-h-[440px] sm:max-h-[500px] md:max-h-[560px] object-contain drop-shadow-[0_15px_30px_rgba(0,0,0,0.08)]"
+                    className="relative z-10 w-full max-h-[380px] sm:max-h-[500px] md:max-h-[560px] object-contain drop-shadow-[0_15px_30px_rgba(0,0,0,0.08)]"
                   />
 
                   {/* Badge flotante en esquina inferior derecha */}
@@ -746,16 +745,16 @@ export default function Landing3() {
                     whileInView={{ opacity: 1, scale: 1 }}
                     viewport={{ once: true }}
                     transition={{ duration: 0.5, delay: 0.35, ease: "easeOut" }}
-                    className="absolute -bottom-4 -right-2 sm:-bottom-5 sm:-right-4 z-20 bg-white rounded-[16px] py-3 px-4 sm:py-3.5 sm:px-5 shadow-[0_12px_30px_rgba(12,24,48,0.1)] border border-[#fce7f3] flex items-center gap-3.5 select-none"
+                    className="absolute -bottom-3 right-1 sm:-bottom-5 sm:-right-2 max-w-[calc(100%-16px)] z-20 bg-white rounded-[14px] sm:rounded-[16px] py-2 px-3 sm:py-3.5 sm:px-5 shadow-[0_12px_30px_rgba(12,24,48,0.12)] border border-[#fce7f3] flex items-center gap-2.5 sm:gap-3.5 select-none"
                   >
-                    <div className="w-[42px] h-[42px] rounded-[12px] bg-[#ffeef7] flex items-center justify-center shrink-0">
-                      <Star className="w-[20px] h-[20px] text-[#ff008c] fill-[#ff008c]" />
+                    <div className="w-[34px] h-[34px] sm:w-[42px] sm:h-[42px] rounded-[10px] sm:rounded-[12px] bg-[#ffeef7] flex items-center justify-center shrink-0">
+                      <Star className="w-[16px] h-[16px] sm:w-[20px] sm:h-[20px] text-[#ff008c] fill-[#ff008c]" />
                     </div>
                     <div className="flex flex-col">
-                      <span className="text-[#071631] font-[850] text-[17px] sm:text-[18px] leading-tight">
+                      <span className="text-[#071631] font-[850] text-[15px] sm:text-[18px] leading-tight">
                         10+ Años
                       </span>
-                      <span className="text-[#617089] text-[10px] sm:text-[11px] font-[750] uppercase tracking-[0.1em] mt-0.5 leading-tight">
+                      <span className="text-[#617089] text-[9.5px] sm:text-[11px] font-[750] uppercase tracking-[0.08em] sm:tracking-[0.1em] mt-0.5 leading-tight">
                         DE EXPERIENCIA
                       </span>
                     </div>
@@ -782,7 +781,7 @@ export default function Landing3() {
                 </div>
 
                 {/* 5. Textos con separación vertical */}
-                <div className="space-y-4 max-w-[580px] text-[#617089] text-[15px] md:text-[16.5px] font-[450] leading-[1.7] mb-8">
+                <div className="space-y-3.5 sm:space-y-4 max-w-[580px] text-[#617089] text-[14px] sm:text-[15.5px] md:text-[16.5px] font-[450] leading-[1.68] mb-6 sm:mb-8">
                   <p>
                     Mi historia en la repostería comenzó como un pequeño sueño en mi cocina, horneando para familiares y amigos. Con el tiempo, esa pasión se transformó en una vocación que me llevó a estudiar, perfeccionar mis técnicas y, finalmente, convertir el azúcar y la harina en mi estilo de vida.
                   </p>
@@ -800,7 +799,7 @@ export default function Landing3() {
                     whileHover={{ y: -2 }}
                     whileTap={{ scale: 0.98 }}
                     onClick={() => navigate("/register")}
-                    className="inline-flex items-center justify-center px-[28px] py-[14px] rounded-[11px] text-white font-[700] text-[15px] md:text-[16px] transition-all duration-300"
+                    className="w-full sm:w-auto inline-flex items-center justify-center px-6 sm:px-[28px] py-3.5 sm:py-[14px] rounded-[12px] text-white font-[700] text-[14.5px] sm:text-[16px] transition-all duration-300"
                     style={{
                       backgroundColor: "#ff008c",
                       boxShadow: "0 8px 25px rgba(255,0,140,0.22)",
@@ -825,7 +824,7 @@ export default function Landing3() {
       </section>
 
       {/* ── SECCIÓN 2 — TESTIMONIOS ── */}
-      <section id="testimonios" className="w-full relative bg-white pt-16 md:pt-24 pb-24 md:pb-32 px-4 sm:px-6">
+      <section id="testimonios" className="w-full relative bg-white pt-14 sm:pt-20 md:pt-24 pb-20 sm:pb-28 md:pb-32 px-4 sm:px-6">
         <div className="max-w-[1220px] mx-auto">
           
           {/* Encabezado */}
@@ -834,12 +833,12 @@ export default function Landing3() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6, ease: "easeOut" }}
-            className="flex flex-col items-center text-center mb-14 md:mb-16"
+            className="flex flex-col items-center text-center mb-10 sm:mb-14 md:mb-16"
           >
-            <span className="text-[#ff008c] font-[750] text-[11px] md:text-[13px] uppercase tracking-[0.14em] mb-3">
+            <span className="text-[#ff008c] font-[750] text-[11px] md:text-[13px] uppercase tracking-[0.14em] mb-2 sm:mb-3">
               LO QUE DICE NUESTRA COMUNIDAD
             </span>
-            <h2 className="text-[34px] sm:text-[42px] md:text-[clamp(38px,4vw,52px)] font-[800] text-[#071631] tracking-[-0.03em] leading-[1.1]">
+            <h2 className="text-[28px] sm:text-[38px] md:text-[clamp(38px,4vw,52px)] font-[800] text-[#071631] tracking-[-0.03em] leading-[1.15]">
               Historias reales, <span className="text-[#ff008c]">resultados reales</span>
             </h2>
           </motion.div>
@@ -851,33 +850,57 @@ export default function Landing3() {
             ))}
           </div>
 
-          {/* Carrusel Mobile: Scroll-snap táctil suave */}
-          <div className="md:hidden w-full">
+          {/* Carrusel Mobile: Cada tarjeta a ancho completo (sin cortes de texto) */}
+          <div className="md:hidden w-full max-w-[460px] mx-auto">
             <div
               ref={testimonialCarouselRef}
               onScroll={handleCarouselScroll}
-              className="flex overflow-x-auto snap-x snap-mandatory gap-4 px-2 pb-4 no-scrollbar"
+              className="flex overflow-x-auto snap-x snap-mandatory w-full pb-2 no-scrollbar"
               style={{ scrollbarWidth: "none" }}
             >
               {testimonials.map((t, idx) => (
-                <div key={idx} className="min-w-[85%] sm:min-w-[75%] snap-center shrink-0">
+                <div key={idx} className="w-full min-w-full shrink-0 snap-center px-1">
                   <TestimonialCard testimonial={t} index={idx} />
                 </div>
               ))}
             </div>
 
-            {/* Indicadores inferiores discretos */}
-            <div className="flex justify-center items-center gap-2 mt-4">
-              {testimonials.map((_, idx) => (
+            {/* Controles de navegación de testimonios */}
+            <div className="flex items-center justify-between px-2 mt-5">
+              <span className="text-[12px] font-[600] text-[#617089]">
+                {activeTestimonial + 1} de {testimonials.length} testimonios
+              </span>
+
+              <div className="flex items-center gap-3">
                 <button
-                  key={idx}
-                  onClick={() => scrollToSlide(idx)}
-                  aria-label={`Ir a testimonio ${idx + 1}`}
-                  className={`h-2 rounded-full transition-all duration-300 ${
-                    activeTestimonial === idx ? "w-6 bg-[#ff008c]" : "w-2 bg-[#e2e8f0]"
-                  }`}
-                />
-              ))}
+                  onClick={() => scrollToSlide((activeTestimonial - 1 + testimonials.length) % testimonials.length)}
+                  className="w-9 h-9 rounded-full border border-[#E8E8EE] bg-white flex items-center justify-center text-[#071631] hover:text-[#ff008c] hover:border-[#ff008c]/40 active:scale-95 transition-all shadow-sm"
+                  aria-label="Testimonio anterior"
+                >
+                  <ChevronLeft size={18} />
+                </button>
+
+                <div className="flex items-center gap-1.5">
+                  {testimonials.map((_, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => scrollToSlide(idx)}
+                      aria-label={`Ir a testimonio ${idx + 1}`}
+                      className={`h-2.5 rounded-full transition-all duration-300 ${
+                        activeTestimonial === idx ? "w-7 bg-[#ff008c]" : "w-2.5 bg-[#e2e8f0]"
+                      }`}
+                    />
+                  ))}
+                </div>
+
+                <button
+                  onClick={() => scrollToSlide((activeTestimonial + 1) % testimonials.length)}
+                  className="w-9 h-9 rounded-full border border-[#E8E8EE] bg-white flex items-center justify-center text-[#071631] hover:text-[#ff008c] hover:border-[#ff008c]/40 active:scale-95 transition-all shadow-sm"
+                  aria-label="Siguiente testimonio"
+                >
+                  <ChevronRight size={18} />
+                </button>
+              </div>
             </div>
           </div>
 
@@ -907,10 +930,8 @@ export default function Landing3() {
             <nav className="flex flex-wrap items-center justify-center gap-5 sm:gap-7 md:gap-8">
               {[
                 { label: "Beneficios", href: "#beneficios" },
-                { label: "La plataforma", href: "#plataforma" },
                 { label: "Planes", href: "#planes" },
                 { label: "Testimonios", href: "#testimonios" },
-                { label: "FAQ", href: "#faq" },
               ].map((item, i) => (
                 <a
                   key={i}
