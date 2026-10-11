@@ -537,9 +537,11 @@ export default function Landing3() {
       {/* Sección Diseñada para inspirarte cada día */}
       <section
         id="plataforma"
-        className="w-full relative flex flex-col justify-center overflow-hidden py-20 md:py-[100px] bg-cover bg-center bg-no-repeat"
-        style={{ backgroundImage: `url(${fondo5})` }}
+        className="w-full relative flex flex-col justify-center overflow-hidden py-20 md:py-[100px]"
       >
+        {/* Fondo oscuro y premium idéntico al de Invierte en tu pasión */}
+        <PricingBackground />
+
         <div className="relative z-10 w-full max-w-[1240px] mx-auto px-4 sm:px-6 grid grid-cols-1 md:grid-cols-[0.9fr_1.1fr] items-center gap-0 md:gap-8">
           
           {/* COLUMNA IZQUIERDA */}
