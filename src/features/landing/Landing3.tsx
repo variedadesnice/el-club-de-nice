@@ -2,6 +2,7 @@ import React, { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "motion/react";
 import fondo1 from "../../assets/landing oscar/FONDO 1.webp";
+import bannerMovil from "../../assets/landing oscar/BANNER MOVIL ECN.webp";
 import logo from "../../assets/logo.png";
 import cuadroReproductor from "../../assets/landing oscar/CUADRO REPRODUCTOR.webp";
 import grupo2 from "../../assets/landing oscar/Grupo 2.webp";
@@ -213,10 +214,18 @@ export default function Landing3() {
       </header>
 
       {/* Sección 1: Hero */}
-      <section
-        className="min-h-[460px] sm:min-h-[560px] md:min-h-[calc(100vh-76px)] w-full bg-cover bg-center bg-no-repeat relative flex flex-col items-center justify-center"
-        style={{ backgroundImage: `url(${fondo1})` }}
-      >
+      <section className="min-h-[460px] sm:min-h-[560px] md:min-h-[calc(100vh-76px)] w-full relative flex flex-col items-center justify-center overflow-hidden">
+        {/* Fondo Mobile / Tablet (< md) */}
+        <div
+          className="md:hidden absolute inset-0 w-full h-full bg-cover bg-top sm:bg-center bg-no-repeat pointer-events-none"
+          style={{ backgroundImage: `url(${bannerMovil})` }}
+        />
+        {/* Fondo Desktop (>= md) */}
+        <div
+          className="hidden md:block absolute inset-0 w-full h-full bg-cover bg-center bg-no-repeat pointer-events-none"
+          style={{ backgroundImage: `url(${fondo1})` }}
+        />
+
         <div className="z-10 flex flex-col items-center justify-center px-4">
           <h1 className="text-3xl sm:text-5xl md:text-7xl text-white font-bold drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] text-center">
             Hero Section
