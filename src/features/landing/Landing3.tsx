@@ -214,23 +214,23 @@ export default function Landing3() {
       </header>
 
       {/* Sección 1: Hero */}
-      <section className="min-h-[460px] sm:min-h-[560px] md:min-h-[calc(100vh-76px)] w-full relative flex flex-col items-center justify-center overflow-hidden">
-        {/* Fondo Mobile / Tablet (< md) */}
+      <section className="w-full relative overflow-hidden">
+        {/* Versión Mobile: se muestra la imagen completica de arriba a abajo */}
+        <div className="block md:hidden w-full">
+          <img
+            src={bannerMovil}
+            alt="El Club de Nice"
+            fetchPriority="high"
+            decoding="async"
+            className="w-full h-auto block"
+          />
+        </div>
+
+        {/* Versión Desktop: fondo de pantalla completa */}
         <div
-          className="md:hidden absolute inset-0 w-full h-full bg-cover bg-top sm:bg-center bg-no-repeat pointer-events-none"
-          style={{ backgroundImage: `url(${bannerMovil})` }}
-        />
-        {/* Fondo Desktop (>= md) */}
-        <div
-          className="hidden md:block absolute inset-0 w-full h-full bg-cover bg-center bg-no-repeat pointer-events-none"
+          className="hidden md:block w-full min-h-[calc(100vh-76px)] bg-cover bg-center bg-no-repeat"
           style={{ backgroundImage: `url(${fondo1})` }}
         />
-
-        <div className="z-10 flex flex-col items-center justify-center px-4">
-          <h1 className="text-3xl sm:text-5xl md:text-7xl text-white font-bold drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] text-center">
-            Hero Section
-          </h1>
-        </div>
       </section>
 
       {/* Sección Estadísticas */}
