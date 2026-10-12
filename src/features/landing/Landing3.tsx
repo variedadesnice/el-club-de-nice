@@ -215,8 +215,8 @@ export default function Landing3() {
 
       {/* Sección 1: Hero */}
       <section className="w-full relative overflow-hidden">
-        {/* Versión Mobile: se muestra la imagen completica de arriba a abajo */}
-        <div className="block md:hidden w-full">
+        {/* Versión Mobile: se muestra la imagen completica y los 2 botones en la parte inferior */}
+        <div className="block md:hidden relative w-full">
           <img
             src={bannerMovil}
             alt="El Club de Nice"
@@ -224,13 +224,57 @@ export default function Landing3() {
             decoding="async"
             className="w-full h-auto block"
           />
+          {/* Botones Hero Mobile */}
+          <div className="absolute bottom-4 sm:bottom-7 inset-x-0 flex justify-center px-3 sm:px-4 z-20">
+            <div className="flex flex-row items-center justify-center gap-2 sm:gap-3.5 w-full max-w-[420px]">
+              <button
+                onClick={() => navigate("/register")}
+                className="flex-1 sm:flex-initial h-[44px] sm:h-[48px] px-3 sm:px-5 rounded-[15px] sm:rounded-[18px] text-white font-[750] text-[12.5px] sm:text-[14px] flex items-center justify-center whitespace-nowrap hover:-translate-y-[2px] transition-all duration-300 cursor-pointer"
+                style={{
+                  backgroundColor: "#ff008c",
+                  boxShadow: "0 4px 18px rgba(255, 0, 140, 0.45)",
+                }}
+              >
+                Quiero ser miembro &nbsp;&rarr;
+              </button>
+              <button
+                onClick={() => navigate("/login")}
+                className="flex-1 sm:flex-initial h-[44px] sm:h-[48px] px-3 sm:px-5 rounded-[15px] sm:rounded-[18px] bg-[#fcf1e8] text-[#071631] font-[750] text-[12.5px] sm:text-[14px] flex items-center justify-center whitespace-nowrap hover:bg-[#faebd9] hover:-translate-y-[2px] transition-all duration-300 cursor-pointer shadow-sm"
+              >
+                Ya tengo cuenta &nbsp;&rsaquo;
+              </button>
+            </div>
+          </div>
         </div>
 
-        {/* Versión Desktop: fondo de pantalla completa */}
+        {/* Versión Desktop: fondo de pantalla completa con botones a la izquierda */}
         <div
-          className="hidden md:block w-full min-h-[calc(100vh-76px)] bg-cover bg-center bg-no-repeat"
+          className="hidden md:flex w-full min-h-[calc(100vh-76px)] bg-cover bg-center bg-no-repeat relative items-end pb-12 lg:pb-16 xl:pb-20"
           style={{ backgroundImage: `url(${fondo1})` }}
-        />
+        >
+          <div className="w-full max-w-[1240px] mx-auto px-6 lg:px-12 z-20">
+            <div className="flex flex-row items-center gap-4">
+              <button
+                onClick={() => navigate("/register")}
+                className="h-[52px] md:h-[56px] px-8 rounded-[20px] text-white font-[750] text-[15px] md:text-[16px] flex items-center justify-center whitespace-nowrap hover:-translate-y-[2px] transition-all duration-300 cursor-pointer"
+                style={{
+                  backgroundColor: "#ff008c",
+                  boxShadow: "0 4px 20px rgba(255, 0, 140, 0.4)",
+                }}
+                onMouseEnter={(e) => (e.currentTarget.style.boxShadow = "0 8px 28px rgba(255, 0, 140, 0.55)")}
+                onMouseLeave={(e) => (e.currentTarget.style.boxShadow = "0 4px 20px rgba(255, 0, 140, 0.4)")}
+              >
+                Quiero ser miembro &nbsp;&rarr;
+              </button>
+              <button
+                onClick={() => navigate("/login")}
+                className="h-[52px] md:h-[56px] px-8 rounded-[20px] bg-[#fcf1e8] text-[#071631] font-[750] text-[15px] md:text-[16px] flex items-center justify-center whitespace-nowrap hover:bg-[#faebd9] hover:-translate-y-[2px] transition-all duration-300 cursor-pointer shadow-md"
+              >
+                Ya tengo cuenta &nbsp;&rsaquo;
+              </button>
+            </div>
+          </div>
+        </div>
       </section>
 
       {/* Sección Estadísticas */}
