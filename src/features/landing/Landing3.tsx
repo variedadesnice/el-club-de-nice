@@ -1,20 +1,17 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "motion/react";
-import fondo1 from "../../assets/landing oscar/FONDO 1.png";
-import fondo2 from "../../assets/landing oscar/FONDO 2.png";
-import fondo3 from "../../assets/landing oscar/FONDO 3.png";
-import fondo5 from "../../assets/landing oscar/FONDO 5.png";
+import fondo1 from "../../assets/landing oscar/FONDO 1.webp";
 import logo from "../../assets/logo.png";
-import cuadroReproductor from "../../assets/landing oscar/CUADRO REPRODUCTOR.png";
-import grupo2 from "../../assets/landing oscar/Grupo 2.png";
+import cuadroReproductor from "../../assets/landing oscar/CUADRO REPRODUCTOR.webp";
+import grupo2 from "../../assets/landing oscar/Grupo 2.webp";
 import { Paintbrush, RefreshCw, Calendar, Star, Instagram, Youtube, ChevronLeft, ChevronRight } from "lucide-react";
-import nicePerfil from "../../assets/contenido/nice de perfil.png";
-import avatarFeat1 from "../../assets/avatars/feat1.jpg";
-import avatarFeat2 from "../../assets/avatars/feat2.jpg";
-import avatarFeat3 from "../../assets/avatars/feat3.jpg";
+import nicePerfil from "../../assets/contenido/nice de perfil.webp";
+import avatarFeat1 from "../../assets/avatars/feat1.webp";
+import avatarFeat2 from "../../assets/avatars/feat2.webp";
+import avatarFeat3 from "../../assets/avatars/feat3.webp";
 import { PricingBackground } from "./PricingBackground";
-import lineaNice from "../../assets/landing oscar/linea nice.png";
+import lineaNice from "../../assets/landing oscar/linea nice.webp";
 
 interface Testimonial {
   name: string;
@@ -82,6 +79,10 @@ function TestimonialCard({ testimonial, index }: { testimonial: Testimonial; ind
         <img
           src={testimonial.image}
           alt={testimonial.name}
+          loading="lazy"
+          decoding="async"
+          width={42}
+          height={42}
           className="w-[42px] h-[42px] rounded-full object-cover border border-[#f0e4ec] shrink-0"
         />
         <div className="flex flex-col">
@@ -172,7 +173,7 @@ export default function Landing3() {
       <header className="w-full bg-white sticky top-0 z-50 flex items-center justify-between px-4 sm:px-6 md:px-12 py-3.5 sm:py-4 shadow-sm">
         {/* Logo and Title */}
         <div className="flex items-center space-x-2.5 sm:space-x-3 cursor-pointer" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}>
-          <img src={logo} alt="El Club de Nice Logo" className="h-7 sm:h-8 w-auto object-contain" />
+          <img src={logo} alt="El Club de Nice Logo" fetchPriority="high" decoding="async" width={112} height={32} className="h-7 sm:h-8 w-auto object-contain" />
           <span className="font-[800] text-[#071426] text-lg sm:text-xl tracking-tight">
             El Club de Nice
           </span>
@@ -293,6 +294,10 @@ export default function Landing3() {
           <img 
             src={cuadroReproductor} 
             alt="Marco Reproductor" 
+            loading="lazy"
+            decoding="async"
+            width={1000}
+            height={676}
             className="w-full h-auto relative z-20 pointer-events-none drop-shadow-2xl" 
           />
           
@@ -556,6 +561,10 @@ export default function Landing3() {
           <img
             src={lineaNice}
             alt="Línea divisora El Club de Nice"
+            loading="lazy"
+            decoding="async"
+            width={1800}
+            height={261}
             className="relative z-10 w-full h-auto min-w-full object-cover block drop-shadow-[0_6px_20px_rgba(0,0,0,0.18)]"
           />
         </div>
@@ -597,6 +606,10 @@ export default function Landing3() {
               <img 
                 src={grupo2} 
                 alt="Vista de la plataforma en móvil" 
+                loading="lazy"
+                decoding="async"
+                width={360}
+                height={433}
                 className="w-full max-w-[360px] object-contain drop-shadow-xl"
               />
             </motion.div>
@@ -695,6 +708,10 @@ export default function Landing3() {
             <img 
               src={grupo2} 
               alt="Vista de la plataforma" 
+              loading="lazy"
+              decoding="async"
+              width={600}
+              height={721}
               className="w-[125%] max-w-none -translate-x-[6%] object-contain drop-shadow-[0_20px_50px_rgba(0,0,0,0.15)]"
             />
           </motion.div>
@@ -761,6 +778,10 @@ export default function Landing3() {
                   <img
                     src={nicePerfil}
                     alt="Nicelis Garrido"
+                    loading="lazy"
+                    decoding="async"
+                    width={420}
+                    height={560}
                     className="relative z-10 w-full max-h-[380px] sm:max-h-[500px] md:max-h-[560px] object-contain drop-shadow-[0_15px_30px_rgba(0,0,0,0.08)]"
                   />
 
@@ -945,7 +966,7 @@ export default function Landing3() {
           >
             {/* Izquierda: Logo El Club de Nice */}
             <div className="flex items-center gap-3.5">
-              <img src={logo} alt="El Club de Nice" className="w-9 h-9 sm:w-10 sm:h-10 object-contain drop-shadow" />
+              <img src={logo} alt="El Club de Nice" loading="lazy" decoding="async" width={40} height={40} className="w-9 h-9 sm:w-10 sm:h-10 object-contain drop-shadow" />
               <span className="font-[800] text-[18px] sm:text-[20px] text-white tracking-tight">
                 El Club de Nice
               </span>

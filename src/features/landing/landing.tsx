@@ -27,14 +27,14 @@ import {
   BadgeCheck,
 } from "lucide-react";
 import logo from "../../assets/logo.png";
-import avatarFeat1 from "../../assets/avatars/feat1.jpg";
-import avatarFeat2 from "../../assets/avatars/feat2.jpg";
-import avatarFeat3 from "../../assets/avatars/feat3.jpg";
-import avatarAuth1 from "../../assets/avatars/auth1.jpg";
-import avatarAuth2 from "../../assets/avatars/auth2.jpg";
-import avatarAuth3 from "../../assets/avatars/auth3.jpg";
-import avatarAuth4 from "../../assets/avatars/auth4.jpg";
-import nicePerfil from "../../assets/contenido/nice de perfil.png";
+import avatarFeat1 from "../../assets/avatars/feat1.webp";
+import avatarFeat2 from "../../assets/avatars/feat2.webp";
+import avatarFeat3 from "../../assets/avatars/feat3.webp";
+import avatarAuth1 from "../../assets/avatars/auth1.webp";
+import avatarAuth2 from "../../assets/avatars/auth2.webp";
+import avatarAuth3 from "../../assets/avatars/auth3.webp";
+import avatarAuth4 from "../../assets/avatars/auth4.webp";
+import nicePerfil from "../../assets/contenido/nice de perfil.webp";
 import { apiFetch, API_BASE } from "../../lib/api";
 import type { Plan } from "../../types";
 
@@ -168,6 +168,10 @@ function TestimonialCard({
         <img
           src={avatar}
           alt={name}
+          loading="lazy"
+          decoding="async"
+          width={40}
+          height={40}
           className="w-10 h-10 rounded-full object-cover border-2 border-pink-200"
         />
         <div>
@@ -379,7 +383,7 @@ function ProductPreview() {
               { avatar: avatarFeat2, name: "Laura M.", text: "¡Primer pedido de encargo completado! 🎂 Esta comunidad me dio el empujón que necesitaba para empezar.", likes: 124, time: "hace 6h" },
             ].map((post, i) => (
               <div key={i} className="bg-white border border-slate-100 rounded-2xl p-4 flex gap-3 shadow-sm">
-                <img src={post.avatar} alt={post.name} className="w-8 h-8 rounded-full object-cover flex-shrink-0 border border-pink-100" />
+                <img src={post.avatar} alt={post.name} loading="lazy" decoding="async" width={32} height={32} className="w-8 h-8 rounded-full object-cover flex-shrink-0 border border-pink-100" />
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1">
                     <span className="text-slate-900 font-bold text-xs">{post.name}</span>
@@ -566,7 +570,7 @@ export default function Landing({ onViewChange }: LandingProps) {
             animate={{ opacity: 1, x: 0 }}
             className="flex items-center gap-3"
           >
-            <img src={logo} alt="El Club de Nice" className="w-9 h-9 object-contain" />
+            <img src={logo} alt="El Club de Nice" fetchPriority="high" decoding="async" width={36} height={36} className="w-9 h-9 object-contain" />
             <span className="font-black text-lg text-slate-900 tracking-tight">
               El Club de Nice
             </span>
@@ -951,6 +955,10 @@ export default function Landing({ onViewChange }: LandingProps) {
                   <img
                     src={nicePerfil}
                     alt="Nice de perfil"
+                    loading="lazy"
+                    decoding="async"
+                    width={448}
+                    height={597}
                     className="w-full max-w-md rounded-[2rem] object-cover shadow-2xl border-4 border-white"
                   />
                   <div className="absolute -bottom-6 -right-6 bg-white p-4 rounded-2xl shadow-lg border border-slate-100 flex items-center gap-4">
@@ -1248,7 +1256,7 @@ export default function Landing({ onViewChange }: LandingProps) {
         <div className="max-w-7xl mx-auto px-6">
           <div className="flex flex-col md:flex-row items-center justify-between gap-8 mb-10">
             <div className="flex items-center gap-3">
-              <img src={logo} alt="El Club de Nice" className="w-8 h-8 object-contain" />
+              <img src={logo} alt="El Club de Nice" loading="lazy" decoding="async" width={32} height={32} className="w-8 h-8 object-contain" />
               <span className="font-black text-lg text-slate-900 tracking-tight">
                 El Club de Nice
               </span>
