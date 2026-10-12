@@ -296,16 +296,15 @@ export default function Landing3() {
             className="w-full h-auto relative z-20 pointer-events-none drop-shadow-2xl" 
           />
           
-          {/* Contenedor del video centrado. */}
-          <div className="absolute z-10 top-[5%] left-[5%] w-[90%] h-[90%] bg-black flex items-center justify-center overflow-hidden rounded-md shadow-inner">
-            <video 
-              className="w-full h-full object-cover" 
-              controls 
-              controlsList="nodownload"
-            >
-              <source src="" type="video/mp4" />
-              Tu navegador no soporta reproducción de video.
-            </video>
+          {/* Contenedor del video centrado dentro del marco */}
+          <div className="absolute z-10 top-[5.6%] left-[5%] w-[90%] h-[88.8%] bg-black flex items-center justify-center overflow-hidden rounded-[16px] sm:rounded-[24px] md:rounded-[32px] shadow-inner">
+            <iframe
+              src="https://player.vimeo.com/video/1217664323?autoplay=1&loop=1&muted=1&controls=1&byline=0&title=0&portrait=0"
+              title="Video de El Club de Nice"
+              className="w-full h-full border-0"
+              allow="autoplay; fullscreen; picture-in-picture"
+              allowFullScreen
+            />
           </div>
         </div>
       </section>
