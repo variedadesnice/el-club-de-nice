@@ -3,6 +3,7 @@ import { Camera, Save, X, Trash2 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { useApiFetch } from "../../../lib/api";
 import { Course } from "../../../types";
+import { useContentCategories } from "../hooks/useContentCategories";
 
 interface CreateCourseSheetProps {
   open: boolean;
@@ -13,9 +14,10 @@ interface CreateCourseSheetProps {
 
 export default function CreateCourseSheet({ open, onClose, onCreated, course }: CreateCourseSheetProps) {
   const api = useApiFetch();
+  const { categories } = useContentCategories();
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [category, setCategory] = useState("Cursos");
+  const [category, setCategory] = useState("");
   const [thumbnailPreview, setThumbnailPreview] = useState("");
   const [thumbnailUrl, setThumbnailUrl] = useState("");
   const [isUploading, setIsUploading] = useState(false);
@@ -27,7 +29,7 @@ export default function CreateCourseSheet({ open, onClose, onCreated, course }: 
     if (open && course) {
       setTitle(course.title);
       setDescription(course.description);
-      setCategory(course.category || "Cursos");
+      setCategory(course.category || "");
       setThumbnailPreview(course.thumbnail);
       setThumbnailUrl(course.thumbnail);
     } else if (open && !course) {
@@ -36,10 +38,20 @@ export default function CreateCourseSheet({ open, onClose, onCreated, course }: 
     // eslint-disable-next-line
   }, [open, course]);
 
+  // Un contenido nuevo arranca en la primera categoría, en cuanto llegan.
+  React.useEffect(() => {
+    if (open && !course && !category && categories.length > 0) setCategory(categories[0].name);
+  }, [open, course, category, categories]);
+
+  // Un contenido que se edita puede estar en una categoría que ya no está activa
+  // (o en "General", la de antes del catálogo). Se muestra igual para no
+  // cambiársela en silencio al guardar.
+  const categoryOutsideCatalog = !!category && !categories.some((c) => c.name === category);
+
   const reset = () => {
     setTitle("");
     setDescription("");
-    setCategory("Cursos");
+    setCategory("");
     setThumbnailPreview("");
     setThumbnailUrl("");
     setError(null);
@@ -93,6 +105,7 @@ export default function CreateCourseSheet({ open, onClose, onCreated, course }: 
     if (!title.trim()) { setError("El nombre del curso es obligatorio"); return; }
     if (!description.trim()) { setError("La descripción es obligatoria"); return; }
     if (!thumbnailUrl) { setError("Sube una imagen para el curso"); return; }
+    if (!category) { setError("Elige una categoría"); return; }
 
     setIsSaving(true);
     try {
@@ -190,10 +203,11 @@ export default function CreateCourseSheet({ open, onClose, onCreated, course }: 
           onChange={(e) => setCategory(e.target.value)}
           className="w-full mt-1 bg-slate-50 border-2 border-transparent focus:border-violet-200 focus:bg-white rounded-xl py-3 px-4 text-sm font-medium outline-none appearance-none"
         >
-          <option value="Cursos">Cursos</option>
-          <option value="Probando marcas">Probando marcas</option>
-          <option value="Guías digitales">Guías digitales</option>
-          <option value="Laboratorios">Laboratorios</option>
+          {categories.length === 0 && !category && <option value="">No hay categorías activas</option>}
+          {categoryOutsideCatalog && <option value={category}>{category} (fuera del catálogo)</option>}
+          {categories.map((c) => (
+            <option key={c.id} value={c.name}>{c.name}</option>
+          ))}
         </select>
       </div>
 

@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Plus } from "lucide-react";
 import { useSearchParams } from "react-router-dom";
 import { useCourses } from "../hooks/useCourses";
+import { useContentCategories } from "../hooks/useContentCategories";
 import { useAuth } from "../../../context/AuthContext";
 import { requireAdmin, isAdmin } from "../../../lib/permissions";
 import CourseCard from "./CourseCard";
@@ -14,6 +15,7 @@ export default function Classroom() {
   const { user } = useAuth();
   const userIsAdmin = isAdmin(user?.role);
   const { courses, isLoading, error, refetch } = useCourses();
+  const { categories } = useContentCategories();
   const [searchParams] = useSearchParams();
   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
   const [showCreate, setShowCreate] = useState(false);
@@ -80,7 +82,7 @@ export default function Classroom() {
 
         {courses.length > 0 && (
           <div className="flex items-center gap-2 overflow-x-auto pb-2 snap-x">
-            {["Todos", "Cursos", "Probando marcas", "Guías digitales", "Laboratorios"].map((cat) => (
+            {["Todos", ...categories.map((c) => c.name)].map((cat) => (
               <button
                 key={cat}
                 type="button"

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import {
   Flame,
@@ -11,17 +11,39 @@ import {
   ChevronUp,
   Award,
   HelpCircle,
+  CalendarCheck,
 } from "lucide-react";
-import { XP_BREAKDOWN } from "../data/profileMock";
+import { apiFetch } from "../../../lib/api";
 
-const actionIconMap = {
-  book: BookOpen,
-  graduation: GraduationCap,
-  pencil: Pencil,
-  heart: Heart,
-  message: MessageSquare,
-  flame: Flame,
-};
+/** Logro del catálogo público (GET /api/achievements/) — la fuente real del XP que se otorga. */
+interface XpAction {
+  code: string;
+  name: string;
+  xp_reward: number;
+  is_repeatable: boolean;
+  daily_limit: number | null;
+}
+
+// Los otorga el admin a mano; no es algo que el miembro pueda "hacer".
+const HIDDEN_CODES = new Set(["admin_award"]);
+
+function iconFor(code: string) {
+  if (code.startsWith("lesson")) return BookOpen;
+  if (code.startsWith("course")) return GraduationCap;
+  if (code.startsWith("post_created")) return Pencil;
+  if (code.includes("like")) return Heart;
+  if (code.startsWith("comment")) return MessageSquare;
+  if (code.startsWith("streak") || code.startsWith("login")) return Flame;
+  if (code.startsWith("member")) return CalendarCheck;
+  return Award;
+}
+
+// Primero lo que se repite (el día a día), después los hitos de una sola vez;
+// dentro de cada grupo, de menos a más XP.
+function sortActions(a: XpAction, b: XpAction) {
+  if (a.is_repeatable !== b.is_repeatable) return a.is_repeatable ? -1 : 1;
+  return a.xp_reward - b.xp_reward;
+}
 
 interface Props {
   level: number;
@@ -43,6 +65,23 @@ export default function ProfileLevelCard({
   loading = false,
 }: Props) {
   const [showXpInfo, setShowXpInfo] = useState(false);
+  const [xpActions, setXpActions] = useState<XpAction[] | null>(null);
+  const [xpError, setXpError] = useState(false);
+
+  // El catálogo se pide la primera vez que se abre el acordeón, no al montar.
+  useEffect(() => {
+    if (!showXpInfo || xpActions !== null) return;
+    let cancelled = false;
+    setXpError(false);
+    apiFetch<XpAction[]>("/api/achievements/")
+      .then(({ data }) => {
+        if (!cancelled) setXpActions(data.filter((a) => !HIDDEN_CODES.has(a.code)).sort(sortActions));
+      })
+      .catch(() => {
+        if (!cancelled) setXpError(true);
+      });
+    return () => { cancelled = true; };
+  }, [showXpInfo, xpActions]);
   const progress = xpNext > 0 ? Math.min(Math.round((xpCurrent / xpNext) * 100), 100) : 0;
   const xpToNext = Math.max(xpNext - xpCurrent, 0);
 
@@ -154,21 +193,33 @@ export default function ProfileLevelCard({
             className="overflow-hidden relative z-10"
           >
             <div className="pt-3 pb-1 border-t border-slate-800/80 mt-2 grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
-              {XP_BREAKDOWN.map((item, idx) => {
-                const Icon = actionIconMap[item.icon as keyof typeof actionIconMap] || HelpCircle;
+              {xpError && (
+                <p className="text-slate-400 py-1 sm:col-span-2">No se pudo cargar la lista. Inténtalo más tarde.</p>
+              )}
+              {!xpError && xpActions === null && (
+                <p className="text-slate-400 py-1 sm:col-span-2">Cargando…</p>
+              )}
+              {xpActions?.map((item, idx) => {
+                const Icon = iconFor(item.code);
                 return (
                   <motion.div
-                    key={idx}
+                    key={item.code}
                     initial={{ y: 5, opacity: 0 }}
                     animate={{ y: 0, opacity: 1 }}
-                    transition={{ delay: idx * 0.05 }}
+                    transition={{ delay: Math.min(idx * 0.03, 0.4) }}
                     className="flex items-center justify-between p-2 rounded-xl bg-slate-900/40 border border-slate-800/50"
                   >
                     <div className="flex items-center gap-2 text-slate-300">
                       <Icon size={14} className="text-indigo-400" />
-                      <span className="font-medium">{item.action}</span>
+                      <span className="font-medium">
+                        {item.name}
+                        {!item.is_repeatable && <span className="text-slate-500"> · una vez</span>}
+                        {item.is_repeatable && item.daily_limit && (
+                          <span className="text-slate-500"> · hasta {item.daily_limit}/día</span>
+                        )}
+                      </span>
                     </div>
-                    <span className="font-extrabold text-emerald-400 shrink-0 ml-2">{item.xp}</span>
+                    <span className="font-extrabold text-emerald-400 shrink-0 ml-2">+{item.xp_reward.toLocaleString()} XP</span>
                   </motion.div>
                 );
               })}

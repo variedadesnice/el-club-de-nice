@@ -64,6 +64,21 @@ export interface Plan {
   sort_order: number;
 }
 
+/** Clave del dibujo del atajo en Comunidad (debe coincidir con el CHECK de content_categories.icon). */
+export type ContentCategoryIcon = "play" | "check" | "doc" | "flask";
+
+/** Categoría de contenido (tabla content_categories). courses.category guarda su `name`. */
+export interface ContentCategory {
+  id: string;
+  name: string;
+  description: string | null;
+  icon: ContentCategoryIcon;
+  sort_order: number;
+  is_active: boolean;
+  /** Sólo en las respuestas de admin. */
+  course_count?: number;
+}
+
 export type PaymentStatus = "pending" | "success" | "failed";
 
 export type PaymentMethodFieldType = "text" | "email" | "phone" | "number";
@@ -225,6 +240,8 @@ export interface AdminPaymentMethod {
   auto_verify: boolean;
   sort_order: number;
   fields: AdminPaymentMethodField[];
+  /** Slug que la verificación automática resuelve del campo "Banco" (bdv/bnc/bfc/binance), o null si no reconoce ninguno. */
+  auto_verify_bank: string | null;
 }
 
 export interface Payment {
@@ -243,6 +260,8 @@ export interface Payment {
   created_at: string;
   user_name?: string | null;
   user_email?: string | null;
+  /** Nombre del plan en la tabla `plans` (o el código, si el plan ya no existe). */
+  plan_name?: string | null;
 }
 
 export interface Comment {
@@ -278,7 +297,8 @@ export interface AnalyticsRevenue {
   today: number;
   this_month: number;
   total: number;
-  by_plan: { "1m": number; "3m": number; "6m": number; "1y": number };
+  /** Planes activos más cualquier plan con ingresos, en el orden del panel de planes. */
+  by_plan: { code: string; name: string; total: number }[];
   payments_pending: number;
   non_renewals: number;
 }

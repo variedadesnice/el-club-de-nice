@@ -82,8 +82,8 @@ export default function CreatePost({ onSubmit }: CreatePostProps) {
 
   return (
     <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden flex flex-col group focus-within:shadow-md transition-all">
-      <div className="p-4 sm:p-6 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
-        <div className="flex items-center gap-3 flex-1">
+      <div className="p-3 sm:p-6 flex items-center gap-2 sm:gap-4">
+        <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
           {user?.avatar ? (
             <img src={user.avatar} alt={user.name ?? "Usuario"} className="w-10 h-10 rounded-2xl object-cover flex-shrink-0" />
           ) : (
@@ -97,15 +97,15 @@ export default function CreatePost({ onSubmit }: CreatePostProps) {
             onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
             type="text"
             placeholder="Comparte algo..."
-            className="bg-slate-50 border-none rounded-2xl w-full px-4 sm:px-6 py-3 text-sm font-medium focus:ring-0 placeholder:text-slate-400 outline-none"
+            className="bg-slate-50 border-none rounded-2xl w-full min-w-0 px-4 sm:px-6 py-3 text-sm font-medium focus:ring-0 placeholder:text-slate-400 outline-none"
           />
         </div>
 
-        <div className="flex items-center justify-end gap-2 shrink-0">
+        <div className="flex items-center gap-1 sm:gap-2 shrink-0">
           <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleImageChange} />
           <button
             onClick={() => fileRef.current?.click()}
-            className={`p-3 rounded-2xl transition-all flex items-center justify-center ${imageData ? "bg-indigo-100 text-indigo-600" : "text-slate-400 hover:text-indigo-500 hover:bg-slate-50"}`}
+            className={`p-2.5 sm:p-3 rounded-2xl transition-all flex items-center justify-center ${imageData ? "bg-indigo-100 text-indigo-600" : "text-slate-400 hover:text-indigo-500 hover:bg-slate-50"}`}
             title="Agregar imagen"
           >
             <ImagePlus size={18} />
@@ -113,7 +113,7 @@ export default function CreatePost({ onSubmit }: CreatePostProps) {
           {canManageTags && (
             <button
               onClick={() => setShowTags((v) => !v)}
-              className={`p-3 rounded-2xl transition-all flex items-center justify-center ${showTags ? "bg-indigo-100 text-indigo-600" : "text-slate-400 hover:text-indigo-500 hover:bg-slate-50"}`}
+              className={`p-2.5 sm:p-3 rounded-2xl transition-all flex items-center justify-center ${showTags ? "bg-indigo-100 text-indigo-600" : "text-slate-400 hover:text-indigo-500 hover:bg-slate-50"}`}
               title="Agregar tags"
             >
               <Tag size={18} />
@@ -122,7 +122,7 @@ export default function CreatePost({ onSubmit }: CreatePostProps) {
           <button
             onClick={handleSubmit}
             disabled={!value.trim()}
-            className="p-3 bg-brand-primary text-white rounded-2xl shadow-md shadow-violet-950/10 hover:bg-brand-primary-hover active:scale-[0.98] disabled:opacity-50 disabled:grayscale transition-all flex items-center justify-center"
+            className="p-2.5 sm:p-3 bg-brand-primary text-white rounded-2xl shadow-md shadow-violet-950/10 hover:bg-brand-primary-hover active:scale-[0.98] disabled:opacity-50 disabled:grayscale transition-all flex items-center justify-center"
           >
             <Send size={20} />
           </button>

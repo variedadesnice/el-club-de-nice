@@ -40,25 +40,21 @@ const EMPTY_METHOD_DRAFT: MethodDraft = { name: "", description: "", is_active: 
 /**
  * La verificación automática sólo funciona si el método tiene un campo
  * etiquetado "Banco" cuyo valor sea uno de los bancos que la pasarela sabe
- * leer. El backend resuelve el banco receptor exactamente así, de modo que si
- * el valor no encaja, activar la casilla no hace nada y todos los pagos de ese
- * método siguen cayendo en revisión manual — sin ningún error visible. Por eso
- * el panel avisa antes en vez de dejar el problema latente.
+ * leer. Si el valor no encaja, activar la casilla no hace nada y todos los
+ * pagos de ese método siguen cayendo en revisión manual — sin ningún error
+ * visible. Por eso el panel avisa antes en vez de dejar el problema latente.
+ *
+ * Qué banco reconoce lo decide el backend (`auto_verify_bank`), con la misma
+ * regla que usa al verificar; aquí sólo se traduce a un mensaje.
  */
-const BANCOS_SOPORTADOS = ["bdv", "de venezuela", "bnc", "nacional de cr", "bfc", "fondo com", "binance"];
-
-function bancoConfigurado(fields: { field_label: string; value: string | null }[]): string | null {
-  const campo = fields.find((f) => f.field_label.trim().toLowerCase() === "banco");
-  return campo ? (campo.value ?? "") : null;
-}
-
-function avisoVerificacion(fields: { field_label: string; value: string | null }[]): string | null {
-  const banco = bancoConfigurado(fields);
-  if (banco === null) return "Falta un campo con la etiqueta exacta \"Banco\". Sin él no se puede saber a qué cuenta tuya entró el dinero.";
+function avisoVerificacion(method: AdminPaymentMethod | undefined): string | null {
+  if (!method) return null;
+  const campo = method.fields.find((f) => f.field_label.trim().toLowerCase() === "banco");
+  if (!campo) return "Falta un campo con la etiqueta exacta \"Banco\". Sin él no se puede saber a qué cuenta tuya entró el dinero.";
+  const banco = campo.value ?? "";
   if (!banco.trim()) return "El campo \"Banco\" está vacío. Rellénalo con el banco que recibe los pagos.";
-  const v = banco.toLowerCase();
-  if (!BANCOS_SOPORTADOS.some((b) => v.includes(b))) {
-    return `"${banco}" no es un banco que la pasarela sepa leer todavía. Soportados: BDV, BNC, BFC y Binance.`;
+  if (!method.auto_verify_bank) {
+    return `"${banco}" no es un banco que la pasarela sepa leer todavía, así que estos pagos quedarán para revisión manual.`;
   }
   return null;
 }
@@ -244,13 +240,13 @@ function PaymentMethodCard({
               {method.auto_verify && (
                 <span
                   className={`text-[10px] font-black px-2 py-0.5 rounded-full flex-shrink-0 border ${
-                    avisoVerificacion(method.fields)
+                    avisoVerificacion(method)
                       ? "bg-amber-50 text-amber-700 border-amber-200"
                       : "bg-indigo-50 text-indigo-600 border-indigo-200"
                   }`}
-                  title={avisoVerificacion(method.fields) ?? "Los pagos por este método se verifican solos."}
+                  title={avisoVerificacion(method) ?? "Los pagos por este método se verifican solos."}
                 >
-                  {avisoVerificacion(method.fields) ? "Auto ⚠️" : "Auto"}
+                  {avisoVerificacion(method) ? "Auto ⚠️" : "Auto"}
                 </span>
               )}
             </div>
@@ -448,7 +444,7 @@ export default function PaymentMethodsPanel() {
   // Los campos y sus valores viven en la tarjeta, no en el draft, así que el
   // aviso se calcula contra el método real que se está editando.
   const editingMethodWarning = draft.id
-    ? avisoVerificacion(methods.find((m) => m.id === draft.id)?.fields ?? [])
+    ? avisoVerificacion(methods.find((m) => m.id === draft.id))
     : null;
   const [isSaving, setIsSaving] = useState(false);
   const [newFieldDraft, setNewFieldDraft] = useState<FieldDraft>(EMPTY_FIELD_DRAFT);

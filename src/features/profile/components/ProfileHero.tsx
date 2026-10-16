@@ -1,6 +1,5 @@
 import React from "react";
 import { Award } from "lucide-react";
-import { PROFILE_LEVEL } from "../data/profileMock";
 
 interface ProfileHeroProps {
   name: string;
@@ -11,8 +10,7 @@ interface ProfileHeroProps {
 }
 
 export default function ProfileHero({ name, avatar, subtitle, levelIcon, onEdit }: ProfileHeroProps) {
-  const displaySubtitle =
-    subtitle?.trim() || `${PROFILE_LEVEL.subtitle} • Nivel ${PROFILE_LEVEL.level}`;
+  const displaySubtitle = subtitle?.trim();
 
   return (
     <section>
@@ -60,7 +58,9 @@ export default function ProfileHero({ name, avatar, subtitle, levelIcon, onEdit 
         </div>
 
         <h1 className="mt-4 text-2xl font-black text-slate-900 tracking-tight">{name}</h1>
-        <p className="mt-1 text-sm font-medium text-slate-500 text-center">{displaySubtitle}</p>
+        {displaySubtitle && (
+          <p className="mt-1 text-sm font-medium text-slate-500 text-center">{displaySubtitle}</p>
+        )}
 
         {onEdit && (
           <div className="mt-5 w-full max-w-xs">

@@ -53,13 +53,6 @@ const GENDER_COLORS: Record<string, string> = {
   Otro: "#94a3b8",
 };
 
-const PLAN_LABELS: Record<string, string> = {
-  "1m": "1 mes",
-  "3m": "3 meses",
-  "6m": "6 meses",
-  "1y": "1 año",
-};
-
 function formatAmount(amount: number) {
   try {
     return new Intl.NumberFormat("es-ES", { style: "currency", currency: "USD" }).format(amount);
@@ -213,11 +206,9 @@ export default function AnalyticsPanel() {
   const ageData = members?.ages.filter((a) => a.total > 0) ?? [];
   const locationData = members?.locations.filter((l) => l.total > 0) ?? [];
 
-  const planData = revenue
-    ? (Object.keys(PLAN_LABELS) as Array<keyof typeof PLAN_LABELS>).map((key) => ({
-        name: PLAN_LABELS[key],
-        value: revenue.by_plan[key as "1m" | "3m" | "6m" | "1y"],
-      }))
+  // Array.isArray: un backend anterior (o su caché de 30 s) todavía manda by_plan como objeto.
+  const planData = revenue && Array.isArray(revenue.by_plan)
+    ? revenue.by_plan.map((p) => ({ name: p.name, value: p.total }))
     : [];
 
   return (

@@ -235,14 +235,14 @@ src/
     classroom/
       components/ Classroom, CourseCard, CourseDetail, CreateCourseSheet, AddChapterForm,
                    ActiveChapterPdfs (student PDF view), ChapterPdfsAdmin (admin PDF manage)
-      hooks/ useCourses, useCourseChapters, useChapterPdfs
+      hooks/ useCourses, useCourseChapters, useChapterPdfs,
+             useContentCategories (GET /api/content-categories/ — shared by PostFeed, Classroom, CreateCourseSheet)
     profile/
       components/ Profile, ProfileHero, ProfileStatsGrid, ProfileLevelCard, ProfileAchievements,
-                   ProfileActivity, ProfileRanking, ProfileEditSheet
-      data/profileMock.ts          — ranking/activity table data only; level/XP/achievements/streak/
-                                     completed-courses/social-impact are now real API data (see below)
+                   ProfileEditSheet, PublicProfile, AdminProfileDetails
     admin/
-      AdminDashboard.tsx, AnalyticsPanel.tsx, GamificationPanel.tsx, PaymentMethodsPanel.tsx
+      AdminDashboard.tsx, AnalyticsPanel.tsx, GamificationPanel.tsx, PaymentMethodsPanel.tsx,
+      PlansPanel.tsx, ContentCategoriesPanel.tsx (tab "Categorías")
       (+ existing invitations/payments tabs)
   shared/layout/Layout.tsx       — nav shell (sidebar desktop + bottom nav mobile)
   types.ts                       — shared TypeScript interfaces
@@ -304,9 +304,10 @@ Fetches the same BCV rate API in parallel with `/api/admin/analytics/*` data. `f
 ### Profile page
 
 - **Real data, fetched on mount in `Profile.tsx`**: level/XP (`GET /api/levels/me`), achievements (`GET /api/levels/me/achievements`), streak (`GET /api/streaks/checkin` — this also registers today's check-in), completed courses (`GET /api/classroom/me/completed-courses`), and social impact (`GET /api/posts/me/social-impact`). All passed as props into `ProfileLevelCard`, `ProfileAchievements`, and `ProfileStatsGrid`.
-- `ProfileStatsGrid` renders badge count, streak days, completed courses, and social impact from real props — these were previously "Próximamente" placeholders backed by `profileMock.ts`.
+- `ProfileStatsGrid` renders badge count, streak days, completed courses, and social impact from real props.
+- "¿Cómo ganar XP?" in `ProfileLevelCard` lists the real catalog (`GET /api/achievements/`, fetched the first time the accordion opens) — never a hardcoded list; XP values change from the admin panel.
 - A milestone banner shows when `streak.milestone_reached` is set (e.g. "¡Hito de 7 días alcanzado!").
-- **Still mock**: ranking and activity-feed tables in `profileMock.ts` remain static.
+- There is no mock data left in the profile: `profileMock.ts`, `ProfileActivity` and `ProfileRanking` were deleted 2026-10-11 (they were unused and showed invented data). A ranking/activity feed would need a real endpoint first.
 - Personal data fields (`gender`, `city`, `phone`, `birthdate`, `email`) are shown in a dedicated info card and saved via `PUT /api/auth/profile`. `birthdate` is edited as a native `<input type="date">` in both `ProfileEditSheet.tsx` (mobile) and the inline desktop edit form in `Profile.tsx` — keep both in sync, they duplicate the same fields.
 
 ### Onboarding (`OnboardingModal.tsx`)
@@ -326,3 +327,14 @@ App name is "El Club de Nice". Primary color is hot pink `#db2777` (`--color-bra
 - `posts_view` is a Supabase SQL view that joins posts with profiles — query it directly instead of joining in code.
 - Supabase auth uses the **admin API** server-side so email confirmation is bypassed on register.
 - WebSocket URLs derive from `API_BASE`/`VITE_API_URL` with the scheme swapped (`http→ws`, `https→wss`).
+
+### Data that lives in the database (don't hardcode it again)
+
+These used to be hardcoded in the frontend and drifted from the real data; each now comes from the backend:
+
+- **Content categories** (Comunidad shortcuts, Classroom tabs, course form select) → `content_categories` table via `useContentCategories()`. `courses.category` stores the category `name`. Only the decorative SVG per `icon` key (`play`/`check`/`doc`/`flask`) lives in `PostFeed.tsx`; a new key needs a new SVG there *and* in the DB CHECK.
+- **Plan names** → `payment.plan_name` (added by the backend to `/api/payments/` and `/api/payments/{user_id}`) and `revenue.by_plan[]` (`{code, name, total}`) in analytics. No `PLAN_LABELS` maps.
+- **Plan prices** → `/api/plans/` on both landings (`landing.tsx` and `Landing3.tsx`).
+- **Banks supported by auto-verification** → `auto_verify_bank` on each admin payment method (computed by the backend with the same rule it uses to verify). `PaymentMethodsPanel` only turns it into a message.
+- **XP per action** → `GET /api/achievements/`.
+

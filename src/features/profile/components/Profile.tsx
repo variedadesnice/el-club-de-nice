@@ -180,9 +180,10 @@ export default function Profile() {
     });
   };
 
-  const subtitle = user?.bio
-    ? `${user.bio}${userLevel ? ` • Nivel ${userLevel.level}` : ""}`
-    : undefined;
+  // Bio y nivel real, cada uno sólo si existe — sin bio igual se ve el nivel.
+  const subtitle = [user?.bio?.trim(), userLevel ? `Nivel ${userLevel.level}` : null]
+    .filter(Boolean)
+    .join(" • ") || undefined;
 
   const tierIcon = userLevel?.tier?.icon_url || (userLevel?.tier as any)?.icon || (userLevel?.tier as any)?.image_url;
 

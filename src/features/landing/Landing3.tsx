@@ -13,6 +13,8 @@ import avatarFeat2 from "../../assets/avatars/feat2.webp";
 import avatarFeat3 from "../../assets/avatars/feat3.webp";
 import { PricingBackground } from "./PricingBackground";
 import lineaNice from "../../assets/landing oscar/linea nice.webp";
+import { apiFetch } from "../../lib/api";
+import type { Plan } from "../../types";
 
 interface Testimonial {
   name: string;
@@ -145,8 +147,151 @@ function AnimatedCounter({ target, duration = 1500 }: { target: number, duration
   return <span ref={ref}>{count}</span>;
 }
 
+const PLAN_FEATURES = [
+  "Acceso completo a todos los cursos",
+  "Lives semanales con expertos",
+  "Muro comunitario",
+  "Sistema de logros y niveles",
+  "Módulo de negocio y emprendimiento",
+];
+
+/** Etiqueta corta de duración ("1 Mes", "1 Año"...) a partir de duration_days. */
+function durationLabel(days: number | null) {
+  if (days === null) return "Sin vencimiento";
+  if (days % 365 === 0) return days === 365 ? "1 Año" : `${days / 365} Años`;
+  if (days % 30 === 0) return days === 30 ? "1 Mes" : `${days / 30} Meses`;
+  return `${days} días`;
+}
+
+function formatUsd(value: number) {
+  return `$${Number(value).toLocaleString("en-US", { maximumFractionDigits: 2 })}`;
+}
+
+function PricingPlanCard({
+  plan,
+  highlighted,
+  index,
+  onSelect,
+}: {
+  plan: Plan;
+  highlighted: boolean;
+  index: number;
+  onSelect: () => void;
+}) {
+  // Equivalente mensual sólo para planes de más de un mes.
+  const monthly = plan.duration_days && plan.duration_days > 31
+    ? formatUsd(Math.round(plan.price_usd / (plan.duration_days / 30)))
+    : null;
+
+  if (!highlighted) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 25 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.6, delay: 0.1 + index * 0.1, ease: "easeOut" }}
+        className="flex flex-col bg-white rounded-[22px] md:rounded-[26px] p-6 sm:p-7 md:p-[34px] shadow-[0_18px_50px_rgba(0,0,0,0.08)] hover:-translate-y-[5px] transition-transform duration-300 ease-in-out order-2 md:order-none"
+      >
+        <div className="mb-5 sm:mb-6">
+          <span className="text-[#ff008c] font-[700] text-[12px] sm:text-[13px] uppercase tracking-wide">{durationLabel(plan.duration_days)}</span>
+          <h3 className="text-[#071426] font-[750] text-[24px] sm:text-[28px] mt-1 leading-none">{plan.name}</h3>
+          {plan.sublabel && <p className="text-[#8ca0b3] font-[600] text-[14px] sm:text-[15px] mt-[4px]">{plan.sublabel}</p>}
+        </div>
+
+        <div className="mb-5 sm:mb-[24px]">
+          <div className="flex items-baseline">
+            <span className="text-[#071426] font-[800] text-[40px] sm:text-[48px] md:text-[58px] tracking-[-0.02em] leading-none">{formatUsd(plan.price_usd)}</span>
+            <span className="text-[#8ca0b3] font-[600] text-[13px] sm:text-[14px] ml-2">USD</span>
+          </div>
+          {monthly && <div className="text-[#8ca0b3] font-[650] text-[13px] sm:text-[14px] mt-1">≈ {monthly} USD / mes</div>}
+        </div>
+
+        <ul className="flex-1 space-y-3 sm:space-y-[15px] flex flex-col justify-start">
+          {PLAN_FEATURES.map((item) => (
+            <li key={item} className="flex items-start">
+              <span className="text-[#ff008c] font-bold mr-2.5 sm:mr-3 mt-[1px] text-[14px]">✓</span>
+              <span className="text-[#17324a] font-[600] text-[14px] sm:text-[15px] leading-tight">{item}</span>
+            </li>
+          ))}
+        </ul>
+
+        <button
+          onClick={onSelect}
+          className="mt-6 sm:mt-[28px] w-full h-[52px] sm:h-[56px] rounded-[16px] bg-[#fff0f7] border border-[#ff008c]/25 text-[#ff008c] font-[700] text-[14.5px] sm:text-[15px] hover:bg-[#ffe5f1] hover:-translate-y-[2px] transition-all duration-300"
+        >
+          Empezar con este plan
+        </button>
+      </motion.div>
+    );
+  }
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 25 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.6, delay: 0.1 + index * 0.1, ease: "easeOut" }}
+      className="relative flex flex-col rounded-[22px] md:rounded-[26px] p-6 sm:p-7 md:p-[34px] shadow-xl hover:shadow-2xl hover:-translate-y-[5px] transition-all duration-300 ease-in-out order-1 md:order-none overflow-hidden"
+      style={{
+        background: "linear-gradient(145deg, #ff00a0 0%, #ff0088 45%, #ff006e 100%)",
+      }}
+    >
+      {/* Radial gradient sutil */}
+      <div className="absolute inset-0 pointer-events-none" style={{ background: "radial-gradient(circle at 85% 5%, rgba(255,255,255,0.12), transparent 35%)" }}></div>
+
+      <div className="relative z-10 flex justify-between items-start mb-5 sm:mb-6">
+        <div>
+          <span className="text-white font-[700] text-[12px] sm:text-[13px] uppercase tracking-wide">{durationLabel(plan.duration_days)}</span>
+          <h3 className="text-white font-[750] text-[24px] sm:text-[28px] mt-1 leading-none">{plan.name}</h3>
+          {plan.sublabel && <p className="text-white/90 font-[600] text-[14px] sm:text-[15px] mt-[4px]">{plan.sublabel}</p>}
+        </div>
+        <div className="bg-white/20 backdrop-blur-[8px] text-white text-[11px] sm:text-[12px] font-[750] tracking-[0.03em] px-3 sm:px-[14px] py-1.5 sm:py-[8px] rounded-full whitespace-nowrap self-start mt-1">
+          ✣ MÁS POPULAR
+        </div>
+      </div>
+
+      <div className="relative z-10 mb-5 sm:mb-[22px]">
+        <div className="flex items-baseline">
+          <span className="text-white font-[800] text-[40px] sm:text-[48px] md:text-[58px] tracking-[-0.02em] leading-none">{formatUsd(plan.price_usd)}</span>
+          <span className="text-white/90 font-[650] text-[13px] sm:text-[14px] ml-2">USD</span>
+        </div>
+        {monthly && <div className="text-white/90 font-[650] text-[13px] sm:text-[14px] mt-1">≈ {monthly} USD / mes</div>}
+      </div>
+
+      <ul className="relative z-10 flex-1 space-y-3 sm:space-y-[15px] flex flex-col justify-start">
+        {PLAN_FEATURES.map((item) => (
+          <li key={item} className="flex items-start">
+            <span className="text-white font-bold mr-2.5 sm:mr-3 mt-[1px] text-[14px]">✓</span>
+            <span className="text-white font-[600] text-[14px] sm:text-[15px] leading-tight">{item}</span>
+          </li>
+        ))}
+      </ul>
+
+      <button
+        onClick={onSelect}
+        className="relative z-10 mt-6 sm:mt-[28px] w-full h-[52px] sm:h-[56px] rounded-[16px] bg-white text-[#ff008c] font-[750] text-[14.5px] sm:text-[15px] hover:shadow-[0_8px_25px_rgba(0,0,0,0.15)] hover:-translate-y-[2px] transition-all duration-300"
+      >
+        Empezar con este plan
+      </button>
+    </motion.div>
+  );
+}
+
 export default function Landing3() {
   const navigate = useNavigate();
+  const [plans, setPlans] = useState<Plan[]>([]);
+
+  useEffect(() => {
+    apiFetch<Plan[]>("/api/plans/")
+      .then(({ data }) => setPlans(data.filter((p) => p.is_active).sort((a, b) => a.sort_order - b.sort_order)))
+      .catch(() => setPlans([]));
+  }, []);
+
+  // Destacado: el plan con vencimiento más largo (hoy, el anual); si hay uno
+  // solo, ése. En teléfono va primero (order-1), como en el diseño original.
+  const highlightedPlanId = plans.length === 0
+    ? null
+    : [...plans].sort((a, b) => (b.duration_days ?? 0) - (a.duration_days ?? 0))[0].id;
   const [activeTestimonial, setActiveTestimonial] = useState(0);
   const testimonialCarouselRef = useRef<HTMLDivElement>(null);
 
@@ -393,104 +538,24 @@ export default function Landing3() {
             Sin renovaciones automáticas. Sin sorpresas. Elige el plan que mejor se adapte a tu ritmo.
           </p>
 
-          {/* Contenedor de Precios */}
-          <div className="w-full max-w-[440px] md:max-w-none grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-[28px] mx-auto">
-            
-            {/* Plan Mensual */}
-            <motion.div
-              initial={{ opacity: 0, y: 25 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: 0.1, ease: "easeOut" }}
-              className="flex flex-col bg-white rounded-[22px] md:rounded-[26px] p-6 sm:p-7 md:p-[34px] shadow-[0_18px_50px_rgba(0,0,0,0.08)] hover:-translate-y-[5px] transition-transform duration-300 ease-in-out order-2 md:order-1"
+          {/* Contenedor de Precios — planes activos de la tabla `plans` */}
+          {plans.length > 0 && (
+            <div
+              className={`w-full max-w-[440px] grid grid-cols-1 gap-5 md:gap-[28px] mx-auto ${
+                plans.length === 2 ? "md:max-w-none md:grid-cols-2" : plans.length >= 3 ? "md:max-w-none md:grid-cols-3" : ""
+              }`}
             >
-              <div className="mb-5 sm:mb-6">
-                <span className="text-[#ff008c] font-[700] text-[12px] sm:text-[13px] uppercase tracking-wide">1 Mes</span>
-                <h3 className="text-[#071426] font-[750] text-[24px] sm:text-[28px] mt-1 leading-none">Mensual</h3>
-                <p className="text-[#8ca0b3] font-[600] text-[14px] sm:text-[15px] mt-[4px]">Acceso mensual</p>
-              </div>
-              
-              <div className="flex items-baseline mb-5 sm:mb-[24px]">
-                <span className="text-[#071426] font-[800] text-[40px] sm:text-[48px] md:text-[58px] tracking-[-0.02em] leading-none">$0.0016</span>
-                <span className="text-[#8ca0b3] font-[600] text-[13px] sm:text-[14px] ml-2">USD</span>
-              </div>
-
-              <ul className="flex-1 space-y-3 sm:space-y-[15px] flex flex-col justify-start">
-                {[
-                  "Acceso completo a todos los cursos",
-                  "Lives semanales con expertos",
-                  "Muro comunitario",
-                  "Sistema de logros y niveles",
-                  "Módulo de negocio y emprendimiento"
-                ].map((item, i) => (
-                  <li key={i} className="flex items-start">
-                    <span className="text-[#ff008c] font-bold mr-2.5 sm:mr-3 mt-[1px] text-[14px]">✓</span>
-                    <span className="text-[#17324a] font-[600] text-[14px] sm:text-[15px] leading-tight">{item}</span>
-                  </li>
-                ))}
-              </ul>
-
-              <button className="mt-6 sm:mt-[28px] w-full h-[52px] sm:h-[56px] rounded-[16px] bg-[#fff0f7] border border-[#ff008c]/25 text-[#ff008c] font-[700] text-[14.5px] sm:text-[15px] hover:bg-[#ffe5f1] hover:-translate-y-[2px] transition-all duration-300">
-                Empezar con este plan
-              </button>
-            </motion.div>
-
-            {/* Plan Anual (Destacado) */}
-            <motion.div
-              initial={{ opacity: 0, y: 25 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: 0.2, ease: "easeOut" }}
-              className="relative flex flex-col rounded-[22px] md:rounded-[26px] p-6 sm:p-7 md:p-[34px] shadow-xl hover:shadow-2xl hover:-translate-y-[5px] transition-all duration-300 ease-in-out order-1 md:order-2 overflow-hidden"
-              style={{
-                background: "linear-gradient(145deg, #ff00a0 0%, #ff0088 45%, #ff006e 100%)",
-              }}
-            >
-              {/* Radial gradient sutil */}
-              <div className="absolute inset-0 pointer-events-none" style={{ background: "radial-gradient(circle at 85% 5%, rgba(255,255,255,0.12), transparent 35%)" }}></div>
-
-              <div className="relative z-10 flex justify-between items-start mb-5 sm:mb-6">
-                <div>
-                  <span className="text-white font-[700] text-[12px] sm:text-[13px] uppercase tracking-wide">1 Año</span>
-                  <h3 className="text-white font-[750] text-[24px] sm:text-[28px] mt-1 leading-none">Anual</h3>
-                  <p className="text-white/90 font-[600] text-[14px] sm:text-[15px] mt-[4px]">Plan anual</p>
-                </div>
-                <div className="bg-white/20 backdrop-blur-[8px] text-white text-[11px] sm:text-[12px] font-[750] tracking-[0.03em] px-3 sm:px-[14px] py-1.5 sm:py-[8px] rounded-full whitespace-nowrap self-start mt-1">
-                  ✣ MÁS POPULAR
-                </div>
-              </div>
-
-              <div className="relative z-10 mb-5 sm:mb-[22px]">
-                <div className="flex items-baseline">
-                  <span className="text-white font-[800] text-[40px] sm:text-[48px] md:text-[58px] tracking-[-0.02em] leading-none">$197</span>
-                  <span className="text-white/90 font-[650] text-[13px] sm:text-[14px] ml-2">USD</span>
-                </div>
-                <div className="text-white/90 font-[650] text-[13px] sm:text-[14px] mt-1">
-                  ≈ $16 USD / mes
-                </div>
-              </div>
-
-              <ul className="relative z-10 flex-1 space-y-3 sm:space-y-[15px] flex flex-col justify-start">
-                {[
-                  "Acceso completo a todos los cursos",
-                  "Lives semanales con expertos",
-                  "Muro comunitario",
-                  "Sistema de logros y niveles",
-                  "Módulo de negocio y emprendimiento"
-                ].map((item, i) => (
-                  <li key={i} className="flex items-start">
-                    <span className="text-white font-bold mr-2.5 sm:mr-3 mt-[1px] text-[14px]">✓</span>
-                    <span className="text-white font-[600] text-[14px] sm:text-[15px] leading-tight">{item}</span>
-                  </li>
-                ))}
-              </ul>
-
-              <button className="relative z-10 mt-6 sm:mt-[28px] w-full h-[52px] sm:h-[56px] rounded-[16px] bg-white text-[#ff008c] font-[750] text-[14.5px] sm:text-[15px] hover:shadow-[0_8px_25px_rgba(0,0,0,0.15)] hover:-translate-y-[2px] transition-all duration-300">
-                Empezar con este plan
-              </button>
-            </motion.div>
-
-          </div>
+              {plans.map((plan, i) => (
+                <PricingPlanCard
+                  key={plan.id}
+                  plan={plan}
+                  highlighted={plan.id === highlightedPlanId}
+                  index={i}
+                  onSelect={() => navigate("/register")}
+                />
+              ))}
+            </div>
+          )}
         </motion.div>
       </section>
 

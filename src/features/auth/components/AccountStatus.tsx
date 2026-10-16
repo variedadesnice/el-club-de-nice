@@ -5,14 +5,6 @@ import { useAuth, User } from "../../../context/AuthContext";
 import { ApiError, useApiFetch } from "../../../lib/api";
 import type { Payment } from "../../../types";
 
-const PLAN_LABELS: Record<string, string> = {
-  "1m": "1 mes",
-  "3m": "3 meses",
-  "6m": "6 meses",
-  "1y": "1 año",
-  indefinido: "Indefinido",
-};
-
 function formatDate(iso: string | null) {
   if (!iso) return "—";
   try {
@@ -194,7 +186,7 @@ export default function AccountStatus() {
             <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Último pago registrado</p>
             <div className="flex items-center justify-between text-sm">
               <span className="font-medium text-slate-400 flex items-center gap-2"><CreditCard size={14} /> Plan</span>
-              <span className="font-bold text-slate-700">{PLAN_LABELS[latestPayment.plan] ?? latestPayment.plan}</span>
+              <span className="font-bold text-slate-700">{latestPayment.plan_name ?? latestPayment.plan}</span>
             </div>
             <div className="flex items-center justify-between text-sm">
               <span className="font-medium text-slate-400 flex items-center gap-2"><Hash size={14} /> Referencia</span>

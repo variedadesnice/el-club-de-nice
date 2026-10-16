@@ -19,7 +19,7 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { useApiFetch } from "../../lib/api";
-import type { Payment, PlanType } from "../../types";
+import type { Payment } from "../../types";
 import GamificationPanel from "./GamificationPanel";
 import AnalyticsPanel from "./AnalyticsPanel";
 import PaymentMethodsPanel from "./PaymentMethodsPanel";
@@ -27,6 +27,7 @@ import RafflesPanel from "./RafflesPanel";
 import RoulettePanel from "./RoulettePanel";
 import PromoBannersPanel from "./PromoBannersPanel";
 import PlansPanel from "./PlansPanel";
+import ContentCategoriesPanel from "./ContentCategoriesPanel";
 
 interface Invitation {
   id: string;
@@ -341,14 +342,6 @@ function InvitationsPanel() {
 
 type PaymentStatusFilter = "todos" | "pending" | "success" | "failed";
 
-const PLAN_LABELS: Record<PlanType, string> = {
-  "1m": "1 mes",
-  "3m": "3 meses",
-  "6m": "6 meses",
-  "1y": "1 año",
-  indefinido: "Indefinido",
-};
-
 const paymentStatusConfig: Record<Exclude<PaymentStatusFilter, "todos">, { label: string; icon: React.ReactNode; cls: string }> = {
   pending: { label: "Pendiente", icon: <Clock size={12} />, cls: "bg-amber-50 text-amber-700 border border-amber-200" },
   success: { label: "Aprobado", icon: <CheckCircle size={12} />, cls: "bg-green-50 text-green-700 border border-green-200" },
@@ -536,7 +529,7 @@ function PaymentsPanel() {
                         <p className="font-bold text-sm text-slate-800">{p.user_name ?? "—"}</p>
                         <p className="text-xs font-medium text-slate-400">{p.user_email ?? "—"}</p>
                       </td>
-                      <td className="py-4 pr-4 text-sm font-bold text-slate-600">{PLAN_LABELS[p.plan] ?? p.plan}</td>
+                      <td className="py-4 pr-4 text-sm font-bold text-slate-600">{p.plan_name ?? p.plan}</td>
                       <td className="py-4 pr-4 text-sm font-bold text-slate-600">{formatAmount(p.amount)}</td>
                       <td className="py-4 pr-4">
                         <p className="text-sm font-bold text-slate-600">{p.reference_number}</p>
@@ -598,7 +591,7 @@ function PaymentsPanel() {
 }
 
 export default function AdminDashboard() {
-  const [activeTab, setActiveTab] = useState<"stats" | "invitaciones" | "pagos" | "metodos-pago" | "planes" | "gamification" | "sorteos" | "ruleta" | "banners">("stats");
+  const [activeTab, setActiveTab] = useState<"stats" | "invitaciones" | "pagos" | "metodos-pago" | "planes" | "categorias" | "gamification" | "sorteos" | "ruleta" | "banners">("stats");
 
   return (
     <div className="space-y-8">
@@ -621,6 +614,7 @@ export default function AdminDashboard() {
             <option value="pagos">💳 Pagos</option>
             <option value="metodos-pago">🏦 Métodos de Pago</option>
             <option value="planes">🏷️ Planes</option>
+            <option value="categorias">🗂️ Categorías</option>
             <option value="gamification">🏆 Niveles e Insignias</option>
             <option value="sorteos">🎁 Sorteos</option>
             <option value="ruleta">🎡 Ruleta</option>
@@ -638,6 +632,7 @@ export default function AdminDashboard() {
           <button onClick={() => setActiveTab("pagos")} className={`px-6 py-2.5 rounded-xl font-bold text-sm transition-all whitespace-nowrap ${activeTab === 'pagos' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>Pagos</button>
           <button onClick={() => setActiveTab("metodos-pago")} className={`px-6 py-2.5 rounded-xl font-bold text-sm transition-all whitespace-nowrap ${activeTab === 'metodos-pago' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>Métodos de Pago</button>
           <button onClick={() => setActiveTab("planes")} className={`px-6 py-2.5 rounded-xl font-bold text-sm transition-all whitespace-nowrap ${activeTab === 'planes' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>Planes</button>
+          <button onClick={() => setActiveTab("categorias")} className={`px-6 py-2.5 rounded-xl font-bold text-sm transition-all whitespace-nowrap ${activeTab === 'categorias' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>Categorías</button>
           <button onClick={() => setActiveTab("gamification")} className={`px-6 py-2.5 rounded-xl font-bold text-sm transition-all whitespace-nowrap ${activeTab === 'gamification' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>Niveles e Insignias</button>
           <button onClick={() => setActiveTab("sorteos")} className={`px-6 py-2.5 rounded-xl font-bold text-sm transition-all whitespace-nowrap ${activeTab === 'sorteos' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>Sorteos</button>
           <button onClick={() => setActiveTab("ruleta")} className={`px-6 py-2.5 rounded-xl font-bold text-sm transition-all whitespace-nowrap ${activeTab === 'ruleta' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>Ruleta</button>
@@ -654,6 +649,8 @@ export default function AdminDashboard() {
       {activeTab === "metodos-pago" && <PaymentMethodsPanel />}
 
       {activeTab === "planes" && <PlansPanel />}
+
+      {activeTab === "categorias" && <ContentCategoriesPanel />}
 
       {activeTab === "gamification" && <GamificationPanel />}
 
