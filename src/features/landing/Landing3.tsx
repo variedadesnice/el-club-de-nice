@@ -394,7 +394,7 @@ export default function Landing3() {
 
         {/* Versión Desktop: fondo de pantalla completa con botones a la izquierda más arriba */}
         <div
-          className="hidden md:flex w-full min-h-[calc(100vh-76px)] bg-cover bg-center bg-no-repeat relative items-end pb-20 lg:pb-28 xl:pb-32"
+          className="hidden md:flex w-full min-h-[calc(100vh-76px)] bg-cover bg-center bg-no-repeat relative items-end pb-12 lg:pb-14 xl:pb-16"
           style={{ backgroundImage: `url(${fondo1})` }}
         >
           <div className="w-full max-w-[1240px] mx-auto px-6 lg:px-12 z-20">
@@ -583,9 +583,9 @@ export default function Landing3() {
             {[
               {
                 emoji: "🎂",
-                title: "Principiantes con pasión",
+                title: "Para principiantes",
                 description:
-                  "Nunca has hecho un macaron perfecto? No importa. Aquí empezamos desde cero con paciencia y metodología probada. Tu primer pastel de bodas está más cerca de lo que crees.",
+                  "¿Crees que sabes hornear una torta básica? Descubre técnicas que le darán un plus profesional a tu resultado.",
                 items: [
                   "Bases sólidas de repostería",
                   "Cursos introductorios",
@@ -596,7 +596,7 @@ export default function Landing3() {
                 emoji: "🍰",
                 title: "Reposteros intermedios",
                 description:
-                  "Ya dominas lo básico pero quieres elevar tu técnica. Los lives y cursos avanzados te darán ese salto de calidad que tus clientes van a notar inmediatamente.",
+                  "Si ya dominas tus técnicas básicas, amplía tu menú de postres con cursos avanzados y lives conmigo.",
                 items: [
                   "Técnicas avanzadas en video",
                   "Feedback de expertos",
@@ -947,13 +947,13 @@ export default function Landing3() {
                 {/* 5. Textos con separación vertical */}
                 <div className="space-y-3.5 sm:space-y-4 max-w-[580px] text-[#617089] text-[14px] sm:text-[15.5px] md:text-[16.5px] font-[450] leading-[1.68] mb-6 sm:mb-8">
                   <p>
-                    Mi historia en la repostería comenzó como un pequeño sueño en mi cocina, horneando para familiares y amigos. Con el tiempo, esa pasión se transformó en una vocación que me llevó a estudiar, perfeccionar mis técnicas y, finalmente, convertir el azúcar y la harina en mi estilo de vida.
+                    Uno de mis mayores secretos al enseñar, es no tener ningún secreto, entregar todo mi conocimiento para que los alumnos tengan un resultado verdadero y excelente.
                   </p>
                   <p>
-                    A lo largo de los años, me di cuenta de que el verdadero arte no solo está en hacer pasteles hermosos, sino en compartir ese conocimiento con otros. Así nació la idea de crear este espacio: un lugar donde cualquiera, sin importar su nivel de experiencia, pueda aprender los secretos de la pastelería.
+                    Allí le di inicio a mi emprendimiento llamado Variedades Nice, apoyándome de las redes sociales y el intercambio y orientación de las recetas de manera personal con mis clientes con el fin de darme a conocer, todo esto ocurría mientras estudiaba para prepararme como chef profesional.
                   </p>
                   <p>
-                    Hoy, mi mayor satisfacción es ver cómo mis alumnos logran texturas perfectas, sabores inolvidables y, sobre todo, cómo muchos transforman este dulce pasatiempo en un negocio exitoso y rentable. ¡Te invito a ser parte de esta historia!
+                    Actualmente doy clases presenciales y online desde hace 12 años aproximadamente, con una comunidad de clientes y alumnos muy amplia. Esto me llevó a registrar Variedades Nice, C.A. y consolidarla como empresa, siendo éste el resultado por el cual trabajé desde hace 18 años; y siempre con el norte de crear una compañía en la que se pueda incentivar y preparar a las personas para que puedan aprender, emprender y ser creadoras, con sus propios medios, de un mundo mejor para ellos y los que los rodean.
                   </p>
                 </div>
 
