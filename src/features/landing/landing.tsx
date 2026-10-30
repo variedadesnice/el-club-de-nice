@@ -571,7 +571,7 @@ export default function Landing({ onViewChange }: LandingProps) {
             className="flex items-center gap-3"
           >
             <img src={logo} alt="El Club de Nice" fetchPriority="high" decoding="async" width={36} height={36} className="w-9 h-9 object-contain" />
-            <span className="font-black text-lg text-slate-900 tracking-tight">
+            <span translate="no" className="font-black text-lg text-slate-900 tracking-tight">
               El Club de Nice
             </span>
           </motion.div>
@@ -1257,7 +1257,7 @@ export default function Landing({ onViewChange }: LandingProps) {
           <div className="flex flex-col md:flex-row items-center justify-between gap-8 mb-10">
             <div className="flex items-center gap-3">
               <img src={logo} alt="El Club de Nice" loading="lazy" decoding="async" width={32} height={32} className="w-8 h-8 object-contain" />
-              <span className="font-black text-lg text-slate-900 tracking-tight">
+              <span translate="no" className="font-black text-lg text-slate-900 tracking-tight">
                 El Club de Nice
               </span>
             </div>
@@ -1282,7 +1282,7 @@ export default function Landing({ onViewChange }: LandingProps) {
 
             <div className="flex items-center gap-4">
               <a
-                href="https://instagram.com"
+                href="https://www.instagram.com/variedadesnice?psln=MXAwYmx5NHl0cjF2cQ%3D%3D"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-9 h-9 rounded-xl border border-slate-200 bg-white shadow-sm flex items-center justify-center text-slate-400 hover:text-pink-500 hover:border-pink-200 transition-all"
@@ -1290,7 +1290,7 @@ export default function Landing({ onViewChange }: LandingProps) {
                 <Instagram size={16} />
               </a>
               <a
-                href="https://youtube.com"
+                href="https://www.youtube.com/@variedadesnice?si=FhFZPAkwA2Ii-cyv"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-9 h-9 rounded-xl border border-slate-200 bg-white shadow-sm flex items-center justify-center text-slate-400 hover:text-red-500 hover:border-red-200 transition-all"
@@ -1298,7 +1298,7 @@ export default function Landing({ onViewChange }: LandingProps) {
                 <Youtube size={16} />
               </a>
               <a
-                href="https://tiktok.com"
+                href="https://www.tiktok.com/@variedadesnice?_r=1&_t=ZS-9AzdaKujx4O"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-9 h-9 rounded-xl border border-slate-200 bg-white shadow-sm flex items-center justify-center text-slate-400 hover:text-slate-900 hover:border-slate-300 transition-all"
@@ -1312,7 +1312,7 @@ export default function Landing({ onViewChange }: LandingProps) {
 
           <div className="border-t border-slate-200 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
             <p className="text-slate-400 text-sm font-medium text-center">
-              © {new Date().getFullYear()} El Club de Nice · Comunidad de Repostería y Pastelería
+              © {new Date().getFullYear()} <span translate="no">El Club de Nice</span> · Comunidad de Repostería y Pastelería
             </p>
             <div className="flex items-center gap-6">
               <a href="#" className="text-slate-400 text-xs font-medium hover:text-slate-600 transition-colors">

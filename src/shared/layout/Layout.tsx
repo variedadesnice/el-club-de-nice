@@ -39,7 +39,7 @@ export default function Layout({ children, onLogout }: LayoutProps) {
       <aside className="hidden lg:flex w-72 bg-white border-r border-brand-border flex-col p-8 space-y-10 flex-shrink-0">
         <div className="group cursor-pointer flex items-center space-x-3" onClick={() => navigate("/muro")}>
           <img src={logo} alt="Logo" className="w-10 h-10 object-contain transition-transform group-hover:scale-110" />
-          <span className="font-black text-xl tracking-tight text-slate-900 group-hover:text-indigo-600 transition-colors">El Club de Nice</span>
+          <span translate="no" className="font-black text-xl tracking-tight text-slate-900 group-hover:text-indigo-600 transition-colors">El Club de Nice</span>
         </div>
 
         <nav className="flex-1 space-y-3">
@@ -108,7 +108,7 @@ export default function Layout({ children, onLogout }: LayoutProps) {
               alt="Logo"
               className="w-8 h-8 object-contain"
             />
-            <span className="font-black text-lg tracking-tight text-slate-900">El Club de Nice</span>
+            <span translate="no" className="font-black text-lg tracking-tight text-slate-900">El Club de Nice</span>
           </div>
           <div className="flex items-center gap-2">
             <button

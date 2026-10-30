@@ -320,7 +320,7 @@ export default function Landing3() {
         {/* Logo and Title */}
         <div className="flex items-center space-x-2.5 sm:space-x-3 cursor-pointer" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}>
           <img src={logo} alt="El Club de Nice Logo" fetchPriority="high" decoding="async" width={112} height={32} className="h-7 sm:h-8 w-auto object-contain" />
-          <span className="font-[800] text-[#071426] text-lg sm:text-xl tracking-tight">
+          <span translate="no" className="font-[800] text-[#071426] text-lg sm:text-xl tracking-tight">
             El Club de Nice
           </span>
         </div>
@@ -866,7 +866,7 @@ export default function Landing3() {
                   SOBRE MÍ
                 </span>
                 <h2 className="text-[28px] sm:text-[36px] font-[800] leading-[1.1] tracking-[-0.03em] text-[#071631]">
-                  Hola, soy <span className="text-[#ff008c]">Nice</span>
+                  Hola, soy <span translate="no" className="text-[#ff008c]">Nice</span>
                 </h2>
               </div>
 
@@ -940,7 +940,7 @@ export default function Landing3() {
                     SOBRE MÍ
                   </span>
                   <h2 className="text-[clamp(42px,4vw,58px)] font-[800] leading-[1.08] tracking-[-0.03em] text-[#071631] mb-6">
-                    Hola, soy <span className="text-[#ff008c]">Nice</span>
+                    Hola, soy <span translate="no" className="text-[#ff008c]">Nice</span>
                   </h2>
                 </div>
 
@@ -1085,7 +1085,7 @@ export default function Landing3() {
             {/* Izquierda: Logo El Club de Nice */}
             <div className="flex items-center gap-3.5">
               <img src={logo} alt="El Club de Nice" loading="lazy" decoding="async" width={40} height={40} className="w-9 h-9 sm:w-10 sm:h-10 object-contain drop-shadow" />
-              <span className="font-[800] text-[18px] sm:text-[20px] text-white tracking-tight">
+              <span translate="no" className="font-[800] text-[18px] sm:text-[20px] text-white tracking-tight">
                 El Club de Nice
               </span>
             </div>
@@ -1110,7 +1110,7 @@ export default function Landing3() {
             {/* Derecha: Botones cuadrados blancos con Instagram, YouTube, TikTok */}
             <div className="flex items-center gap-3">
               <a
-                href="https://instagram.com"
+                href="https://www.instagram.com/variedadesnice?psln=MXAwYmx5NHl0cjF2cQ%3D%3D"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-10 h-10 rounded-[12px] bg-white flex items-center justify-center text-[#2a0515] hover:bg-[#ffeef7] hover:text-[#ff008c] hover:-translate-y-0.5 shadow-sm transition-all"
@@ -1119,7 +1119,7 @@ export default function Landing3() {
                 <Instagram size={18} strokeWidth={2.2} />
               </a>
               <a
-                href="https://youtube.com"
+                href="https://www.youtube.com/@variedadesnice?si=FhFZPAkwA2Ii-cyv"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-10 h-10 rounded-[12px] bg-white flex items-center justify-center text-[#2a0515] hover:bg-[#ffeef7] hover:text-[#ff008c] hover:-translate-y-0.5 shadow-sm transition-all"
@@ -1128,7 +1128,7 @@ export default function Landing3() {
                 <Youtube size={18} strokeWidth={2.2} />
               </a>
               <a
-                href="https://tiktok.com"
+                href="https://www.tiktok.com/@variedadesnice?_r=1&_t=ZS-9AzdaKujx4O"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-10 h-10 rounded-[12px] bg-white flex items-center justify-center text-[#2a0515] hover:bg-[#ffeef7] hover:text-[#ff008c] hover:-translate-y-0.5 shadow-sm transition-all"
@@ -1144,7 +1144,7 @@ export default function Landing3() {
           {/* Debajo del contenedor principal */}
           <div className="mt-8 flex flex-col md:flex-row items-center justify-between gap-4 text-center md:text-left px-2">
             <p className="text-[#617089] text-[13px] sm:text-[13.5px] font-[500]">
-              © 2026 El Club de Nice · Comunidad de Repostería y Pastelería
+              © 2026 <span translate="no">El Club de Nice</span> · Comunidad de Repostería y Pastelería
             </p>
             <div className="flex items-center gap-6 text-[12.5px] sm:text-[13px] font-[500] text-[#617089]">
               <a href="#" className="hover:text-[#ff008c] transition-colors">
